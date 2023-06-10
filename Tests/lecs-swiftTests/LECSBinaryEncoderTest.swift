@@ -10,8 +10,10 @@ import XCTest
 
 final class LECSBinaryEncoderTest: XCTestCase {
 
-    func testExample() throws {
-        let encoder = LECSBinaryEncoder()
+    func testEncodeTwoStructs() throws {
+        let encoder = LECSBinaryEncoder(
+            MemoryLayout<LECSId>.stride + MemoryLayout<LECSPosition2d>.stride
+        )
 
         let id = LECSId(id: 10)
         let position = LECSPosition2d(x: 5, y: 25)

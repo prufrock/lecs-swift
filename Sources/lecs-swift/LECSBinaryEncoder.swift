@@ -11,8 +11,12 @@ class LECSBinaryEncoder: Encoder {
     var codingPath: [CodingKey] = []
     var userInfo: [CodingUserInfoKey : Any] = [:]
 
-    var data: Data = Data(count: MemoryLayout<LECSId>.stride + MemoryLayout<LECSPosition2d>.stride)
-    var index = 0
+    var data: Data
+    var offset = 0
+
+    init(_ count: Int) {
+        self.data = Data(count: count)
+    }
 
     func container<Key>(keyedBy type: Key.Type) -> KeyedEncodingContainer<Key> where Key : CodingKey {
 //        return KeyedEncodingContainer(BinaryKeyedEncodingContainer<Key>(encoder: self))
@@ -46,11 +50,11 @@ class LECSBinaryUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         var value = NSNull()
         let data = Data(bytes: &value, count: stride)
 
-        for i in encoder.index..<encoder.index+stride {
-            encoder.data[i] = data[i - encoder.index]
+        for i in encoder.offset..<encoder.offset+stride {
+            encoder.data[i] = data[i - encoder.offset]
         }
 
-        encoder.index = encoder.index + stride
+        encoder.offset = encoder.offset + stride
     }
 
     func encode(_ value: Bool) throws {
@@ -65,11 +69,11 @@ class LECSBinaryUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         var value = value
         let data = Data(bytes: &value, count: MemoryLayout<Double>.stride)
 
-        for i in encoder.index..<encoder.index+MemoryLayout<Double>.stride {
-            encoder.data[i] = data[i - encoder.index]
+        for i in encoder.offset..<encoder.offset+MemoryLayout<Double>.stride {
+            encoder.data[i] = data[i - encoder.offset]
         }
 
-        encoder.index = encoder.index + MemoryLayout<Double>.stride
+        encoder.offset = encoder.offset + MemoryLayout<Double>.stride
     }
 
     func encode(_ value: Float) throws {
@@ -80,11 +84,11 @@ class LECSBinaryUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         var value = value
         let data = Data(bytes: &value, count: MemoryLayout<Int>.stride)
 
-        for i in encoder.index..<encoder.index+MemoryLayout<Int>.stride {
-            encoder.data[i] = data[i - encoder.index]
+        for i in encoder.offset..<encoder.offset+MemoryLayout<Int>.stride {
+            encoder.data[i] = data[i - encoder.offset]
         }
 
-        encoder.index = encoder.index + MemoryLayout<Int>.stride
+        encoder.offset = encoder.offset + MemoryLayout<Int>.stride
     }
 
     func encode(_ value: Int8) throws {
@@ -107,11 +111,11 @@ class LECSBinaryUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         var value = value
         let data = Data(bytes: &value, count: MemoryLayout<UInt>.stride)
 
-        for i in encoder.index..<encoder.index+MemoryLayout<UInt>.stride {
-            encoder.data[i] = data[i - encoder.index]
+        for i in encoder.offset..<encoder.offset+MemoryLayout<UInt>.stride {
+            encoder.data[i] = data[i - encoder.offset]
         }
 
-        encoder.index = encoder.index + MemoryLayout<UInt>.stride
+        encoder.offset = encoder.offset + MemoryLayout<UInt>.stride
     }
 
     func encode(_ value: UInt8) throws {
@@ -201,11 +205,11 @@ class BinarySingleValueEncodingContainer: SingleValueEncodingContainer {
         var value = value
         let data = Data(bytes: &value, count: MemoryLayout<UInt>.stride)
 
-        for i in encoder.index..<encoder.index+MemoryLayout<UInt>.stride {
-            encoder.data[i] = data[i - encoder.index]
+        for i in encoder.offset..<encoder.offset+MemoryLayout<UInt>.stride {
+            encoder.data[i] = data[i - encoder.offset]
         }
 
-        encoder.index = encoder.index + MemoryLayout<UInt>.stride
+        encoder.offset = encoder.offset + MemoryLayout<UInt>.stride
     }
 
     func encode(_ value: UInt8) throws {
