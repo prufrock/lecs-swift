@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct LECSName: Codable {
+struct LECSName: Component, Codable {
     var name: String?
 
     init(name: String?) {
