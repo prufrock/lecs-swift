@@ -18,6 +18,10 @@ class LECSBinaryEncoder: Encoder {
         self.data = Data(count: count)
     }
 
+    init(from data: Data) {
+        self.data = data
+    }
+
     func container<Key>(keyedBy type: Key.Type) -> KeyedEncodingContainer<Key> where Key : CodingKey {
 //        return KeyedEncodingContainer(BinaryKeyedEncodingContainer<Key>(encoder: self))
         fatalError("not implemented")
