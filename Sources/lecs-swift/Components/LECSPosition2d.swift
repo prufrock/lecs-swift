@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct LECSPosition2d: Component, Codable {
+struct LECSPosition2d: LECSComponent, Codable {
     var x: Int
     var y: Int
     func encode(to encoder: Encoder) throws {

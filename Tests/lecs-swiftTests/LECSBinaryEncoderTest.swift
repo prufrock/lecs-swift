@@ -8,7 +8,7 @@
 import XCTest
 @testable import lecs_swift
 
-final class LECSTableTest: XCTestCase {
+final class LECSBinaryEncoderTest: XCTestCase {
 
     func testEncodeTwoStructs() throws {
         let encoder = LECSBinaryEncoder(

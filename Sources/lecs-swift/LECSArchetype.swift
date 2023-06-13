@@ -13,6 +13,7 @@ typealias LECSComponentId = LECSEntityId
 typealias LECSType = [LECSComponentId]
 typealias LECSSize = Int
 typealias LECSRowId = Int
+typealias LECSRow = [LECSComponent]
 
 class LECSArchetype {
     let id: LECSArchetypeId

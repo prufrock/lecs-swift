@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct LECSId: Component, Codable {
+struct LECSId: LECSComponent, Codable {
     var id: UInt
 
     init(id: UInt) {
