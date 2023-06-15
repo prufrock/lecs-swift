@@ -16,10 +16,11 @@ final class LECSTableTest: XCTestCase {
             size: 1
         )
 
-        let encoder = LECSBinaryEncoder(MemoryLayout<LECSId>.stride)
+        let encoder = LECSRowEncoder(MemoryLayout<LECSId>.stride)
         let id = LECSId(id: 1)
-        try id.encode(to: encoder)
-        table.add(encoder.data)
+        let entity: [LECSComponent] = [id]
+        let data = try encoder.encode(entity)
+        table.add(data)
         XCTAssertEqual(1, table.count)
 
         let first = table.read(0)
@@ -32,24 +33,23 @@ final class LECSTableTest: XCTestCase {
             size: 5
         )
 
-
         // insert 5 LECSIds into the table
         for i in 1...5 {
-            let encoder = LECSBinaryEncoder(MemoryLayout<LECSId>.stride)
+            let encoder = LECSRowEncoder(MemoryLayout<LECSId>.stride)
             let id = LECSId(id: UInt(i))
-            try id.encode(to: encoder)
-            table.add(encoder.data)
+            let entity: [LECSComponent] = [id]
+            let data = try encoder.encode(entity)
+            table.add(data)
         }
         XCTAssertEqual(5, table.count)
 
-
+        // read the 5 LECIds out of the table
         for i in 0..<5 {
         	let first = table.read(i)
-            //TODO: Need to create LECSBinaryDecoder
-            let firstId: LECSId = LECSBinaryEncoder(from: first).data.withUnsafeBytes {
-                $0.load(as: LECSId.self)
-            }
-            XCTAssertEqual(UInt(i + 1), firstId.id)
+            let decoder = LECSRowDecoder(first)
+            let values = try decoder.decode(types: [LECSId.self])
+            let id = values[0] as! LECSId
+            XCTAssertEqual(UInt(i + 1), id.id)
         }
     }
 }
