@@ -23,9 +23,4 @@ struct LECSName: LECSComponent, Codable {
         var container = encoder.unkeyedContainer()
         try container.encode(name)
     }
-
-    func encodeNull(to encoder: LECSBinaryEncoder) throws {
-        var container = encoder.unkeyedContainer() as! LECSBinaryUnkeyedEncodingContainer
-        try container.encodeNullStruct(MemoryLayout<Self>.stride)
-    }
 }

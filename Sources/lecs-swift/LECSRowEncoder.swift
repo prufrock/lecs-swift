@@ -53,7 +53,7 @@ class LECSRowUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     }
 
     func encode(_ value: Bool) throws {
-        fatalError("not implemented")
+        try encodeSimpleType(value)
     }
 
     func encode(_ value: String) throws {
@@ -61,31 +61,31 @@ class LECSRowUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     }
 
     func encode(_ value: Double) throws {
-        fatalError("not implemented")
+        try encodeSimpleType(value)
     }
 
     func encode(_ value: Float) throws {
-        fatalError("not implemented")
+        try encodeSimpleType(value)
     }
 
     func encode(_ value: Int) throws {
-        fatalError("not implemented")
+        try encodeSimpleType(value)
     }
 
     func encode(_ value: Int8) throws {
-        fatalError("not implemented")
+        try encodeSimpleType(value)
     }
 
     func encode(_ value: Int16) throws {
-        fatalError("not implemented")
+        try encodeSimpleType(value)
     }
 
     func encode(_ value: Int32) throws {
-        fatalError("not implemented")
+        try encodeSimpleType(value)
     }
 
     func encode(_ value: Int64) throws {
-        fatalError("not implemented")
+        try encodeSimpleType(value)
     }
 
     func encode(_ value: UInt) throws {
@@ -104,19 +104,19 @@ class LECSRowUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     }
 
     func encode(_ value: UInt8) throws {
-        fatalError("not implemented")
+        try encodeSimpleType(value)
     }
 
     func encode(_ value: UInt16) throws {
-        fatalError("not implemented")
+        try encodeSimpleType(value)
     }
 
     func encode(_ value: UInt32) throws {
-        fatalError("not implemented")
+        try encodeSimpleType(value)
     }
 
     func encode(_ value: UInt64) throws {
-        fatalError("not implemented")
+        try encodeSimpleType(value)
     }
 
     func encode<T>(_ value: T) throws where T : Encodable {

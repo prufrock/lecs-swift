@@ -50,17 +50,6 @@ class LECSBinaryUnkeyedEncodingContainer: UnkeyedEncodingContainer {
         fatalError("not implemented")
     }
 
-    func encodeNullStruct(_ stride: Int) {
-        var value = NSNull()
-        let data = Data(bytes: &value, count: stride)
-
-        for i in encoder.offset..<encoder.offset+stride {
-            encoder.data[i] = data[i - encoder.offset]
-        }
-
-        encoder.offset = encoder.offset + stride
-    }
-
     func encode(_ value: Bool) throws {
         fatalError("not implemented")
     }

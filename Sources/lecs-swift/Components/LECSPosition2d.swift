@@ -16,7 +16,7 @@ struct LECSPosition2d: LECSComponent, Codable {
         try container.encode(y)
     }
 
-    init (x: Int, y: Int) {
+    init(x: Int, y: Int) {
         self.x = x
         self.y = y
     }
