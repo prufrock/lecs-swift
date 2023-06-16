@@ -30,7 +30,7 @@ class LECSRowDecoder: Decoder {
         fatalError("Not implemented")
     }
 
-    func decode(types: [LECSComponent.Type]) throws -> [LECSComponent] {
+    func decode(types: [LECSComponent.Type]) throws -> LECSRow {
         try types.forEach {
             let value = try $0.init(from: self)
             decoded.append(value)

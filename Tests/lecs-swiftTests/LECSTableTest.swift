@@ -20,7 +20,8 @@ final class LECSTableTest: XCTestCase {
         let id = LECSId(id: 1)
         let entity: [LECSComponent] = [id]
         let data = try encoder.encode(entity)
-        table.add(data)
+        let rowId = table.insert(data)
+        XCTAssertEqual(0, rowId)
         XCTAssertEqual(1, table.count)
 
         let first = table.read(0)
@@ -39,7 +40,8 @@ final class LECSTableTest: XCTestCase {
             let id = LECSId(id: UInt(i))
             let entity: [LECSComponent] = [id]
             let data = try encoder.encode(entity)
-            table.add(data)
+            let rowId = table.insert(data)
+            XCTAssertEqual(i - 1, rowId)
         }
         XCTAssertEqual(5, table.count)
 

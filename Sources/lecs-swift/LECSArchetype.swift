@@ -14,23 +14,50 @@ typealias LECSType = [LECSComponentId]
 typealias LECSSize = Int
 typealias LECSRowId = Int
 typealias LECSRow = [LECSComponent]
+typealias LECSColumns = [LECSComponent.Type]
 
 class LECSArchetype {
     let id: LECSArchetypeId
     let type: LECSType
-    let table: LECSTable
+    private var table: LECSTable
+    private let columns: LECSColumns
 
-    init(id: LECSArchetypeId, type: LECSType, table: LECSTable) {
+    //TODO: Think about ways to reduce the number of arguments on here
+    init(id: LECSArchetypeId, type: LECSType, columns: LECSColumns, size: LECSSize) {
         self.id = id
         self.type = type
+        self.columns = columns
+
+        // total of all the strides of the components
+        let elementSize = columns.reduce(0) { $0 + MemoryLayout.stride(ofValue: $1) }
+
+        self.table = LECSTable(elementSize: elementSize, size: size)
+    }
+
+    init(id: LECSArchetypeId, type: LECSType, columns: LECSColumns, table: LECSTable) {
+        self.id = id
+        self.type = type
+        self.columns = columns
         self.table = table
+    }
+
+    func insert(_ values: LECSRow) throws -> LECSRowId {
+        let encoder = LECSRowEncoder(table.elementSize)
+        let data = try encoder.encode(values)
+        return table.insert(data)
+    }
+
+    func read(_ rowId: LECSRowId) throws -> LECSRow {
+        let data = table.read(rowId)
+        let decoder = LECSRowDecoder(data)
+        return try decoder.decode(types: columns)
     }
 }
 
 struct LECSTable {
     private var rows: Data
-    let elementSize: LECSSize
-    let size: LECSSize
+    fileprivate let elementSize: LECSSize
+    fileprivate let size: LECSSize
     private (set) var count: LECSSize
     private var offset: LECSSize {
         count * elementSize
@@ -44,9 +71,11 @@ struct LECSTable {
         count = 0
     }
 
-    mutating func add(_ row: Data) {
+    mutating func insert(_ row: Data) -> LECSRowId {
         rows.replaceSubrange(offset..<(offset + elementSize), with: row)
+        let row = count
         count += 1
+        return row
     }
 
     func read(_ rowId: LECSRowId) -> Data {
