@@ -8,7 +8,7 @@
 import XCTest
 @testable import lecs_swift
 
-final class LECSTableTest: XCTestCase {
+final class LECSTableTests: XCTestCase {
 
     func testAddAComponentToATable() throws {
         var table = LECSTable(

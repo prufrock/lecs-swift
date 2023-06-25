@@ -8,7 +8,7 @@
 import XCTest
 @testable import lecs_swift
 
-final class LECSArchetypeTest: XCTestCase {
+final class LECSArchetypeTests: XCTestCase {
     var entityCounter: () -> UInt = {
         var count: UInt = 1
         return {
