@@ -29,9 +29,19 @@ protocol LECSWorld {
 
 class LECSWorldActual {
     private var entityCounter: LECSEntityId = 0
+    private var entityComponent: [LECSEntityId: Set<MetatypeWrapper>] = [:]
 
     func createEntity(_ name: String) -> LECSEntityId {
         entityCounter += 1
+        var set: Set<MetatypeWrapper> = Set()
+        set.insert(LECSId.self)
+        set.insert(LECSName.self)
+        entityComponent[entityCounter] = set
         return entityCounter
+    }
+
+    // MARK: Querying Entities
+    func hasComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) -> Bool {
+        return entityComponent[entityId]?.contains(component) ?? false
     }
 }
