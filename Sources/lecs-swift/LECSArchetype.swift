@@ -52,6 +52,21 @@ class LECSArchetype {
         let decoder = LECSRowDecoder(data)
         return try decoder.decode(types: columns)
     }
+
+    func hasComponent(_ component: LECSComponentId) -> Bool {
+        type.contains(component) 
+    }
+
+    func getComponent<T>(rowId: LECSRowId, componentId: LECSComponentId, componentType: T.Type) throws -> T? {
+        var component: T? = nil
+
+        if let componentIndex = type.firstIndex(of: componentId) {
+            let row = try read(rowId)
+            component = row[componentIndex] as? T
+        }
+
+        return component
+    }
 }
 
 struct LECSTable {

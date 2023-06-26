@@ -15,9 +15,9 @@ final class LECSWorldActualTests: XCTestCase {
         let player = try world.createEntity("player")
 
         XCTAssertLessThanOrEqual(0, player, "Create an entity, get an Id.")
-        XCTAssertTrue(world.hasComponent(player, component: LECSId.self))
-        XCTAssertTrue(world.hasComponent(player, component: LECSName.self))
-        XCTAssertFalse(world.hasComponent(player, component: Velocity.self))
+        XCTAssertTrue(world.hasComponent(player, LECSId.self))
+        XCTAssertTrue(world.hasComponent(player, LECSName.self))
+        XCTAssertFalse(world.hasComponent(player, Velocity.self))
         let playerName = try world.getComponent(player, LECSName.self)
         XCTAssertEqual("player", playerName?.name)
 

@@ -12,9 +12,9 @@ protocol LECSWorld {
     func createEntity(_ name: String) -> LECSEntityId
 
     // MARK: Querying Entities
-    func hasComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) -> Bool
+    func hasComponent(_ entityId: LECSEntityId, _ component: LECSComponent.Type) -> Bool
 
-    func getComponent<T: LECSComponent>(_ entityId: LECSEntityId) -> T
+    func getComponent<T>(_ entityId: LECSEntityId, _ component: T.Type) throws -> T?
 
     // MARK: Components
     func addComponent<T: LECSComponent>(_ entityId: LECSEntityId, component: T)
@@ -29,66 +29,61 @@ protocol LECSWorld {
 
 class LECSWorldActual {
     private var entityCounter: LECSEntityId = 0
-    private var entityComponent: [LECSEntityId: Set<MetatypeWrapper>] = [:]
-    private var entityRecord: [LECSEntityId: LECSRecord] = [:]
-    private var idNameArchetype: LECSArchetype
+
+    // archetypes
+    private var idNameArchetype: LECSArchetype? = nil
 
     // indexes
-    private var idComponent: LECSComponentId
-    private var nameComponent: LECSComponentId
-    private var typeComponent: [MetatypeWrapper: LECSEntityId] = [:]
-
-    init() {
-        idComponent = entityCounter
-        typeComponent[LECSId.self] = idComponent
-        entityCounter += 1
-        nameComponent = entityCounter
-        typeComponent[LECSName.self] = nameComponent
-        entityCounter += 1
-
-        let id = entityCounter
-        entityCounter += 1
-        idNameArchetype = LECSArchetype(
-            id: id,
-            type: [idComponent, nameComponent],
-            columns: [LECSId.self, LECSName.self],
-            size: 10
-        )
-    }
+    private var entityRecord: [LECSEntityId: LECSRecord] = [:]
+    private var typeComponent: [MetatypeWrapper: LECSComponentId] = [:]
 
     func createEntity(_ name: String) throws -> LECSEntityId {
-        let id = entityCounter
-        entityCounter += 1
+        let id = entity()
 
-        var set: Set<MetatypeWrapper> = Set()
-        set.insert(LECSId.self)
-        set.insert(LECSName.self)
-        entityComponent[id] = set
+        // create the components
+        let idComponent = entity()
+        typeComponent[LECSId.self] = idComponent
+        let nameComponent = entity()
+        typeComponent[LECSName.self] = nameComponent
 
-        let rowId = try idNameArchetype.insert([LECSId(id: id), LECSName(name: name)])
+        // if idNameArchetype is nil create it
+        if idNameArchetype == nil {
+            // create the archetype
+            idNameArchetype = LECSArchetype(
+                id: entity(),
+                type: [idComponent, nameComponent],
+                columns: [LECSId.self, LECSName.self],
+                size: 10
+            )
+        }
 
-        entityRecord[id] = LECSRecord(entityId: id, archetype: idNameArchetype, row: rowId)
+        let rowId = try idNameArchetype!.insert([LECSId(id: id), LECSName(name: name)])
+
+        entityRecord[id] = LECSRecord(entityId: id, archetype: idNameArchetype!, row: rowId)
 
         return id
     }
 
     // MARK: Querying Entities
-    func hasComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) -> Bool {
-        return entityComponent[entityId]?.contains(component) ?? false
+    func hasComponent(_ entityId: LECSEntityId, _ component: LECSComponent.Type) -> Bool {
+        // Find the id of the component
+        guard let componentId = typeComponent[component] else {
+            return false
+        }
+        // TODO: replace with a faster search
+        // Check to see if the entity has the component
+        return entityRecord[entityId]?.hasComponent(componentId) ?? false
     }
 
     func getComponent<T>(_ entityId: LECSEntityId, _ component: T.Type) throws -> T? {
         let record = entityRecord[entityId]!
-        let archetype = record.archetype
 
-        var component: T? = nil
+        return try record.getComponent(entityId, typeComponent[T.self]!, T.self)
+    }
 
-        if let componentIndex = archetype.type.firstIndex(of: typeComponent[T.self]!) {
-            let row = try archetype.read(record.row)
-            component = row[componentIndex] as? T
-        }
-
-
-        return component
+    private func entity() -> LECSEntityId {
+        let id = entityCounter
+        entityCounter += 1
+        return id
     }
 }
