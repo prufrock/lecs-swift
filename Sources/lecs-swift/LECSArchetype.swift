@@ -20,10 +20,16 @@ class LECSArchetype {
     let id: LECSArchetypeId
     let type: LECSType
     private var table: LECSTable
-    private let columns: LECSColumns
+    internal let columns: LECSColumns
+    private var edges: [LECSComponentId:ArchetypeEdge] = [:]
 
     //TODO: Think about ways to reduce the number of arguments on here
-    init(id: LECSArchetypeId, type: LECSType, columns: LECSColumns, size: LECSSize) {
+    init(
+        id: LECSArchetypeId,
+        type: LECSType,
+        columns: LECSColumns,
+        size: LECSSize
+    ) {
         self.id = id
         self.type = type
         self.columns = columns
@@ -53,6 +59,12 @@ class LECSArchetype {
         return try decoder.decode(types: columns)
     }
 
+    func remove(_ rowId: LECSRowId) throws -> LECSRow {
+        let row = try read(rowId)
+        table.remove(rowId)
+        return row
+    }
+
     func hasComponent(_ component: LECSComponentId) -> Bool {
         type.contains(component) 
     }
@@ -66,6 +78,30 @@ class LECSArchetype {
         }
 
         return component
+    }
+
+    func setAddEdge(_ id: LECSComponentId, _ archetype: LECSArchetype) {
+        if var edge = edges[id] {
+            edge.add = archetype
+        } else {
+            edges[id] = ArchetypeEdge(add: archetype)
+        }
+    }
+
+    func setRemoveEdge(_ id: LECSComponentId, _ archetype: LECSArchetype) {
+        if var edge = edges[id] {
+            edge.remove = archetype
+        } else {
+            edges[id] = ArchetypeEdge(remove: archetype)
+        }
+    }
+
+    func addComponent(_ id: LECSComponentId) -> LECSArchetype? {
+        edges[id]?.add
+    }
+
+    func removeComponent(_ id: LECSComponentId) -> LECSArchetype? {
+        edges[id]?.remove
     }
 }
 
@@ -96,4 +132,15 @@ struct LECSTable {
     func read(_ rowId: LECSRowId) -> Data {
         rows.subdata(in: (rowId * elementSize)..<(rowId * elementSize + elementSize))
     }
+
+    mutating func remove(_ id: Int)  {
+        // if there's no need to store the rows then there's nothing to remove
+        guard elementSize > 0 else { return }
+        //TODO: implement
+    }
+}
+
+struct ArchetypeEdge {
+    var add: LECSArchetype? = nil
+    var remove: LECSArchetype? = nil
 }

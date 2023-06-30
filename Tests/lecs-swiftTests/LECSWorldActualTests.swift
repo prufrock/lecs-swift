@@ -18,13 +18,20 @@ final class LECSWorldActualTests: XCTestCase {
         XCTAssertTrue(world.hasComponent(player, LECSId.self))
         XCTAssertTrue(world.hasComponent(player, LECSName.self))
         XCTAssertFalse(world.hasComponent(player, Velocity.self))
+        let playerId = try world.getComponent(player, LECSId.self)
         let playerName = try world.getComponent(player, LECSName.self)
+        XCTAssertEqual(player, playerId?.id)
         XCTAssertEqual("player", playerName?.name)
 
         let enemy = try world.createEntity("enemy")
 
         XCTAssertLessThanOrEqual(0, enemy, "Create another entity, get another Id. The Id may not necessarily occur after the player, in case reuse needs to happen.")
-        XCTAssertNotEqual(player, enemy, "The Ids of player and enemy should not be equal.")
+        XCTAssertNotEqual(player, enemy, "The ids of player and enemy should not be equal.")
+
+        let enemyId = try world.getComponent(enemy, LECSId.self)
+        let enemyName = try world.getComponent(enemy, LECSName.self)
+        XCTAssertEqual(enemy, enemyId?.id)
+        XCTAssertEqual("enemy", enemyName?.name)
     }
 }
 
