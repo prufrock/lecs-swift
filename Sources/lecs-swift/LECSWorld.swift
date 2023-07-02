@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  LECSWorld.swift
 //  
 //
 //  Created by David Kanenwisher on 6/24/23.
@@ -7,31 +7,58 @@
 
 import Foundation
 
+/**
+ The world is the facade for the ECS system. All or nearly all access to the ECS system goes through world.
+ */
 protocol LECSWorld {
     // MARK: Entities
-    func createEntity(_ name: String) -> LECSEntityId
+
+    /// Creates an entity, adds it to the ECS, and returns its id.
+    /// - Parameter name: The name of the entity.
+    /// - Returns: The id of the new entity.
+    func createEntity(_ name: String) throws -> LECSEntityId
 
     // MARK: Querying Entities
+    /// Checks to see if the entity has a component.
+    /// - Parameters:
+    ///   - entityId: The id of the entity to check.
+    ///   - component: The Type of the component.
+    /// - Returns: whether or not the entity has the component
     func hasComponent(_ entityId: LECSEntityId, _ component: LECSComponent.Type) -> Bool
 
+    /// Finds the component on the entity if it exists.
+    /// - Parameters:
+    ///   - entityId: The id of the entity to get the entity for.
+    ///   - component: The Type of the component.
+    /// - Returns: The component requested if it exists on the entity.
     func getComponent<T>(_ entityId: LECSEntityId, _ component: T.Type) throws -> T?
 
     // MARK: Components
-    func addComponent<T: LECSComponent>(_ entityId: LECSEntityId, component: T)
+    /// Adds a component to the entity.
+    /// - Parameters:
+    ///   - entityId: The id of the entity to add the component to.
+    ///   - component: The component to add to the entity.
+    func addComponent<T: LECSComponent>(_ entityId: LECSEntityId, _ component: T) throws
 
-    func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type)
+    /// Removes a component from the entity.
+    /// - Parameters:
+    ///   - entityId: The id of the entity to remove the component from.
+    ///   - component: The Type of the component to remove.
+//    func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type)
 
     // MARK: Systems
-    func addSystem(_ name: String, selector: [LECSComponentId], lambda: ([LECSComponent])) -> LECSEntityId
+//    func addSystem(_ name: String, selector: [LECSComponentId], lambda: ([LECSComponent])) -> LECSEntityId
 
-    func process(_ system: LECSEntityId)
+//    func process(_ system: LECSEntityId)
 }
 
 enum LECSWorldErrors: Error {
     case entityDoesNotExist
 }
 
-class LECSWorldActual {
+class LECSWorldFixedSize: LECSWorld {
+    private let archetypeSize: LECSSize
+
     private var entityCounter: LECSEntityId = 2
 
     private var rootEntity: LECSEntityId = 0
@@ -45,10 +72,14 @@ class LECSWorldActual {
     )
 
     // indexes
+    // entityRecord is a map of entity ids to records. The record contains the archetype and the row id.
     private var entityRecord: [LECSEntityId: LECSRecord] = [:]
+    // typeComponent maps the Swift Type of a Component to a ComponentId
     private var typeComponent: [MetatypeWrapper: LECSComponentId] = [:]
 
-    init() {
+    init(archetypeSize: LECSSize = 10) {
+        self.archetypeSize = archetypeSize
+
         entityRecord[rootEntity] = LECSRecord(
             entityId: rootEntity,
             archetype: emptyArchetype,
@@ -151,8 +182,7 @@ class LECSWorldActual {
             id: id,
             type: type,
             columns: columns,
-            //TODO: set a global size until you figure out a way to determine sizes
-            size: 10
+            size: archetypeSize
         )
     }
 }

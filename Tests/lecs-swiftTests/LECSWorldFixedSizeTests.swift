@@ -1,5 +1,5 @@
 //
-//  LECSWorldActualTests.swift
+//  LECSWorldFixedSizeTests.swift
 //  
 //
 //  Created by David Kanenwisher on 6/24/23.
@@ -8,9 +8,9 @@
 import XCTest
 @testable import lecs_swift
 
-final class LECSWorldActualTests: XCTestCase {
+final class LECSWorldFixedSizeTests: XCTestCase {
     func testCreateEntities() throws {
-        let world = LECSWorldActual()
+        let world = LECSWorldFixedSize()
 
         let player = try world.createEntity("player")
 
