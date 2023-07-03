@@ -54,6 +54,7 @@ protocol LECSWorld {
 
 enum LECSWorldErrors: Error {
     case entityDoesNotExist
+    case rowDoesNotExist
 }
 
 class LECSWorldFixedSize: LECSWorld {
@@ -131,7 +132,9 @@ class LECSWorldFixedSize: LECSWorld {
         }
 
         let oldArchetype = record.archetype
-        let row = try oldArchetype.remove(record.row)
+        guard let row = try oldArchetype.remove(record.row) else {
+            throw LECSWorldErrors.rowDoesNotExist
+        }
         let componentId = typeComponent[T.self] ?? createComponent(T.self)
 
         let newArchetype = oldArchetype.addComponent(componentId) ?? createArchetype(
@@ -159,10 +162,11 @@ class LECSWorldFixedSize: LECSWorld {
 
     private func createEntity() -> LECSEntityId {
         let id = entity()
+        let rowId = try! emptyArchetype.insert([])
         entityRecord[id] = LECSRecord(
             entityId: id,
             archetype: emptyArchetype,
-            row: 0 // always 0 because there is nothing to store
+            row: rowId
         )
         return id
     }

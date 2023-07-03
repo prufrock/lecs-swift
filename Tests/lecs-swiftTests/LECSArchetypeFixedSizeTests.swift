@@ -34,7 +34,7 @@ final class LECSArchetypeFixedSizeTests: XCTestCase {
 
         let rowId = try archetype.insert([LECSId(id: firstEntity)])
         XCTAssertEqual(0, rowId)
-        let row = try archetype.read(rowId)
+        let row = try archetype.read(rowId)!
         let firstEntityId = row[0] as! LECSId
         XCTAssertEqual(firstEntity, firstEntityId.id)
     }

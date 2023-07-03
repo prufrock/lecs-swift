@@ -24,7 +24,7 @@ final class LECSTableTests: XCTestCase {
         XCTAssertEqual(0, rowId)
         XCTAssertEqual(1, table.count)
 
-        let first = table.read(0)
+        let first = table.read(0)!
         XCTAssertEqual(1, first[0])
     }
 
@@ -47,7 +47,7 @@ final class LECSTableTests: XCTestCase {
 
         // read the 5 LECIds out of the table
         for i in 0..<5 {
-        	let first = table.read(i)
+        	let first = table.read(i)!
             let decoder = LECSRowDecoder(first)
             let values = try decoder.decode(types: [LECSId.self])
             let id = values[0] as! LECSId

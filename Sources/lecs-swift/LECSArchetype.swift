@@ -35,13 +35,13 @@ protocol LECSArchetype {
     /// - Parameter rowId: The id of the row to read.
     /// - Returns: The row requested.
     /// - Throws: If there is an error reading the row, usually because the row id is out of bounds.
-    func read(_ rowId: LECSRowId) throws -> LECSRow
+    func read(_ rowId: LECSRowId) throws -> LECSRow?
 
     /// Removes a row from the archetype.
     /// - Parameter rowId: The id of the row to remove.
     /// - Returns: The row removed
     /// - Throws: If there is an error removing the row.
-    func remove(_ rowId: LECSRowId) throws -> LECSRow
+    func remove(_ rowId: LECSRowId) throws -> LECSRow?
 
     /// Checks to see if the archetype has a component.
     /// - Parameter component: The id of the component to check.
@@ -129,13 +129,15 @@ class LECSArchetypeFixedSize: LECSArchetype {
         return table.insert(data)
     }
 
-    func read(_ rowId: LECSRowId) throws -> LECSRow {
-        let data = table.read(rowId)
+    func read(_ rowId: LECSRowId) throws -> LECSRow? {
+        guard let data = table.read(rowId) else {
+            return nil
+        }
         let decoder = LECSRowDecoder(data)
         return try decoder.decode(types: columns)
     }
 
-    func remove(_ rowId: LECSRowId) throws -> LECSRow {
+    func remove(_ rowId: LECSRowId) throws -> LECSRow? {
         let row = try read(rowId)
         table.remove(rowId)
         return row
@@ -148,8 +150,7 @@ class LECSArchetypeFixedSize: LECSArchetype {
     func getComponent<T>(rowId: LECSRowId, componentId: LECSComponentId, componentType: T.Type) throws -> T? {
         var component: T? = nil
 
-        if let componentIndex = type.firstIndex(of: componentId) {
-            let row = try read(rowId)
+        if let componentIndex = type.firstIndex(of: componentId), let row = try read(rowId) {
             component = row[componentIndex] as? T
         }
 
@@ -186,9 +187,8 @@ struct LECSTable {
     fileprivate let elementSize: LECSSize
     fileprivate let size: LECSSize
     private (set) var count: LECSSize
-    private var offset: LECSSize {
-        count * elementSize
-    }
+
+    private var removed: Set<LECSRowId> = []
 
     init(elementSize: LECSSize, size: LECSSize) {
         self.elementSize = elementSize
@@ -198,21 +198,34 @@ struct LECSTable {
         count = 0
     }
 
-    mutating func insert(_ row: Data) -> LECSRowId {
-        rows.replaceSubrange(offset..<(offset + elementSize), with: row)
+    mutating func insert(_ values: Data) -> LECSRowId {
+        let row = emptyRow()
+        let offset = offset(row)
+        rows.replaceSubrange(offset..<(offset + elementSize), with: values)
+        return row
+    }
+
+    func read(_ rowId: LECSRowId) -> Data? {
+        guard !removed.contains(rowId) else {
+            return nil
+        }
+
+        return rows.subdata(in: (rowId * elementSize)..<(rowId * elementSize + elementSize))
+    }
+
+    mutating func remove(_ id: Int)  {
+        removed.insert(id)
+    }
+
+    mutating private func emptyRow() -> LECSRowId {
+        //TODO: reuse rows that have been removed
         let row = count
         count += 1
         return row
     }
 
-    func read(_ rowId: LECSRowId) -> Data {
-        rows.subdata(in: (rowId * elementSize)..<(rowId * elementSize + elementSize))
-    }
-
-    mutating func remove(_ id: Int)  {
-        // if there's no need to store the rows then there's nothing to remove
-        guard elementSize > 0 else { return }
-        //TODO: implement
+    private func offset(_ row: LECSRowId) -> Int {
+        row * elementSize
     }
 }
 
