@@ -11,6 +11,9 @@ struct LECSName: LECSComponent, Codable {
     var name: String
 
     init(name: String) {
+        if (name.count > 15) {
+            fatalError("I'm lazy so this blows up if you make LECSName larger than 15 characters.")
+        }
         self.name = name
     }
 
