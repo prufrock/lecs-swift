@@ -1,5 +1,5 @@
 //
-//  LECSArchetype.swift
+//  LECSArchetypeFixedSizeTests.swift
 //  
 //
 //  Created by David Kanenwisher on 6/15/23.
@@ -8,7 +8,7 @@
 import XCTest
 @testable import lecs_swift
 
-final class LECSArchetypeTests: XCTestCase {
+final class LECSArchetypeFixedSizeTests: XCTestCase {
     var entityCounter: () -> UInt = {
         var count: UInt = 1
         return {
@@ -23,7 +23,7 @@ final class LECSArchetypeTests: XCTestCase {
         let type: LECSType = [idComponent]
         let columns: LECSColumns = [LECSId.self]
         let archetypeId: LECSEntityId = entityCounter()
-        let archetype: LECSArchetype = LECSArchetype(
+        let archetype: LECSArchetypeFixedSize = LECSArchetypeFixedSize(
             id: archetypeId,
             type: type,
             columns: columns,

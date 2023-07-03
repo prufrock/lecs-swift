@@ -64,7 +64,7 @@ class LECSWorldFixedSize: LECSWorld {
     private var rootEntity: LECSEntityId = 0
 
     // archetypes
-    private var emptyArchetype: LECSArchetype = LECSArchetype(
+    private var emptyArchetype: LECSArchetypeFixedSize = LECSArchetypeFixedSize(
         id: 1,
         type: [],
         columns: [],
@@ -178,7 +178,7 @@ class LECSWorldFixedSize: LECSWorld {
 
     private func createArchetype(columns: LECSColumns, type: LECSType) -> LECSArchetype {
         let id = entity()
-        return LECSArchetype(
+        return LECSArchetypeFixedSize(
             id: id,
             type: type,
             columns: columns,
