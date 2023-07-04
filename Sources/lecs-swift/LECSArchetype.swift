@@ -37,6 +37,8 @@ protocol LECSArchetype {
     /// - Throws: If there is an error reading the row, usually because the row id is out of bounds.
     func read(_ rowId: LECSRowId) throws -> LECSRow?
 
+    func readAll(_ block: (LECSRow) -> Void) throws
+
     /// Removes a row from the archetype.
     /// - Parameter rowId: The id of the row to remove.
     /// - Returns: The row removed
@@ -135,6 +137,17 @@ class LECSArchetypeFixedSize: LECSArchetype {
         }
         let decoder = LECSRowDecoder(data)
         return try decoder.decode(types: columns)
+    }
+
+    func readAll(_ block: (LECSRow) -> Void) throws {
+        // iterate from 0 to table.count
+        for i in 0..<table.count {
+            // read the row
+            guard let row = try read(i) else {
+                continue
+            }
+            block(row)
+        }
     }
 
     func remove(_ rowId: LECSRowId) throws -> LECSRow? {

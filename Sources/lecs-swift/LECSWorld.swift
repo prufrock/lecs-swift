@@ -65,7 +65,7 @@ class LECSWorldFixedSize: LECSWorld {
     private var rootEntity: LECSEntityId = 0
 
     // archetypes
-    private var emptyArchetype: LECSArchetypeFixedSize = LECSArchetypeFixedSize(
+    private var emptyArchetype: LECSArchetype = LECSArchetypeFixedSize(
         id: 1,
         type: [],
         columns: [],
@@ -77,6 +77,11 @@ class LECSWorldFixedSize: LECSWorld {
     private var entityRecord: [LECSEntityId: LECSRecord] = [:]
     // typeComponent maps the Swift Type of a Component to a ComponentId
     private var typeComponent: [MetatypeWrapper: LECSComponentId] = [:]
+    // archetypeIndex maps archetype ids to archetypes
+    private var archetypeIndex: [LECSArchetypeId: LECSArchetype] = [:]
+    // componentArchetype maps component ids to the archetypes their in and the column they are in.
+    // this makes determining if a component is in an archetype and retrieval fast
+    private var componentArchetype: [LECSComponentId : LECSArchetypeMap] = [:]
 
     init(archetypeSize: LECSSize = 10) {
         self.archetypeSize = archetypeSize
@@ -86,6 +91,8 @@ class LECSWorldFixedSize: LECSWorld {
             archetype: emptyArchetype,
             row: 0
         )
+
+        archetypeIndex[emptyArchetype.id] = emptyArchetype
     }
 
     func createEntity(_ name: String) throws -> LECSEntityId {
@@ -103,9 +110,10 @@ class LECSWorldFixedSize: LECSWorld {
         guard let componentId = typeComponent[component] else {
             return false
         }
-        // TODO: replace with a faster search
-        // Check to see if the entity has the component
-        return entityRecord[entityId]?.hasComponent(componentId) ?? false
+        guard let archetype = entityRecord[entityId]?.archetype else {
+            return false
+        }
+        return componentArchetype[componentId]?[archetype.id] != nil
     }
 
     func getComponent<T>(_ entityId: LECSEntityId, _ component: T.Type) throws -> T? {
@@ -152,6 +160,27 @@ class LECSWorldFixedSize: LECSWorld {
             archetype: newArchetype,
             row: newRow
         )
+
+        updateComponentArchetypeMap(newArchetype)
+        archetypeIndex[newArchetype.id] = newArchetype
+    }
+
+    func select(_ query: [LECSComponent.Type], _ block: (LECSWorld, [LECSComponent]) -> Void) {
+        guard query.count > 0 else {
+            return
+        }
+        // Find the archetype that matches the query
+        let firstComponent = query.first!
+        let firstComponentId = typeComponent[firstComponent]!
+        let archetypeMaps = componentArchetype[firstComponentId]!
+        archetypeMaps.forEach { archetypeId, archetypeRecord in
+            let archetype = archetypeIndex[archetypeId]!
+            try! archetype.readAll { row in
+                let firstFoundComponent = row[archetypeRecord.column]
+                block(self, [firstFoundComponent])
+            }
+        }
+
     }
 
     private func entity() -> LECSEntityId {
@@ -189,4 +218,21 @@ class LECSWorldFixedSize: LECSWorld {
             size: archetypeSize
         )
     }
+
+    private func updateComponentArchetypeMap(_ archetype: LECSArchetype) {
+        // iterate over the type in the archetype
+        for (column, componentId) in archetype.type.enumerated() {
+            // get the map for the component
+            var map = componentArchetype[componentId] ?? [:]
+            // add the archetype to the map
+            map[archetype.id] = LECSArchetypeRecord(column: column)
+            // update the map in the index
+            componentArchetype[componentId] = map
+        }
+    }
 }
+
+struct LECSArchetypeRecord{
+    let column: Int
+}
+typealias LECSArchetypeMap = [LECSArchetypeId: LECSArchetypeRecord]

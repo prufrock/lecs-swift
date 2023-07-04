@@ -33,6 +33,26 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         XCTAssertEqual(enemy, enemyId?.id)
         XCTAssertEqual("enemy", enemyName?.name)
     }
+
+    func testSelect() throws {
+        let world = LECSWorldFixedSize()
+
+        let player = try world.createEntity("player")
+
+        var activated = false
+        var foundId: UInt = 0
+
+        let cloze = { (world: LECSWorld, components: [LECSComponent]) in
+            activated = true
+            let id = components[0] as! LECSId
+            foundId = id.id
+        }
+
+        world.select([LECSId.self], cloze)
+
+        XCTAssertTrue(activated)
+        XCTAssertEqual(player, foundId)
+    }
 }
 
 struct Velocity: LECSComponent {
