@@ -169,18 +169,42 @@ class LECSWorldFixedSize: LECSWorld {
         guard query.count > 0 else {
             return
         }
+        // the set of all the archetypes that contain the selected components
+        var intersectionSet = Set<LECSArchetypeId>()
+        // the location of each component in each archetype
+        var archetypeComponent: [LECSArchetypeId:[LECSArchetypeRecord]] = [:]
+
         // Find the archetype that matches the query
-        let firstComponent = query.first!
-        let firstComponentId = typeComponent[firstComponent]!
-        let archetypeMaps = componentArchetype[firstComponentId]!
-        archetypeMaps.forEach { archetypeId, archetypeRecord in
-            let archetype = archetypeIndex[archetypeId]!
-            try! archetype.readAll { row in
-                let firstFoundComponent = row[archetypeRecord.column]
-                block(self, [firstFoundComponent])
+        query.forEach { componentType in
+            let componentId = typeComponent[componentType]!
+            let archetypeMaps = componentArchetype[componentId]!
+            var selectionSet = Set<LECSArchetypeId>()
+            archetypeMaps.forEach { archetypeId, archetypeRecord in
+                selectionSet.insert(archetypeId)
+                if archetypeComponent[archetypeId] == nil {
+                    archetypeComponent[archetypeId] = []
+                }
+                archetypeComponent[archetypeId]!.append(archetypeRecord)
+            }
+
+            if (intersectionSet.isEmpty) {
+                intersectionSet = selectionSet
+            } else {
+                intersectionSet = intersectionSet.intersection(selectionSet)
             }
         }
 
+        intersectionSet.forEach { archetypeId in
+            let archetype = archetypeIndex[archetypeId]!
+            let archetypeRecords = archetypeComponent[archetypeId]!
+            try! archetype.readAll { row in
+                var components: [LECSComponent] = []
+                archetypeRecords.forEach { archetypeRecord in
+                    components.append(row[archetypeRecord.column])
+                }
+                block(self, components)
+            }
+        }
     }
 
     private func entity() -> LECSEntityId {

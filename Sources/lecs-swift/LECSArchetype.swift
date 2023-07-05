@@ -82,6 +82,8 @@ protocol LECSArchetype {
     func setRemoveEdge(_ id: LECSComponentId, _ archetype: LECSArchetype)
 }
 
+
+
 class LECSArchetypeFixedSize: LECSArchetype {
     let id: LECSArchetypeId
     let type: LECSType
@@ -193,6 +195,7 @@ class LECSArchetypeFixedSize: LECSArchetype {
             edges[id] = ArchetypeEdge(remove: archetype)
         }
     }
+
 }
 
 struct LECSTable {

@@ -34,7 +34,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         XCTAssertEqual("enemy", enemyName?.name)
     }
 
-    func testSelect() throws {
+    func testSelectOneComponent() throws {
         let world = LECSWorldFixedSize()
 
         let player = try world.createEntity("player")
@@ -52,6 +52,30 @@ final class LECSWorldFixedSizeTests: XCTestCase {
 
         XCTAssertTrue(activated)
         XCTAssertEqual(player, foundId)
+    }
+
+    func testSelectTwoComponents() throws {
+        let world = LECSWorldFixedSize()
+
+        let player = try world.createEntity("player")
+
+        var activated = false
+        var foundId: UInt = 0
+        var foundName: String = ""
+
+        let cloze = { (world: LECSWorld, components: [LECSComponent]) in
+            activated = true
+            let id = components[0] as! LECSId
+            let name = components[1] as! LECSName
+            foundId = id.id
+            foundName = name.name
+        }
+
+        world.select([LECSId.self, LECSName.self], cloze)
+
+        XCTAssertTrue(activated)
+        XCTAssertEqual(player, foundId)
+        XCTAssertEqual("player", foundName)
     }
 }
 
