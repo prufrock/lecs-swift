@@ -166,6 +166,7 @@ class LECSWorldFixedSize: LECSWorld {
     }
 
     func select(_ query: [LECSComponent.Type], _ block: (LECSWorld, [LECSComponent]) -> Void) {
+        // If there aren't any components in the query there is no work to be done.
         guard query.count > 0 else {
             return
         }
@@ -175,16 +176,14 @@ class LECSWorldFixedSize: LECSWorld {
         var archetypeComponent: [LECSArchetypeId:[LECSArchetypeRecord]] = [:]
 
         // Find the archetype that matches the query
+        // Process in component order so they can be read out in order
         query.forEach { componentType in
             let componentId = typeComponent[componentType]!
             let archetypeMaps = componentArchetype[componentId]!
             var selectionSet = Set<LECSArchetypeId>()
             archetypeMaps.forEach { archetypeId, archetypeRecord in
                 selectionSet.insert(archetypeId)
-                if archetypeComponent[archetypeId] == nil {
-                    archetypeComponent[archetypeId] = []
-                }
-                archetypeComponent[archetypeId]!.append(archetypeRecord)
+                archetypeComponent.updateCollection(archetypeRecord, forKey: archetypeId)
             }
 
             if (intersectionSet.isEmpty) {
