@@ -20,3 +20,9 @@ extension Dictionary where Value: RangeReplaceableCollection {
         self[key] = collection
     }
 }
+
+extension Collection {
+    @inlinable public var isNotEmpty: Bool {
+        !isEmpty
+    }
+}
