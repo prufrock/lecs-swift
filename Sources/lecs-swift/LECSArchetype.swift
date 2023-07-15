@@ -10,6 +10,7 @@ import Foundation
 typealias LECSEntityId = UInt
 typealias LECSArchetypeId = LECSEntityId
 typealias LECSComponentId = LECSEntityId
+typealias LECSSystemId = LECSEntityId
 typealias LECSType = [LECSComponentId]
 typealias LECSSize = Int
 typealias LECSRowId = Int

@@ -44,12 +44,12 @@ protocol LECSWorld {
     /// - Parameters:
     ///   - entityId: The id of the entity to remove the component from.
     ///   - component: The Type of the component to remove.
-//    func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type)
+    func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type)
 
     // MARK: Systems
-//    func addSystem(_ name: String, selector: [LECSComponentId], lambda: ([LECSComponent])) -> LECSEntityId
+    func addSystem(_ name: String, selector: [LECSComponentId], lambda: ([LECSComponent])) -> LECSSystemId
 
-//    func process(_ system: LECSEntityId)
+    func process(system: LECSSystemId)
 }
 
 enum LECSWorldErrors: Error {
@@ -165,6 +165,19 @@ class LECSWorldFixedSize: LECSWorld {
         archetypeIndex[newArchetype.id] = newArchetype
     }
 
+    func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) {
+        fatalError("not implemented")
+    }
+
+    // MARK: Systems
+    func addSystem(_ name: String, selector: [LECSComponentId], lambda: ([LECSComponent])) -> LECSSystemId {
+        fatalError("not implemented")
+    }
+
+    func process(system: LECSSystemId) {
+        fatalError("not implemented")
+    }
+
     func select(_ query: [LECSComponent.Type], _ block: (LECSWorld, [LECSComponent]) -> Void) {
         // If there aren't any components in the query there is no work to be done.
         guard query.isNotEmpty else {
@@ -238,17 +251,17 @@ class LECSWorldFixedSize: LECSWorld {
     private func findArchetypesWithComponents(_ components: [LECSComponent.Type]) -> [LECSArchetypeId:[LECSArchetypeRecord]] {
         // stores one and only one of each archetype
         // knows the location of each component in each archetype
-        var archetypeComponent: [LECSArchetypeId:[LECSArchetypeRecord]] = [:]
+        var archetypePositions: [LECSArchetypeId:[LECSArchetypeRecord]] = [:]
 
         // Find the archetype that matches the query
         // Process in component order so they can be read out in order
         components.forEach { componentType in
             findArchetypesWithComponent(componentType).forEach { archetypeId, archetypeRecord in
-                archetypeComponent.updateCollection(archetypeRecord, forKey: archetypeId)
+                archetypePositions.updateCollection(archetypeRecord, forKey: archetypeId)
             }
         }
 
-        return archetypeComponent
+        return archetypePositions
     }
 }
 
