@@ -47,7 +47,7 @@ protocol LECSWorld {
     func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type)
 
     // MARK: Systems
-    func addSystem(_ name: String, selector: [LECSComponentId], lambda: ([LECSComponent])) -> LECSSystemId
+    func addSystem(_ name: String, selector: [LECSComponent.Type], lambda: @escaping (LECSWorld, [LECSComponent]) -> [LECSComponent]) -> LECSSystemId
 
     func process(system: LECSSystemId)
 }
@@ -71,6 +71,9 @@ class LECSWorldFixedSize: LECSWorld {
         columns: [],
         table: LECSTable(elementSize: 0, size: 0)
     )
+
+    //systems
+    private var systems: [LECSSystemId: LECSSystem] = [:]
 
     // indexes
     // entityRecord is a map of entity ids to records. The record contains the archetype and the row id.
@@ -170,12 +173,18 @@ class LECSWorldFixedSize: LECSWorld {
     }
 
     // MARK: Systems
-    func addSystem(_ name: String, selector: [LECSComponentId], lambda: ([LECSComponent])) -> LECSSystemId {
-        fatalError("not implemented")
+    func addSystem(_ name: String, selector: [LECSComponent.Type], lambda: @escaping (LECSWorld, [LECSComponent]) -> [LECSComponent]) -> LECSSystemId {
+        let system = LECSSystem(name: name, selector: selector, lambda: lambda)
+        let id = entity()
+        systems[id] = system
+        return id
     }
 
-    func process(system: LECSSystemId) {
-        fatalError("not implemented")
+    func process(system id: LECSSystemId) {
+        let system = systems[id]!
+        update(system.selector) { world, components, archetype, rowId in
+            return system.lambda(world, components)
+        }
     }
 
     func select(_ query: [LECSComponent.Type], _ block: (LECSWorld, [LECSComponent]) -> Void) {
@@ -186,12 +195,40 @@ class LECSWorldFixedSize: LECSWorld {
 
         for (archetypeId, archetypeRecords) in findArchetypesWithComponents(query) {
             let archetype = archetypeIndex[archetypeId]!
-            try! archetype.readAll { row in
+            try! archetype.readAll { rowId, row in
                 var components: [LECSComponent] = []
                 archetypeRecords.forEach { archetypeRecord in
                     components.append(row[archetypeRecord.column])
                 }
                 block(self, components)
+            }
+        }
+    }
+
+
+    private func update(_ query: [LECSComponent.Type], _ block: (LECSWorld, [LECSComponent], LECSArchetype, LECSRowId) -> [LECSComponent]) {
+        // If there aren't any components in the query there is no work to be done.
+        guard query.isNotEmpty else {
+            return
+        }
+
+        for (archetypeId, archetypeRecords) in findArchetypesWithComponents(query) {
+            let archetype = archetypeIndex[archetypeId]!
+            try! archetype.readAll { rowId, row in
+                var components: [LECSComponent] = []
+                archetypeRecords.forEach { archetypeRecord in
+                    components.append(row[archetypeRecord.column])
+                }
+                let updatedComponents = block(self, components, archetype, rowId)
+                updatedComponents.forEach { component in
+                    archetypeRecords.forEach { archetypeRecord in
+                        try! archetype.update(
+                            rowId,
+                            column: archetypeRecord.column,
+                            component: component
+                        )
+                    }
+                }
             }
         }
     }

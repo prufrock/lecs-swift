@@ -38,7 +38,14 @@ protocol LECSArchetype {
     /// - Throws: If there is an error reading the row, usually because the row id is out of bounds.
     func read(_ rowId: LECSRowId) throws -> LECSRow?
 
-    func readAll(_ block: (LECSRow) -> Void) throws
+    func readAll(_ block: (LECSRowId, LECSRow) -> Void) throws
+
+    /// Updates the column of the row with the component.
+    /// - Parameters:
+    ///   - rowId: The id of the row to update.
+    ///   - column: The column to update.
+    ///   - component: The component to write to the row and column.
+    func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) throws
 
     /// Removes a row from the archetype.
     /// - Parameter rowId: The id of the row to remove.
@@ -142,15 +149,23 @@ class LECSArchetypeFixedSize: LECSArchetype {
         return try decoder.decode(types: columns)
     }
 
-    func readAll(_ block: (LECSRow) -> Void) throws {
+    func readAll(_ block: (LECSRowId, LECSRow) -> Void) throws {
         // iterate from 0 to table.count
         for i in 0..<table.count {
             // read the row
             guard let row = try read(i) else {
                 continue
             }
-            block(row)
+            block(i, row)
         }
+    }
+
+    func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) throws {
+        var row = try read(rowId)!
+        row[column] = component
+        let encoder = LECSRowEncoder(table.elementSize)
+        let data = try encoder.encode(row)
+        try table.update(rowId, data)
     }
 
     func remove(_ rowId: LECSRowId) throws -> LECSRow? {
@@ -228,6 +243,11 @@ struct LECSTable {
         }
 
         return rows.subdata(in: (rowId * elementSize)..<(rowId * elementSize + elementSize))
+    }
+
+    mutating func update(_ row: LECSRowId, _ values: Data) throws {
+        let offset = offset(row)
+        rows.replaceSubrange(offset..<(offset + elementSize), with: values)
     }
 
     mutating func remove(_ id: Int)  {
