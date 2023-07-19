@@ -151,7 +151,7 @@ class LECSArchetypeFixedSize: LECSArchetype {
 
     func readAll(_ block: (LECSRowId, LECSRow) -> Void) throws {
         // iterate from 0 to table.count
-        for i in 0..<table.count {
+        for i in table {
             // read the row
             guard let row = try read(i) else {
                 continue
@@ -214,26 +214,26 @@ class LECSArchetypeFixedSize: LECSArchetype {
 
 }
 
-struct LECSTable {
+struct LECSTable: Sequence {
     private var rows: Data
     fileprivate let elementSize: LECSSize
     fileprivate let size: LECSSize
-    private (set) var count: LECSSize
+    private var rowManager = IncrementingRowManager()
+    private(set) var count: LECSSize = 0
 
     private var removed: Set<LECSRowId> = []
 
     init(elementSize: LECSSize, size: LECSSize) {
         self.elementSize = elementSize
         self.size = size
-
         rows = Data(count: elementSize * size)
-        count = 0
     }
 
     mutating func insert(_ values: Data) -> LECSRowId {
         let row = emptyRow()
         let offset = offset(row)
         rows.replaceSubrange(offset..<(offset + elementSize), with: values)
+        count = count + 1
         return row
     }
 
@@ -252,17 +252,88 @@ struct LECSTable {
 
     mutating func remove(_ id: Int)  {
         removed.insert(id)
+        count = count - 1
     }
 
     mutating private func emptyRow() -> LECSRowId {
         //TODO: reuse rows that have been removed
-        let row = count
-        count += 1
-        return row
+        return rowManager.emptyRow()!
     }
 
     private func offset(_ row: LECSRowId) -> Int {
         row * elementSize
+    }
+
+    func makeIterator() -> Iterator {
+        return Iterator(rowManager.makeIterator())
+    }
+
+    struct Iterator: IteratorProtocol {
+        private var iterator: IncrementingRowManager.Iterator
+
+        init(_ iterator: IncrementingRowManager.Iterator) {
+            self.iterator = iterator
+        }
+
+        mutating func next() -> LECSSize? {
+            iterator.next()
+        }
+    }
+}
+
+protocol RowManager: Sequence {
+    /// An empty row. The rows do not have to be consecutive.
+    /// - Returns: The next available empty row, if there is one otherwise nil.
+    mutating func emptyRow() -> LECSRowId?
+
+
+    /// Makes the rowId available to be assigned again.
+    /// - Returns: Whether or not the row was freed.
+    mutating func freeRow(_ rowId: LECSRowId) -> Bool
+}
+
+struct IncrementingRowManager: RowManager {
+    private var count: LECSSize
+
+    init(initialRowId: Int = 0) {
+        count = initialRowId
+    }
+
+    mutating func emptyRow() -> LECSRowId? {
+        let row = count
+        count += 1
+
+        return row
+    }
+
+    mutating func freeRow(_ rowId: LECSRowId) -> Bool {
+        true
+    }
+
+    func makeIterator() -> Iterator {
+        Iterator(count: count)
+    }
+
+    struct Iterator: IteratorProtocol {
+        private let count: LECSSize
+        private var index = 0
+
+        init(count: LECSSize) {
+            self.count = count
+        }
+
+        mutating func next() -> LECSSize? {
+            if index >= count {
+                index = 0
+                return nil
+            }
+
+            defer {
+                index = index + 1
+            }
+
+            return index
+        }
     }
 }
 

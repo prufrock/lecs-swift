@@ -60,3 +60,36 @@ final class LECSArchetypeFixedSizeTests: XCTestCase {
         XCTAssertEqual(10, updatedPosition.x)
     }
 }
+
+final class IncrementingRowManagerTests: XCTestCase {
+    func testIncrement() {
+        var manager = IncrementingRowManager()
+
+        XCTAssertEqual(0, manager.emptyRow())
+        XCTAssertEqual(1, manager.emptyRow())
+        XCTAssertEqual(2, manager.emptyRow())
+        XCTAssertEqual(3, manager.emptyRow())
+    }
+
+    func testFreeRow() {
+        var manager = IncrementingRowManager()
+
+        XCTAssertTrue(manager.freeRow(0))
+    }
+
+    func testIterator() {
+        var manager = IncrementingRowManager()
+
+        for _ in 0..<3 {
+            let _ = manager.emptyRow()
+        }
+
+        var rowsIterated = 0
+
+        for _ in manager {
+            rowsIterated += 1
+        }
+
+        XCTAssertEqual(3, rowsIterated)
+    }
+}
