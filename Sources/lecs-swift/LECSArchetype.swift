@@ -90,8 +90,6 @@ protocol LECSArchetype {
     func setRemoveEdge(_ id: LECSComponentId, _ archetype: LECSArchetype)
 }
 
-
-
 class LECSArchetypeFixedSize: LECSArchetype {
     let id: LECSArchetypeId
     let type: LECSType
@@ -218,7 +216,7 @@ struct LECSTable: Sequence {
     private var rows: Data
     fileprivate let elementSize: LECSSize
     fileprivate let size: LECSSize
-    private var rowManager = IncrementingRowManager()
+    private var rowManager = RecyclingRowManager()
     private(set) var count: LECSSize = 0
 
     private var removed: Set<LECSRowId> = []
@@ -256,7 +254,6 @@ struct LECSTable: Sequence {
     }
 
     mutating private func emptyRow() -> LECSRowId {
-        //TODO: reuse rows that have been removed
         return rowManager.emptyRow()!
     }
 
@@ -310,30 +307,62 @@ struct IncrementingRowManager: RowManager {
         true
     }
 
-    func makeIterator() -> Iterator {
-        Iterator(count: count)
+    func makeIterator() -> RowIterator {
+        RowIterator(count: count)
+    }
+}
+
+struct RecyclingRowManager: RowManager {
+    private var count: LECSSize
+    private var freed: Set<LECSSize>
+
+    init(initialRowId: Int = 0, freed: Set<LECSSize> = Set<LECSSize>()) {
+        count = initialRowId
+        self.freed = freed
     }
 
-    struct Iterator: IteratorProtocol {
-        private let count: LECSSize
-        private var index = 0
-
-        init(count: LECSSize) {
-            self.count = count
+    mutating func emptyRow() -> LECSRowId? {
+        if let rowId = freed.popFirst() {
+            return rowId
         }
 
-        mutating func next() -> LECSSize? {
-            if index >= count {
-                index = 0
-                return nil
-            }
-
-            defer {
-                index = index + 1
-            }
-
-            return index
+        defer {
+            count = count + 1
         }
+
+        return count
+    }
+
+    mutating func freeRow(_ rowId: LECSRowId) -> Bool {
+        freed.insert(rowId)
+        return true
+    }
+
+    func makeIterator() -> RowIterator {
+        RowIterator(count: count)
+    }
+}
+
+struct RowIterator: IteratorProtocol {
+    private let count: LECSSize
+    private var index = 0
+
+    init(count: LECSSize) {
+        self.count = count
+    }
+
+    mutating func next() -> LECSSize? {
+        if index >= count {
+            index = 0
+            return nil
+        }
+
+        defer {
+            index = index + 1
+        }
+
+        //TODO: skip freed elements
+        return index
     }
 }
 
