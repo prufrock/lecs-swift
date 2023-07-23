@@ -7,13 +7,13 @@
 
 import Foundation
 
-typealias LECSEntityId = UInt
-typealias LECSArchetypeId = LECSEntityId
-typealias LECSComponentId = LECSEntityId
-typealias LECSSystemId = LECSEntityId
-typealias LECSType = [LECSComponentId]
-typealias LECSSize = Int
-typealias LECSRowId = Int
+public typealias LECSEntityId = UInt
+public typealias LECSArchetypeId = LECSEntityId
+public typealias LECSComponentId = LECSEntityId
+public typealias LECSSystemId = LECSEntityId
+public typealias LECSType = [LECSComponentId]
+public typealias LECSSize = Int
+public typealias LECSRowId = Int
 typealias LECSRow = [LECSComponent]
 typealias LECSColumns = [LECSComponent.Type]
 
@@ -173,7 +173,7 @@ class LECSArchetypeFixedSize: LECSArchetype {
     }
 
     func hasComponent(_ component: LECSComponentId) -> Bool {
-        type.contains(component) 
+        type.contains(component)
     }
 
     func getComponent<T>(rowId: LECSRowId, componentId: LECSComponentId, componentType: T.Type) throws -> T? {

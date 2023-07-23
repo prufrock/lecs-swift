@@ -69,6 +69,7 @@ class LECSRowUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     }
 
     func decodeSimpleType<T>(_ type: T.Type) throws -> T where T : Decodable {
+        let range = rangeToRead(type)
         let value = decoder.data[rangeToRead(type)].withUnsafeBytes {
             $0.load(as: T.self)
         }
@@ -91,10 +92,11 @@ class LECSRowUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     }
 
     private func rangeToRead<T>(_ type: T.Type) -> Range<Int> {
-        decoder.offset..<decoder.offset + MemoryLayout<T>.stride
+        decoder.offset..<(decoder.offset + MemoryLayout<T>.stride)
     }
 
     private func slideOffsetForward<T>(_ type: T.Type) {
+        let offset = decoder.offset + MemoryLayout<T>.stride
         decoder.offset = decoder.offset + MemoryLayout<T>.stride
     }
 }

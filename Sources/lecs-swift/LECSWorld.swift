@@ -10,7 +10,7 @@ import Foundation
 /**
  The world is the facade for the ECS system. All or nearly all access to the ECS system goes through world.
  */
-protocol LECSWorld {
+public protocol LECSWorld {
     // MARK: Entities
 
     /// Creates an entity, adds it to the ECS, and returns its id.
@@ -49,6 +49,8 @@ protocol LECSWorld {
     // MARK: Systems
     func addSystem(_ name: String, selector: [LECSComponent.Type], lambda: @escaping (LECSWorld, [LECSComponent]) -> [LECSComponent]) -> LECSSystemId
 
+    func select(_ query: [LECSComponent.Type], _ block: (LECSWorld, [LECSComponent]) -> Void)
+
     func process(system: LECSSystemId)
 }
 
@@ -57,7 +59,7 @@ enum LECSWorldErrors: Error {
     case rowDoesNotExist
 }
 
-class LECSWorldFixedSize: LECSWorld {
+public class LECSWorldFixedSize: LECSWorld {
     private let archetypeSize: LECSSize
 
     private var entityCounter: LECSEntityId = 2
@@ -86,7 +88,7 @@ class LECSWorldFixedSize: LECSWorld {
     // this makes determining if a component is in an archetype and retrieval fast
     private var componentArchetype: [LECSComponentId : LECSArchetypeMap] = [:]
 
-    init(archetypeSize: LECSSize = 10) {
+    public init(archetypeSize: LECSSize = 10) {
         self.archetypeSize = archetypeSize
 
         entityRecord[rootEntity] = LECSRecord(
@@ -98,7 +100,7 @@ class LECSWorldFixedSize: LECSWorld {
         archetypeIndex[emptyArchetype.id] = emptyArchetype
     }
 
-    func createEntity(_ name: String) throws -> LECSEntityId {
+    public func createEntity(_ name: String) throws -> LECSEntityId {
         let id = createEntity()
 
         try addComponent(id, LECSId(id: id))
@@ -108,7 +110,7 @@ class LECSWorldFixedSize: LECSWorld {
     }
 
     // MARK: Querying Entities
-    func hasComponent(_ entityId: LECSEntityId, _ component: LECSComponent.Type) -> Bool {
+    public func hasComponent(_ entityId: LECSEntityId, _ component: LECSComponent.Type) -> Bool {
         // Find the id of the component
         guard let componentId = typeComponent[component] else {
             return false
@@ -119,14 +121,14 @@ class LECSWorldFixedSize: LECSWorld {
         return componentArchetype[componentId]?[archetype.id] != nil
     }
 
-    func getComponent<T>(_ entityId: LECSEntityId, _ component: T.Type) throws -> T? {
+    public func getComponent<T>(_ entityId: LECSEntityId, _ component: T.Type) throws -> T? {
         let record = entityRecord[entityId]!
 
         return try record.getComponent(entityId, typeComponent[T.self]!, T.self)
     }
 
     //MARK: Components
-    func addComponent<T: LECSComponent>(_ entityId: LECSEntityId, _ component: T) throws {
+    public func addComponent<T: LECSComponent>(_ entityId: LECSEntityId, _ component: T) throws {
         // Get the entity's record
         // Remove the row from the archetype returning the value
         // Retrieve the next archetype:
@@ -168,26 +170,26 @@ class LECSWorldFixedSize: LECSWorld {
         archetypeIndex[newArchetype.id] = newArchetype
     }
 
-    func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) {
+    public func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) {
         fatalError("not implemented")
     }
 
     // MARK: Systems
-    func addSystem(_ name: String, selector: [LECSComponent.Type], lambda: @escaping (LECSWorld, [LECSComponent]) -> [LECSComponent]) -> LECSSystemId {
+    public func addSystem(_ name: String, selector: [LECSComponent.Type], lambda: @escaping (LECSWorld, [LECSComponent]) -> [LECSComponent]) -> LECSSystemId {
         let system = LECSSystem(name: name, selector: selector, lambda: lambda)
         let id = entity()
         systems[id] = system
         return id
     }
 
-    func process(system id: LECSSystemId) {
+    public func process(system id: LECSSystemId) {
         let system = systems[id]!
         update(system.selector) { world, components, archetype, rowId in
             return system.lambda(world, components)
         }
     }
 
-    func select(_ query: [LECSComponent.Type], _ block: (LECSWorld, [LECSComponent]) -> Void) {
+    public func select(_ query: [LECSComponent.Type], _ block: (LECSWorld, [LECSComponent]) -> Void) {
         // If there aren't any components in the query there is no work to be done.
         guard query.isNotEmpty else {
             return
@@ -220,14 +222,13 @@ class LECSWorldFixedSize: LECSWorld {
                     components.append(row[archetypeRecord.column])
                 }
                 let updatedComponents = block(self, components, archetype, rowId)
-                updatedComponents.forEach { component in
-                    archetypeRecords.forEach { archetypeRecord in
-                        try! archetype.update(
-                            rowId,
-                            column: archetypeRecord.column,
-                            component: component
-                        )
-                    }
+                //TODO: hide this loop
+                for i in 0..<updatedComponents.count {
+                    try! archetype.update(
+                        rowId,
+                        column: archetypeRecords[i].column,
+                        component: updatedComponents[i]
+                    )
                 }
             }
         }

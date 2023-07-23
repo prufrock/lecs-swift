@@ -7,6 +7,6 @@
 
 import Foundation
 
-protocol LECSComponent: Codable {
+public protocol LECSComponent: Codable {
 
 }
