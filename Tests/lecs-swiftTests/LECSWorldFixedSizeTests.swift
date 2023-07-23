@@ -129,14 +129,14 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         let world = LECSWorldFixedSize()
 
         let player = try world.createEntity("player")
-        try world.addComponent(player, LECSPosition2dF(x: 1.0, y: 2.0))
+        try world.addComponent(player, LECSPosition2d(x: 1.0, y: 2.0))
 
         let enemy = try world.createEntity("enemy")
-        try world.addComponent(enemy, LECSPosition2dF(x: 5.0, y: 2.0))
+        try world.addComponent(enemy, LECSPosition2d(x: 5.0, y: 2.0))
 
-        let system = world.addSystem("simple", selector: [LECSName.self, LECSPosition2dF.self]) { world, components in
+        let system = world.addSystem("simple", selector: [LECSName.self, LECSPosition2d.self]) { world, components in
             let name = components[0] as! LECSName
-            var position = components[1] as! LECSPosition2dF
+            var position = components[1] as! LECSPosition2d
             if (name.name == "player") {
                 position.x = position.x + 3.2
             }
@@ -146,7 +146,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
 
         world.process(system: system)
 
-        let position = try world.getComponent(player, LECSPosition2dF.self)!
+        let position = try world.getComponent(player, LECSPosition2d.self)!
 
         XCTAssertEqual(4.2, position.x)
         XCTAssertEqual(2, position.y)

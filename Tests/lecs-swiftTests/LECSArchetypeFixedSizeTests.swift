@@ -43,7 +43,7 @@ final class LECSArchetypeFixedSizeTests: XCTestCase {
         let positionComponent = entityCounter()
 
         let type: LECSType = [positionComponent]
-        let columns: LECSColumns = [LECSPosition2dF.self]
+        let columns: LECSColumns = [LECSPosition2d.self]
         let archetypeId: LECSArchetypeId = entityCounter()
         let archetype: LECSArchetypeFixedSize = LECSArchetypeFixedSize(
             id: archetypeId,
@@ -52,11 +52,11 @@ final class LECSArchetypeFixedSizeTests: XCTestCase {
             size: 1
         )
 
-        let rowId = try archetype.insert([LECSPosition2dF(x: 2, y: 3)])
+        let rowId = try archetype.insert([LECSPosition2d(x: 2, y: 3)])
         XCTAssertEqual(0, rowId)
-        try archetype.update(rowId, column: 0, component: LECSPosition2dF(x: 10, y: 4))
+        try archetype.update(rowId, column: 0, component: LECSPosition2d(x: 10, y: 4))
         let row = try archetype.read(rowId)!
-        let updatedPosition = row[0] as! LECSPosition2dF
+        let updatedPosition = row[0] as! LECSPosition2d
         XCTAssertEqual(10, updatedPosition.x)
     }
 
@@ -64,7 +64,7 @@ final class LECSArchetypeFixedSizeTests: XCTestCase {
         let positionComponent = entityCounter()
 
         let type: LECSType = [positionComponent]
-        let columns: LECSColumns = [LECSId.self, LECSName.self, LECSPosition2dF.self]
+        let columns: LECSColumns = [LECSId.self, LECSName.self, LECSPosition2d.self]
         let archetypeId: LECSArchetypeId = entityCounter()
         let archetype: LECSArchetypeFixedSize = LECSArchetypeFixedSize(
             id: archetypeId,
@@ -73,13 +73,16 @@ final class LECSArchetypeFixedSizeTests: XCTestCase {
             size: 1
         )
 
-        let rowId = try archetype.insert([LECSId(id: 14), LECSName(name: "Bella"), LECSPosition2dF(x: 2, y: 3)])
+        let rowId = try archetype.insert(
+            [LECSId(id: 14), LECSName(name: "Bella"), LECSPosition2d(x: 2, y: 3)]
+        )
         XCTAssertEqual(0, rowId)
+        
         try archetype.update(rowId, column: 1, component: LECSName(name: "Stella"))
-        try archetype.update(rowId, column: 2, component: LECSPosition2dF(x: 10, y: 4))
+        try archetype.update(rowId, column: 2, component: LECSPosition2d(x: 10, y: 4))
         let row = try archetype.read(rowId)!
         let updatedName = row[1] as! LECSName
-        let updatedPosition = row[2] as! LECSPosition2dF
+        let updatedPosition = row[2] as! LECSPosition2d
         XCTAssertEqual("Stella", updatedName.name)
         XCTAssertEqual(10.0, updatedPosition.x)
     }

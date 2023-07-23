@@ -20,40 +20,6 @@ final class LECSRowEncoderTests: XCTestCase {
         XCTAssertEqual(56, data[0])
     }
 
-    func testEncodeOnePosition2dF() throws {
-        let size = 1
-        let encoder = LECSRowEncoder(MemoryLayout<LECSPosition2dF>.stride * size)
-        let entity: [LECSComponent] = [LECSPosition2dF(x: 10.0, y: 3.0)]
-
-        let data = try encoder.encode(entity)
-        let position = data.withUnsafeBytes {
-            $0.load(as: LECSPosition2dF.self)
-        }
-
-        XCTAssertEqual(10.0, position.x)
-        XCTAssertEqual(3.0, position.y)
-    }
-
-    func testEncodeNameAndPosition2dF() throws {
-        let size = 1
-        let stride = MemoryLayout<LECSName>.stride + MemoryLayout<LECSPosition2dF>.stride
-        let encoder = LECSRowEncoder(stride * size)
-        let entity: [LECSComponent] = [LECSName(name: "Bella"), LECSPosition2dF(x: 14.0, y: 5.0)]
-
-        let data = try encoder.encode(entity)
-
-        let name = data.withUnsafeBytes {
-            $0.load(as: LECSName.self)
-        }
-
-        let position = data.withUnsafeBytes {
-            $0.load(fromByteOffset: MemoryLayout<LECSName>.stride, as: LECSPosition2dF.self)
-        }
-
-        XCTAssertEqual("Bella", name.name)
-        XCTAssertEqual(14.0, position.x)
-    }
-
     func testEncodeTwoStructs() throws {
         let size = 1
         let stride = MemoryLayout<LECSId>.stride + MemoryLayout<LECSName>.stride
@@ -74,5 +40,25 @@ final class LECSRowEncoderTests: XCTestCase {
 
         XCTAssertEqual(24, id.id)
         XCTAssertEqual("Bella", name.name)
+    }
+
+    func testEncodeNameAndPosition2d() throws {
+        let size = 1
+        let stride = MemoryLayout<LECSName>.stride + MemoryLayout<LECSPosition2d>.stride
+        let encoder = LECSRowEncoder(stride * size)
+        let entity: [LECSComponent] = [LECSName(name: "Bella"), LECSPosition2d(x: 14.0, y: 5.0)]
+
+        let data = try encoder.encode(entity)
+
+        let name = data.withUnsafeBytes {
+            $0.load(as: LECSName.self)
+        }
+
+        let position = data.withUnsafeBytes {
+            $0.load(fromByteOffset: MemoryLayout<LECSName>.stride, as: LECSPosition2d.self)
+        }
+
+        XCTAssertEqual("Bella", name.name)
+        XCTAssertEqual(14.0, position.x)
     }
 }

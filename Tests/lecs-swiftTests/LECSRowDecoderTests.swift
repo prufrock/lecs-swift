@@ -43,23 +43,4 @@ final class LECSRowDecoderTests: XCTestCase {
         XCTAssertEqual(24, id.id)
         XCTAssertEqual("Bella", name.name)
     }
-
-    func testEncodeTwoStructsWithPosition2dF() throws {
-        let size = 1
-        let stride = MemoryLayout<LECSName>.stride + MemoryLayout<LECSPosition2dF>.stride
-        let encoder = LECSRowEncoder(stride * size)
-        let entity: [LECSComponent] = [LECSName(name: "Bella"), LECSPosition2dF(x: 2.3, y: 43.1)]
-
-        let data = try encoder.encode(entity)
-
-        let type: [LECSComponent.Type] = [LECSName.self, LECSPosition2dF.self]
-        let decoder = LECSRowDecoder(data)
-        let result = try decoder.decode(types: type)
-
-        let name = result[0] as! LECSName
-        let position = result[1] as! LECSPosition2dF
-
-        XCTAssertEqual("Bella", name.name)
-        XCTAssertEqual(2.3, position.x)
-    }
 }
