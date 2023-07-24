@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import simd
 
 public struct LECSPosition2d: LECSComponent, Codable {
     public var x: Float
@@ -26,5 +27,26 @@ public struct LECSPosition2d: LECSComponent, Codable {
         var container = try decoder.unkeyedContainer()
         x = try container.decode(Float.self)
         y = try container.decode(Float.self)
+    }
+}
+
+public struct LECSVelocity2d: LECSComponent, Codable {
+    public var velocity: SIMD2<Float>
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        try container.encode(velocity.x)
+        try container.encode(velocity.y)
+    }
+
+    public init(x: Float, y: Float) {
+        velocity = SIMD2<Float>(x, y)
+    }
+
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        let x = try container.decode(Float.self)
+        let y = try container.decode(Float.self)
+        velocity = SIMD2<Float>(x, y)
     }
 }

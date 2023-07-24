@@ -25,7 +25,22 @@ final class LECSRowDecoderTests: XCTestCase {
         XCTAssertEqual(56, data[0])
     }
 
-    func testEncodeTwoStructs() throws {
+    func testDecodeVelocity2d() throws {
+        let size = 1
+        let encoder = LECSRowEncoder(MemoryLayout<LECSVelocity2d>.stride * size)
+        let entity: [LECSComponent] = [LECSVelocity2d(x: 2.1, y: 3.0)]
+
+        let data = try encoder.encode(entity)
+
+        let decoder = LECSRowDecoder(data)
+        let result = try decoder.decode(types: [LECSVelocity2d.self])
+
+        // assert the first element is and instance of LECSId
+        XCTAssertTrue(result[0] is LECSVelocity2d)
+        XCTAssertEqual(2.1, (result[0] as! LECSVelocity2d).velocity.x)
+    }
+
+    func testDecodeTwoStructs() throws {
         let size = 1
         let stride = MemoryLayout<LECSId>.stride + MemoryLayout<LECSName>.stride
         let encoder = LECSRowEncoder(stride * size)
