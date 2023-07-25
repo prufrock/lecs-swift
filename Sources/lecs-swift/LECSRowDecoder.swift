@@ -57,7 +57,7 @@ class LECSRowUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     }
 
     func decode(_ type: Bool.Type) throws -> Bool {
-        fatalError("not implemented")
+        try decodeSimpleType(type)
     }
 
     func decode(_ type: String.Type) throws -> String {

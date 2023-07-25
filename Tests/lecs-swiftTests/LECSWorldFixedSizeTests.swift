@@ -151,6 +151,35 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         XCTAssertEqual(4.2, position.x)
         XCTAssertEqual(2, position.y)
     }
+
+
+    /// I ran into this problem where it seems like I am "OR"ing the components in the query when I mean it to be an "AND".
+    /// This test ensures they stay as an "AND".
+    func testProcessTwoComponentsWithOverlappingArchetypes() throws {
+        let world = LECSWorldFixedSize()
+
+        let player = try world.createEntity("player")
+        try world.addComponent(player, LECSPosition2d(x: 1.0, y: 2.0))
+        try world.addComponent(player, LECSVelocity2d(x: 2.0, y: 1.0))
+
+        let enemy = try world.createEntity("enemy")
+        try world.addComponent(enemy, LECSPosition2d(x: 5.0, y: 2.0))
+
+        var processed = 0
+        let system = world.addSystem("simple", selector: [LECSPosition2d.self, LECSVelocity2d.self]) { world, components in
+            let name = components[0] as! LECSPosition2d
+            var position = components[1] as! LECSVelocity2d
+
+            processed += 1
+
+            return [name, position]
+        }
+
+        world.process(system: system)
+
+
+        XCTAssertEqual(1, processed)
+    }
 }
 
 struct Velocity: LECSComponent {

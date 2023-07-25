@@ -299,7 +299,8 @@ public class LECSWorldFixedSize: LECSWorld {
             }
         }
 
-        return archetypePositions
+        // the number of components located in each archetype must be the same as the components queried
+        return archetypePositions.filter { $1.count == components.count }
     }
 }
 

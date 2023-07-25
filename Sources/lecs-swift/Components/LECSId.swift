@@ -7,19 +7,19 @@
 
 import Foundation
 
-struct LECSId: LECSComponent, Codable {
+public struct LECSId: LECSComponent, Codable {
     var id: UInt
 
-    init(id: UInt) {
+    public init(id: UInt) {
         self.id = id
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()
         try container.encode(id)
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
         id = try container.decode(UInt.self)
     }
