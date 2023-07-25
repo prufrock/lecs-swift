@@ -13,45 +13,68 @@ final class LECSTableTests: XCTestCase {
     func testAddAComponentToATable() throws {
         var table = LECSTable(
             elementSize: MemoryLayout<LECSId>.stride,
-            size: 1
+            size: 1,
+            columns: [LECSId.self]
         )
 
-        let encoder = LECSRowEncoder(MemoryLayout<LECSId>.stride)
         let id = LECSId(id: 1)
         let entity: [LECSComponent] = [id]
-        let data = try encoder.encode(entity)
-        let rowId = table.insert(data)
+        let rowId = try table.insert(entity)
         XCTAssertEqual(0, rowId)
         XCTAssertEqual(1, table.count)
 
-        let first = table.read(0)!
-        XCTAssertEqual(1, first[0])
+        let first = try table.read(0)!
+        XCTAssertEqual(1, (first[0] as! LECSId).id)
     }
 
     func testAddManyComponentsToATable() throws {
         var table = LECSTable(
             elementSize: MemoryLayout<LECSId>.stride,
-            size: 5
+            size: 5,
+            columns: [LECSId.self]
         )
 
         // insert 5 LECSIds into the table
         for i in 1...5 {
-            let encoder = LECSRowEncoder(MemoryLayout<LECSId>.stride)
             let id = LECSId(id: UInt(i))
             let entity: [LECSComponent] = [id]
-            let data = try encoder.encode(entity)
-            let rowId = table.insert(data)
+            let rowId = try table.insert(entity)
             XCTAssertEqual(i - 1, rowId)
         }
         XCTAssertEqual(5, table.count)
 
         // read the 5 LECIds out of the table
         for i in 0..<5 {
-        	let first = table.read(i)!
-            let decoder = LECSRowDecoder(first)
-            let values = try decoder.decode(types: [LECSId.self])
-            let id = values[0] as! LECSId
+            let row = try table.read(i)!
+            let id = row[0] as! LECSId
             XCTAssertEqual(UInt(i + 1), id.id)
+        }
+    }
+
+    func testPerformanceExample() throws {
+        let size = 200
+        var table = LECSTable(
+            elementSize: MemoryLayout<LECSId>.stride,
+            size: size,
+            columns: [LECSId.self]
+        )
+
+        // insert 5 LECSIds into the table
+        for i in 1...size {
+            let id = LECSId(id: UInt(i))
+            let entity: [LECSComponent] = [id]
+            let rowId = try table.insert(entity)
+            XCTAssertEqual(i - 1, rowId)
+        }
+        XCTAssertEqual(size, table.count)
+
+        self.measure {
+            for i in 0..<size {
+                try! table.update(i, column: 0, component: LECSId(id: UInt(i)))
+                let row = try! table.read(i)!
+                let id = row[0] as! LECSId
+                XCTAssertEqual(UInt(i), id.id)
+            }
         }
     }
 }

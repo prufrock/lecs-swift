@@ -168,7 +168,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         var processed = 0
         let system = world.addSystem("simple", selector: [LECSPosition2d.self, LECSVelocity2d.self]) { world, components in
             let name = components[0] as! LECSPosition2d
-            var position = components[1] as! LECSVelocity2d
+            let position = components[1] as! LECSVelocity2d
 
             processed += 1
 
