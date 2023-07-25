@@ -8,10 +8,10 @@
 import XCTest
 @testable import lecs_swift
 
-final class LECSTableTests: XCTestCase {
+final class LECSBufferTableTests: XCTestCase {
 
     func testAddAComponentToATable() throws {
-        var table = LECSTable(
+        var table = LECSBufferTable(
             elementSize: MemoryLayout<LECSId>.stride,
             size: 1,
             columns: [LECSId.self]
@@ -28,7 +28,7 @@ final class LECSTableTests: XCTestCase {
     }
 
     func testAddManyComponentsToATable() throws {
-        var table = LECSTable(
+        var table = LECSBufferTable(
             elementSize: MemoryLayout<LECSId>.stride,
             size: 5,
             columns: [LECSId.self]
@@ -53,7 +53,7 @@ final class LECSTableTests: XCTestCase {
 
     func testPerformanceExample() throws {
         let size = 200
-        var table = LECSTable(
+        var table = LECSBufferTable(
             elementSize: MemoryLayout<LECSId>.stride,
             size: size,
             columns: [LECSId.self]
@@ -76,5 +76,40 @@ final class LECSTableTests: XCTestCase {
                 XCTAssertEqual(UInt(i), id.id)
             }
         }
+    }
+}
+
+final class RecyclingRowManagerTests: XCTestCase {
+    func testIncrement() {
+        var manager = LECSBufferTable.RecyclingRowManager()
+
+        XCTAssertEqual(0, manager.emptyRow())
+        XCTAssertEqual(1, manager.emptyRow())
+        XCTAssertEqual(2, manager.emptyRow())
+        XCTAssertEqual(3, manager.emptyRow())
+    }
+
+    func testFreeRow() {
+        var manager = LECSBufferTable.RecyclingRowManager()
+
+        XCTAssertEqual(0, manager.emptyRow())
+        XCTAssertTrue(manager.freeRow(0))
+        XCTAssertEqual(0, manager.emptyRow())
+    }
+
+    func testIterator() {
+        var manager = LECSBufferTable.RecyclingRowManager()
+
+        for _ in 0..<3 {
+            let _ = manager.emptyRow()
+        }
+
+        var rowsIterated = 0
+
+        for _ in manager {
+            rowsIterated += 1
+        }
+
+        XCTAssertEqual(3, rowsIterated)
     }
 }
