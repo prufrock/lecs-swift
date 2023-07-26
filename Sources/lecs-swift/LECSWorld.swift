@@ -71,7 +71,7 @@ public class LECSWorldFixedSize: LECSWorld {
         id: 1,
         type: [],
         columns: [],
-        table: LECSBufferTable(elementSize: 0, size: 0, columns: [])
+        table: LECSArrayTable(size: 0, columns: [])
     )
 
     //systems

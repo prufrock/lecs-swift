@@ -13,7 +13,9 @@ struct LECSBufferTable: LECSTable {
     fileprivate let size: LECSSize
     private let columns: LECSColumns
     private var rowManager = RecyclingRowManager()
-    private(set) var count: LECSSize = 0
+    var count: LECSSize  {
+        rowManager.count
+    }
 
     private var removed: Set<LECSRowId> = []
 
@@ -48,14 +50,11 @@ struct LECSBufferTable: LECSTable {
 
         try writeToBuffer(row, data)
 
-        count = count + 1
-
         return row
     }
 
     mutating func remove(_ id: Int)  {
         removed.insert(id)
-        count = count - 1
     }
 
     func makeIterator() -> Iterator {
@@ -94,58 +93,62 @@ struct LECSBufferTable: LECSTable {
         let offset = offset(row)
         rows.replaceSubrange(offset..<(offset + elementSize), with: values)
     }
+}
 
-    struct RecyclingRowManager: RowManager {
-        private var count: LECSSize
-        private var freed: Set<LECSSize>
+struct RecyclingRowManager: RowManager {
+    private(set) var count: LECSSize
+    private var freed: Set<LECSSize>
 
-        init(initialRowId: Int = 0, freed: Set<LECSSize> = Set<LECSSize>()) {
-            count = initialRowId
-            self.freed = freed
-        }
-
-        mutating func emptyRow() -> LECSRowId? {
-            if let rowId = freed.popFirst() {
-                return rowId
-            }
-
-            defer {
-                count = count + 1
-            }
-
-            return count
-        }
-
-        mutating func freeRow(_ rowId: LECSRowId) -> Bool {
-            freed.insert(rowId)
-            return true
-        }
-
-        func makeIterator() -> RowIterator {
-            RowIterator(count: count)
-        }
+    init(initialRowId: Int = 0, freed: Set<LECSSize> = Set<LECSSize>()) {
+        count = initialRowId
+        self.freed = freed
     }
 
-    struct RowIterator: IteratorProtocol {
-        private let count: LECSSize
-        private var index = 0
-
-        init(count: LECSSize) {
-            self.count = count
+    mutating func emptyRow() -> LECSRowId? {
+        if let rowId = freed.popFirst() {
+            return rowId
         }
 
-        mutating func next() -> LECSSize? {
-            if index >= count {
-                index = 0
-                return nil
-            }
-
-            defer {
-                index = index + 1
-            }
-
-            //TODO: skip freed elements
-            return index
+        defer {
+            count = count + 1
         }
+
+        return count
+    }
+
+    mutating func freeRow(_ rowId: LECSRowId) -> Bool {
+        freed.insert(rowId)
+        return true
+    }
+
+    func makeIterator() -> RowIterator {
+        RowIterator(count: count)
+    }
+
+    func vacant(_ rowId: LECSRowId) -> Bool {
+        rowId > count || freed.contains(rowId)
+    }
+}
+
+struct RowIterator: IteratorProtocol {
+    private let count: LECSSize
+    private var index = 0
+
+    init(count: LECSSize) {
+        self.count = count
+    }
+
+    mutating func next() -> LECSSize? {
+        if index >= count {
+            index = 0
+            return nil
+        }
+
+        defer {
+            index = index + 1
+        }
+
+        //TODO: skip freed elements
+        return index
     }
 }

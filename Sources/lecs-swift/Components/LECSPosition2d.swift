@@ -12,6 +12,11 @@ public struct LECSPosition2d: LECSComponent, Codable {
     public var x: Float
     public var y: Float
 
+    public init() {
+        x = 0
+        y = 0
+    }
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()
         try container.encode(x)
@@ -32,6 +37,10 @@ public struct LECSPosition2d: LECSComponent, Codable {
 
 public struct LECSVelocity2d: LECSComponent, Codable {
     public var velocity: SIMD2<Float>
+
+    public init() {
+        velocity = SIMD2<Float>(0, 0)
+    }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()

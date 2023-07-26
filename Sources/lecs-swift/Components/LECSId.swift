@@ -10,6 +10,10 @@ import Foundation
 public struct LECSId: LECSComponent, Codable {
     var id: UInt
 
+    public init() {
+        self.id = 0
+    }
+
     public init(id: UInt) {
         self.id = id
     }

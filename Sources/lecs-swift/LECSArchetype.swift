@@ -93,7 +93,7 @@ protocol LECSArchetype {
 class LECSArchetypeFixedSize: LECSArchetype {
     let id: LECSArchetypeId
     let type: LECSType
-    private var table: LECSBufferTable
+    private var table: LECSArrayTable
     let columns: LECSColumns
     private var edges: [LECSComponentId:ArchetypeEdge] = [:]
 
@@ -117,7 +117,7 @@ class LECSArchetypeFixedSize: LECSArchetype {
         // total of all the strides of the components
         let elementSize = columns.reduce(0) { $0 + MemoryLayout.stride(ofValue: $1) }
 
-        self.table = LECSBufferTable(elementSize: elementSize, size: size, columns: columns)
+        self.table = LECSArrayTable(size: size, columns: columns)
     }
 
     /// Creates a new archetype of the specified type, allowing the table to be explicitly provided.
@@ -126,7 +126,7 @@ class LECSArchetypeFixedSize: LECSArchetype {
     ///   - type: The component ids stored in the archetype. Determines the order the components are stored.
     ///   - columns: The types of the components stored in the archetype. Must match the order of the component ids in type.
     ///   - table: The table to store the components in.
-    init(id: LECSArchetypeId, type: LECSType, columns: LECSColumns, table: LECSBufferTable) {
+    init(id: LECSArchetypeId, type: LECSType, columns: LECSColumns, table: LECSArrayTable) {
         self.id = id
         self.type = type
         self.columns = columns

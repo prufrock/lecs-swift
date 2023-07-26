@@ -16,4 +16,8 @@ protocol RowManager: Sequence {
     /// Makes the rowId available to be assigned again.
     /// - Returns: Whether or not the row was freed.
     mutating func freeRow(_ rowId: LECSRowId) -> Bool
+
+    // Useful if you want to know if a row is available.
+    // - Returns: Whether or not the row is vacant.
+    func vacant(_ rowId: LECSRowId) -> Bool
 }

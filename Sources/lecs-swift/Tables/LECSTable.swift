@@ -8,6 +8,8 @@
 import Foundation
 
 protocol LECSTable: Sequence {
+    var count: LECSSize { get }
+
     func read(_ rowId: LECSRowId) throws -> LECSRow?
 
     mutating func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) throws
