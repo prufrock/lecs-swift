@@ -14,7 +14,7 @@ public typealias LECSSystemId = LECSEntityId
 public typealias LECSType = [LECSComponentId]
 public typealias LECSSize = Int
 public typealias LECSRowId = Int
-typealias LECSRow = [LECSComponent]
+public typealias LECSRow = [LECSComponent]
 typealias LECSColumns = [LECSComponent.Type]
 
 /// An Archetype manages the storage of entities with a specific set of components.
@@ -25,6 +25,8 @@ protocol LECSArchetype {
     var type: LECSType { get }
     // The ordered list of component types in the archetype.
     var columns: LECSColumns { get }
+
+    var table: LECSArrayTable { get set }
 
     /// Inserts a new row into the archetype.
     /// - Parameter values: A list of components to insert into the archetype.
@@ -93,7 +95,7 @@ protocol LECSArchetype {
 class LECSArchetypeFixedSize: LECSArchetype {
     let id: LECSArchetypeId
     let type: LECSType
-    private var table: LECSArrayTable
+    public var table: LECSArrayTable
     let columns: LECSColumns
     private var edges: [LECSComponentId:ArchetypeEdge] = [:]
 

@@ -9,8 +9,8 @@ import Foundation
 
 struct LECSArrayTable: LECSTable {
     private let size: LECSSize
-    private let columns: LECSColumns
-    private var rows: [[LECSComponent]]
+    public let columns: LECSColumns
+    public var rows: [LECSRow]
     private var rowManager = RecyclingRowManager()
     var count: LECSSize {
         rowManager.count
@@ -20,11 +20,16 @@ struct LECSArrayTable: LECSTable {
         self.size = size
         self.columns = columns
 
-        var tempRows: [[LECSComponent]] = []
-        for i in 0..<columns.count {
-            let componentType = columns[i]
-            tempRows.append(Array(repeating: componentType.init(), count: size))
+        var tempRows: [LECSRow] = []
+        for i in 0..<size {
+            var row: LECSRow = []
+            for i in 0..<columns.count {
+                let componentType = columns[i]
+                row.append(componentType.init())
+            }
+            tempRows.append(row)
         }
+
 
         rows = tempRows
     }
@@ -34,20 +39,16 @@ struct LECSArrayTable: LECSTable {
         if columns.isEmpty {
             return []
         }
-
+        
         guard rowId < size || rowManager.vacant(rowId) else {
             return nil
         }
-
-        return columns.indices.map { rows[$0][rowId] }
+        
+        return rows[rowId]
     }
 
     mutating func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) throws {
-        if var row = try read(rowId) {
-            row[column] = component
-
-            writeToArrays(rowId, row)
-        }
+        writeToColumn(rowId, column: column, value: component)
     }
 
     mutating func insert(_ values: LECSRow) throws -> LECSRowId {
@@ -83,8 +84,16 @@ struct LECSArrayTable: LECSTable {
     }
 
     mutating private func writeToArrays(_ row: LECSSize, _ values: LECSRow) {
-        columns.indices.forEach {
-            rows[$0][row] = values[$0]
+        guard !columns.isEmpty else {
+            return
         }
+        rows[row] = values
+    }
+
+    mutating private func writeToColumn(_ row: LECSSize, column: Int, value: LECSComponent) {
+        guard !columns.isEmpty else {
+            return
+        }
+        rows[row][column] = value
     }
 }

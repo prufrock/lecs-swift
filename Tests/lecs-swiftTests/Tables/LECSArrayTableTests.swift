@@ -49,7 +49,7 @@ final class LECSArrayTableTests: XCTestCase {
         }
     }
 
-    func testPerformanceExample() throws {
+    func testPerformanceOfUpdate() throws {
         let size = 200
         var table = LECSArrayTable(
             size: size,

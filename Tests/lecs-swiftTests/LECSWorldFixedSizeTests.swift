@@ -180,6 +180,28 @@ final class LECSWorldFixedSizeTests: XCTestCase {
 
         XCTAssertEqual(1, processed)
     }
+
+    func testPerformanceOfProcess() throws {
+        let size = 10000
+        let world = LECSWorldFixedSize(archetypeSize: size)
+
+        for i in 0..<size {
+            let b = try world.createEntity("b\(i)")
+            try world.addComponent(b, LECSPosition2d(x: 1.0, y: 2.0))
+        }
+
+        let system: LECSSystemId = world.addSystem("simple", selector: [LECSName.self, LECSPosition2d.self]) { world, components in
+            let name = components[0] as! LECSName
+            var position = components[1] as! LECSPosition2d
+            position.x = position.x + 1
+
+            return [name, position]
+        }
+
+        self.measure {
+            world.process(system: system)
+        }
+    }
 }
 
 struct Velocity: LECSComponent {
