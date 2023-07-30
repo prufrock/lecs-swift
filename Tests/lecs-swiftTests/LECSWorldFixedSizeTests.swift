@@ -85,7 +85,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         try world.addComponent(player, LECSPosition2d(x: 1, y: 2))
 
         let system = world.addSystem("simple", selector: [LECSPosition2d.self]) { world, components, columns in
-            var position = components.first as! LECSPosition2d
+            var position = components[2] as! LECSPosition2d
             position.x = position.x + 1
 
             return [position]
@@ -108,8 +108,8 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         try world.addComponent(enemy, LECSPosition2d(x: 5, y: 2))
 
         let system = world.addSystem("simple", selector: [LECSName.self, LECSPosition2d.self]) { world, components, columns in
-            let name = components[0] as! LECSName
-            var position = components[1] as! LECSPosition2d
+            let name = components[1] as! LECSName
+            var position = components[2] as! LECSPosition2d
             if (name.name == "player") {
                 position.x = position.x + 3
             }
@@ -135,8 +135,8 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         try world.addComponent(enemy, LECSPosition2d(x: 5.0, y: 2.0))
 
         let system = world.addSystem("simple", selector: [LECSName.self, LECSPosition2d.self]) { world, components, columns in
-            let name = components[0] as! LECSName
-            var position = components[1] as! LECSPosition2d
+            let name = components[1] as! LECSName
+            var position = components[2] as! LECSPosition2d
             if (name.name == "player") {
                 position.x = position.x + 3.2
             }
@@ -167,8 +167,8 @@ final class LECSWorldFixedSizeTests: XCTestCase {
 
         var processed = 0
         let system = world.addSystem("simple", selector: [LECSPosition2d.self, LECSVelocity2d.self]) { world, components, columns in
-            let name = components[0] as! LECSPosition2d
-            let position = components[1] as! LECSVelocity2d
+            let name = components[2] as! LECSPosition2d
+            let position = components[3] as! LECSVelocity2d
 
             processed += 1
 
@@ -191,8 +191,8 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         }
 
         let system: LECSSystemId = world.addSystem("simple", selector: [LECSName.self, LECSPosition2d.self]) { world, components, columns in
-            let name = components[0] as! LECSName
-            var position = components[1] as! LECSPosition2d
+            let name = components[1] as! LECSName
+            var position = components[2] as! LECSPosition2d
             position.x = position.x + 1
 
             return [name, position]
