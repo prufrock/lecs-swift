@@ -11,7 +11,7 @@ struct LECSBufferTable: LECSTable {
     private var rows: Data
     fileprivate let elementSize: LECSSize
     fileprivate let size: LECSSize
-    private let columns: LECSColumns
+    private let columns: LECSColumnTypes
     private var rowManager = RecyclingRowManager()
     var count: LECSSize  {
         rowManager.count
@@ -19,7 +19,7 @@ struct LECSBufferTable: LECSTable {
 
     private var removed: Set<LECSRowId> = []
 
-    init(elementSize: LECSSize, size: LECSSize, columns: LECSColumns) {
+    init(elementSize: LECSSize, size: LECSSize, columns: LECSColumnTypes) {
         self.elementSize = elementSize
         self.size = size
         rows = Data(count: elementSize * size)

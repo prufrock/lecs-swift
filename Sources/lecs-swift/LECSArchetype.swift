@@ -15,7 +15,9 @@ public typealias LECSType = [LECSComponentId]
 public typealias LECSSize = Int
 public typealias LECSRowId = Int
 public typealias LECSRow = [LECSComponent]
-typealias LECSColumns = [LECSComponent.Type]
+public typealias LECSColumns = [Int]
+typealias LECSColumn = Int
+typealias LECSColumnTypes = [LECSComponent.Type]
 
 /// An Archetype manages the storage of entities with a specific set of components.
 protocol LECSArchetype {
@@ -24,7 +26,7 @@ protocol LECSArchetype {
     // The ordered list of components in the archetype.
     var type: LECSType { get }
     // The ordered list of component types in the archetype.
-    var columns: LECSColumns { get }
+    var columns: LECSColumnTypes { get }
 
     var table: LECSArrayTable { get set }
 
@@ -96,7 +98,7 @@ class LECSArchetypeFixedSize: LECSArchetype {
     let id: LECSArchetypeId
     let type: LECSType
     public var table: LECSArrayTable
-    let columns: LECSColumns
+    let columns: LECSColumnTypes
     private var edges: [LECSComponentId:ArchetypeEdge] = [:]
 
     //TODO: Think about ways to reduce the number of arguments on here
@@ -109,7 +111,7 @@ class LECSArchetypeFixedSize: LECSArchetype {
     init(
         id: LECSArchetypeId,
         type: LECSType,
-        columns: LECSColumns,
+        columns: LECSColumnTypes,
         size: LECSSize
     ) {
         self.id = id
@@ -128,7 +130,7 @@ class LECSArchetypeFixedSize: LECSArchetype {
     ///   - type: The component ids stored in the archetype. Determines the order the components are stored.
     ///   - columns: The types of the components stored in the archetype. Must match the order of the component ids in type.
     ///   - table: The table to store the components in.
-    init(id: LECSArchetypeId, type: LECSType, columns: LECSColumns, table: LECSArrayTable) {
+    init(id: LECSArchetypeId, type: LECSType, columns: LECSColumnTypes, table: LECSArrayTable) {
         self.id = id
         self.type = type
         self.columns = columns
@@ -207,4 +209,10 @@ class LECSArchetypeFixedSize: LECSArchetype {
 struct ArchetypeEdge {
     var add: LECSArchetype? = nil
     var remove: LECSArchetype? = nil
+}
+
+extension LECSRow {
+    func component<T>(at position: LECSSize, _ columns: [Int], _ type: T.Type) -> T {
+        self[columns[position]] as! T
+    }
 }

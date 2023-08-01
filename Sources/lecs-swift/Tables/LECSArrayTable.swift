@@ -9,14 +9,14 @@ import Foundation
 
 struct LECSArrayTable: LECSTable {
     private let size: LECSSize
-    public let columns: LECSColumns
+    public let columns: LECSColumnTypes
     public var rows: [LECSRow]
     private var rowManager = RecyclingRowManager()
     var count: LECSSize {
         rowManager.count
     }
 
-    init(size: LECSSize, columns: LECSColumns) {
+    init(size: LECSSize, columns: LECSColumnTypes) {
         self.size = size
         self.columns = columns
 
@@ -90,7 +90,7 @@ struct LECSArrayTable: LECSTable {
         rows[row] = values
     }
 
-    mutating private func writeToColumn(_ row: LECSSize, column: Int, value: LECSComponent) {
+    mutating private func writeToColumn(_ row: LECSSize, column: LECSColumn, value: LECSComponent) {
         guard !columns.isEmpty else {
             return
         }

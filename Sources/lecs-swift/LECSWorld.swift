@@ -54,6 +54,8 @@ public protocol LECSWorld {
     func select(_ query: [LECSComponent.Type], _ block: (LECSWorld, [LECSComponent]) -> Void)
 
     func process(system: LECSSystemId)
+
+    func readComponentOf<T>(_ row: LECSRow, columns: [Int], position: LECSSize) -> T
 }
 
 enum LECSWorldErrors: Error {
@@ -178,6 +180,7 @@ public class LECSWorldFixedSize: LECSWorld {
 
     // MARK: Systems
     public func addSystem(_ name: String, selector: [LECSComponent.Type], lambda: @escaping (LECSWorld, LECSRow, [Int]) -> [LECSComponent]) -> LECSSystemId {
+        //TODO: Consider prefering selectors of [Int] where they are component Ids and converting [LECSComponent.Type] to [Int] before, sorting or querying.
         let system = LECSSystem(name: name, selector: selector, lambda: lambda)
         let id = entity()
         systems[id] = system
@@ -209,8 +212,11 @@ public class LECSWorldFixedSize: LECSWorld {
         }
     }
 
+    public func readComponentOf<T>(_ row: LECSRow, columns: LECSColumns, position: LECSSize) -> T {
+        row[columns[position]] as! T
+    }
 
-    private func update(_ query: Query, _ block: (LECSWorld, LECSRow, [Int]) -> [LECSComponent]) {
+    private func update(_ query: Query, _ block: (LECSWorld, LECSRow, LECSColumns) -> [LECSComponent]) {
         // If there aren't any components in the query there is no work to be done.
         guard query.isNotEmpty else {
             return
@@ -256,7 +262,7 @@ public class LECSWorldFixedSize: LECSWorld {
         return id
     }
 
-    private func createArchetype(columns: LECSColumns, type: LECSType) -> LECSArchetype {
+    private func createArchetype(columns: LECSColumnTypes, type: LECSType) -> LECSArchetype {
         let id = entity()
         return LECSArchetypeFixedSize(
             id: id,
@@ -285,6 +291,7 @@ public class LECSWorldFixedSize: LECSWorld {
     private var queryCache: [String: [LECSArchetypeId:[LECSArchetypeRecord]]] = [:]
 
     private func findArchetypesWithComponents(_ query: Query) -> [LECSArchetypeId:[LECSArchetypeRecord]] {
+        // TODO: hashing queries would be easier if they were converted to [Int] first and passed around in systems as that.
         if let positions =  queryCache[queryHash(query)] {
             return positions
         }
