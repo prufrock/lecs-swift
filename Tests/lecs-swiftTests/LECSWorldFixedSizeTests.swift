@@ -42,7 +42,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         var activated = false
         var foundId: UInt = 0
 
-        let cloze = { (world: LECSWorld, row: LECSRow) in
+        let cloze = { (world: LECSWorld, row: LECSRow, columns: LECSColumns) in
             activated = true
             let id = row[0] as! LECSId
             foundId = id.id
@@ -63,7 +63,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         var foundId: UInt = 0
         var foundName: String = ""
 
-        let cloze = { (world: LECSWorld, row: LECSRow) in
+        let cloze = { (world: LECSWorld, row: LECSRow, columns: LECSColumns) in
             activated = true
             let id = row[0] as! LECSId
             let name = row[1] as! LECSName
