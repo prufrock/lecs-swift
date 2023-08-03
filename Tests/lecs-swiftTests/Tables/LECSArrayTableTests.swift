@@ -50,7 +50,7 @@ final class LECSArrayTableTests: XCTestCase {
     }
 
     func testPerformanceOfUpdate() throws {
-        let size = 200
+        let size = 10000
         var table = LECSArrayTable(
             size: size,
             columns: [LECSId.self]

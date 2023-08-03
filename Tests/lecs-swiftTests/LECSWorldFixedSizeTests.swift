@@ -181,6 +181,29 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         XCTAssertEqual(1, processed)
     }
 
+    func testASystemOnlyProcessesNotDeletedEntities() throws {
+        let world = LECSWorldFixedSize()
+
+        let _ = try world.createEntity("e1")
+        let e2 = try world.createEntity("e2")
+        let _ = try world.createEntity("e3")
+
+        var ids:[LECSId] = []
+        let system = world.addSystem("ids", selector: [LECSId.self, LECSName.self]) { world, row, columns in
+            let id = row.component(at: 0, columns, LECSId.self)
+            let name = row.component(at: 1, columns, LECSName.self)
+            ids.append(id)
+
+            return [id, name]
+        }
+
+        world.deleteEntity(e2)
+
+        world.process(system: system)
+
+        XCTAssertEqual(2, ids.count)
+    }
+
     func testPerformanceOfProcess() throws {
         let size = 10000
         let world = LECSWorldFixedSize(archetypeSize: size)

@@ -20,6 +20,11 @@ public protocol LECSWorld {
     /// - Returns: The id of the new entity.
     func createEntity(_ name: String) throws -> LECSEntityId
 
+    // Deletes the entity.
+    // - Parameter entityId: The id of the entity to delete
+    // - Returns: void
+    func deleteEntity(_ entityId: LECSEntityId)
+
     // MARK: Querying Entities
     /// Checks to see if the entity has a component.
     /// - Parameters:
@@ -111,6 +116,14 @@ public class LECSWorldFixedSize: LECSWorld {
         try addComponent(id, LECSName(name: name))
 
         return id
+    }
+
+    public func deleteEntity(_ entityId: LECSEntityId) {
+        guard let record = entityRecord[entityId], var archetype = archetypeIndex[record.archetype.id] else {
+            return
+        }
+
+        archetype.table.remove(record.row)
     }
 
     // MARK: Querying Entities
@@ -226,11 +239,13 @@ public class LECSWorldFixedSize: LECSWorld {
             var archetype = archetypeIndex[archetypeId]!
             (0..<archetype.table.count).forEach { rowId in
                 let columns: [Int] = archetypeRecords.map { $0.column }
-                let updatedComponents = block(self, archetype.table.rows[rowId], columns)
-                var uc = 0
-                columns.forEach {
-                    archetype.table.rows[rowId][$0] = updatedComponents[uc]
-                    uc += 1
+                if archetype.table.exists(rowId) {
+                    let updatedComponents = block(self, archetype.table.rows[rowId], columns)
+                    var uc = 0
+                    columns.forEach {
+                        archetype.table.rows[rowId][$0] = updatedComponents[uc]
+                        uc += 1
+                    }
                 }
             }
         }

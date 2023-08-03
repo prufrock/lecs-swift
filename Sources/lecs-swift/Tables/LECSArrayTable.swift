@@ -21,7 +21,7 @@ struct LECSArrayTable: LECSTable {
         self.columns = columns
 
         var tempRows: [LECSRow] = []
-        for i in 0..<size {
+        for _ in 0..<size {
             var row: LECSRow = []
             for i in 0..<columns.count {
                 let componentType = columns[i]
@@ -34,13 +34,17 @@ struct LECSArrayTable: LECSTable {
         rows = tempRows
     }
 
+    func exists(_ rowId: LECSRowId) -> Bool {
+        return rowId < size && !rowManager.vacant(rowId)
+    }
+
     func read(_ rowId: LECSRowId) throws -> LECSRow? {
         // for the empty archetype that has nothing to read from it
         if columns.isEmpty {
             return []
         }
         
-        guard rowId < size || rowManager.vacant(rowId) else {
+        guard exists(rowId) else {
             return nil
         }
         

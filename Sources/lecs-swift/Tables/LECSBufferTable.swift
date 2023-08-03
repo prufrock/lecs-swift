@@ -34,6 +34,10 @@ struct LECSBufferTable: LECSTable {
         return try decoder.decode(types: columns)
     }
 
+    func exists(_ rowId: LECSRowId) -> Bool {
+        return !removed.contains(rowId)
+    }
+
     mutating func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) throws {
         var row = try read(rowId)!
         row[column] = component
@@ -126,7 +130,7 @@ struct RecyclingRowManager: RowManager {
     }
 
     func vacant(_ rowId: LECSRowId) -> Bool {
-        rowId > count || freed.contains(rowId)
+        freed.contains(rowId) || rowId > count
     }
 }
 

@@ -12,6 +12,8 @@ protocol LECSTable: Sequence {
 
     func read(_ rowId: LECSRowId) throws -> LECSRow?
 
+    func exists(_ rowId: LECSRowId) -> Bool
+
     mutating func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) throws
 
     mutating func insert(_ values: LECSRow) throws -> LECSRowId
