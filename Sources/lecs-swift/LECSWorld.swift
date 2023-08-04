@@ -7,7 +7,7 @@
 
 import Foundation
 
-public typealias Query = [LECSComponent.Type]
+public typealias LECSQuery = [LECSComponent.Type]
 
 /**
  The world is the facade for the ECS system. All or nearly all access to the ECS system goes through world.
@@ -16,16 +16,19 @@ public protocol LECSWorld {
     // MARK: Entities
 
     /// Creates an entity, adds it to the ECS, and returns its id.
-    /// - Parameter name: The name of the entity.
+    /// - Parameters:
+    ///   - name: The name of the entity.
     /// - Returns: The id of the new entity.
     func createEntity(_ name: String) throws -> LECSEntityId
 
-    // Deletes the entity.
-    // - Parameter entityId: The id of the entity to delete
-    // - Returns: void
+    /// Deletes the entity.
+    /// - Parameters:
+    ///   - entityId: The id of the entity to delete
+    /// - Returns: void
     func deleteEntity(_ entityId: LECSEntityId)
 
     // MARK: Querying Entities
+
     /// Checks to see if the entity has a component.
     /// - Parameters:
     ///   - entityId: The id of the entity to check.
@@ -41,6 +44,7 @@ public protocol LECSWorld {
     func getComponent<T>(_ entityId: LECSEntityId, _ component: T.Type) throws -> T?
 
     // MARK: Components
+
     /// Adds a component to the entity.
     /// - Parameters:
     ///   - entityId: The id of the entity to add the component to.
@@ -54,10 +58,24 @@ public protocol LECSWorld {
     func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type)
 
     // MARK: Systems
-    func addSystem(_ name: String, selector: [LECSComponent.Type], lambda: @escaping (LECSWorld, LECSRow, [Int]) -> [LECSComponent]) -> LECSSystemId
 
-    func select(_ query: Query, _ block: (LECSWorld, LECSRow, LECSColumns) -> Void)
+    /// Adds a system to the world.
+    /// - Parameters:
+    ///   - name: The name of the system.
+    ///   - selector: The query selecting entities to process with the system.
+    ///   - block: The closure to run on the results of the query.
+    /// - Returns: The id of the system.
+    func addSystem(_ name: String, selector: LECSQuery, block: @escaping (LECSWorld, LECSRow, [Int]) -> [LECSComponent]) -> LECSSystemId
 
+    /// Runs a query to read from the world.
+    /// - Parameters:
+    ///   - query: The query selecting entities.
+    ///   - block: The closure to run on the resulting data.
+    func select(_ query: LECSQuery, _ block: (LECSWorld, LECSRow, LECSColumns) -> Void)
+
+    /// Executes the system.
+    /// - Parameters:
+    ///   - system: The system to run.
     func process(system: LECSSystemId)
 
     func readComponentOf<T>(_ row: LECSRow, columns: [Int], position: LECSSize) -> T
@@ -66,6 +84,13 @@ public protocol LECSWorld {
 enum LECSWorldErrors: Error {
     case entityDoesNotExist
     case rowDoesNotExist
+}
+
+/// Create a LECSWorld with archetypes of size.
+/// - Parameters
+///   - archetypeSize: The size of the archetypes in LECSWorld.
+public func LECSCreateWorld(archetypeSize: LECSSize = 2000) -> LECSWorld {
+    return LECSWorldFixedSize(archetypeSize: archetypeSize)
 }
 
 public class LECSWorldFixedSize: LECSWorld {
@@ -192,9 +217,9 @@ public class LECSWorldFixedSize: LECSWorld {
     }
 
     // MARK: Systems
-    public func addSystem(_ name: String, selector: [LECSComponent.Type], lambda: @escaping (LECSWorld, LECSRow, [Int]) -> [LECSComponent]) -> LECSSystemId {
+    public func addSystem(_ name: String, selector: [LECSComponent.Type], block: @escaping (LECSWorld, LECSRow, [Int]) -> [LECSComponent]) -> LECSSystemId {
         //TODO: Consider prefering selectors of [Int] where they are component Ids and converting [LECSComponent.Type] to [Int] before, sorting or querying.
-        let system = LECSSystem(name: name, selector: selector, lambda: lambda)
+        let system = LECSSystem(name: name, selector: selector, lambda: block)
         let id = entity()
         systems[id] = system
         return id
@@ -207,7 +232,7 @@ public class LECSWorldFixedSize: LECSWorld {
         }
     }
 
-    public func select(_ query: Query, _ block: (LECSWorld, LECSRow, LECSColumns) -> Void) {
+    public func select(_ query: LECSQuery, _ block: (LECSWorld, LECSRow, LECSColumns) -> Void) {
         // If there aren't any components in the query there is no work to be done.
         guard query.isNotEmpty else {
             return
@@ -228,7 +253,7 @@ public class LECSWorldFixedSize: LECSWorld {
         row[columns[position]] as! T
     }
 
-    private func update(_ query: Query, _ block: (LECSWorld, LECSRow, LECSColumns) -> [LECSComponent]) {
+    private func update(_ query: LECSQuery, _ block: (LECSWorld, LECSRow, LECSColumns) -> [LECSComponent]) {
         // If there aren't any components in the query there is no work to be done.
         guard query.isNotEmpty else {
             return
@@ -304,7 +329,7 @@ public class LECSWorldFixedSize: LECSWorld {
 
     private var queryCache: [String: [LECSArchetypeId:[LECSArchetypeRecord]]] = [:]
 
-    private func findArchetypesWithComponents(_ query: Query) -> [LECSArchetypeId:[LECSArchetypeRecord]] {
+    private func findArchetypesWithComponents(_ query: LECSQuery) -> [LECSArchetypeId:[LECSArchetypeRecord]] {
         // TODO: hashing queries would be easier if they were converted to [Int] first and passed around in systems as that.
         if let positions =  queryCache[queryHash(query)] {
             return positions
@@ -327,7 +352,7 @@ public class LECSWorldFixedSize: LECSWorld {
         return positions
     }
 
-    private func queryHash(_ query: Query) -> String {
+    private func queryHash(_ query: LECSQuery) -> String {
         query.map { String(typeComponent[$0]!) }.joined(separator: ":")
     }
 }
