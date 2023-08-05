@@ -9,29 +9,46 @@ import Foundation
 import simd
 
 public struct LECSPosition2d: LECSComponent, Codable {
-    public var x: Float
-    public var y: Float
+    public var position: SIMD2<Float>
+
+    public var x: Float {
+        get {
+            position.x
+        }
+        set(value) {
+            position.x = value
+        }
+    }
+
+    public var y: Float {
+        get {
+            position.y
+        }
+        set(value) {
+            position.y = value
+        }
+    }
 
     public init() {
-        x = 0
-        y = 0
+        position = SIMD2<Float>(0, 0)
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.unkeyedContainer()
-        try container.encode(x)
-        try container.encode(y)
+        try container.encode(position.x)
+        try container.encode(position.y)
     }
 
     public init(x: Float, y: Float) {
-        self.x = x
-        self.y = y
+        position = SIMD2<Float>(x, y)
     }
 
     public init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
-        x = try container.decode(Float.self)
-        y = try container.decode(Float.self)
+        position = SIMD2<Float>(
+            try container.decode(Float.self),
+            try container.decode(Float.self)
+        )
     }
 }
 
