@@ -9,8 +9,8 @@ import Foundation
 
 public typealias LECSQuery = [LECSComponent.Type]
 
-/**
- The world is the facade for the ECS system. All or nearly all access to the ECS system goes through world.
+public typealias LECSColumnPositions = [Int]
+
 /// The world is the facade for the ECS system. All or nearly all access to the ECS system goes through world.
 public protocol LECSWorld {
     // MARK: Entities
@@ -65,7 +65,7 @@ public protocol LECSWorld {
     ///   - selector: The query selecting entities to process with the system.
     ///   - block: The closure to run on the results of the query.
     /// - Returns: The id of the system.
-    func addSystem(_ name: String, selector: LECSQuery, block: @escaping (LECSWorld, LECSRow, [Int]) -> [LECSComponent]) -> LECSSystemId
+    func addSystem(_ name: String, selector: LECSQuery, block: @escaping (LECSWorld, LECSRow, LECSColumnPositions) -> [LECSComponent]) -> LECSSystemId
 
     /// Runs a query to read from the world.
     /// - Parameters:
@@ -255,7 +255,7 @@ public class LECSWorldFixedSize: LECSWorld {
         }
     }
 
-    public func readComponentOf<T>(_ row: LECSRow, columns: LECSColumns, position: LECSSize) -> T {
+    public func readComponentOf<T: LECSComponent>(_ row: LECSRow, columns: LECSColumns, position: LECSSize, type: T.Type) -> T {
         row[columns[position]] as! T
     }
 
