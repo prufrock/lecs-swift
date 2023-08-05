@@ -11,7 +11,7 @@ public typealias LECSQuery = [LECSComponent.Type]
 
 /**
  The world is the facade for the ECS system. All or nearly all access to the ECS system goes through world.
- */
+/// The world is the facade for the ECS system. All or nearly all access to the ECS system goes through world.
 public protocol LECSWorld {
     // MARK: Entities
 
