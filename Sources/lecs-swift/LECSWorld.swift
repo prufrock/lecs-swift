@@ -78,7 +78,13 @@ public protocol LECSWorld {
     ///   - system: The system to run.
     func process(system: LECSSystemId)
 
-    func readComponentOf<T>(_ row: LECSRow, columns: [Int], position: LECSSize) -> T
+    /// Reads a component of the row provided. It's used inside of the closure passed to a system.
+    /// - Parameters:
+    ///    - row: The row to retrieve the component from.
+    ///    - columns: The position of the columns in the row inside the closure.
+    ///    - position: The position to read from relative to columns requested.
+    ///    - type: The type of the component retrieved.
+    func readComponentOf<T: LECSComponent>(_ row: LECSRow, columns: LECSColumnPositions, position: LECSSize, type: T.Type) -> T
 }
 
 enum LECSWorldErrors: Error {
