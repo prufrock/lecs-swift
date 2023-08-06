@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Stores components in an array.
 struct LECSArrayTable: LECSTable {
     private let size: LECSSize
     public let columns: LECSColumnTypes
