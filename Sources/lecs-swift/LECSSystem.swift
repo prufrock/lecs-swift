@@ -9,6 +9,6 @@ import Foundation
 
 struct LECSSystem {
     let name: String
-    let selector: [LECSComponent.Type]
+    let selector: [LECSComponentId]
     let lambda: (LECSWorld, [LECSComponent], [Int]) -> [LECSComponent]
 }
