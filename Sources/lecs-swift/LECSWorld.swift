@@ -7,8 +7,17 @@
 
 import Foundation
 
+public typealias LECSEntityId = UInt
+public typealias LECSArchetypeId = LECSEntityId
+public typealias LECSComponentId = LECSEntityId
+public typealias LECSSystemId = LECSEntityId
+public typealias LECSType = [LECSComponentId]
+public typealias LECSSize = Int
+public typealias LECSRowId = Int
+public typealias LECSRow = [LECSComponent]
+public typealias LECSColumns = [LECSColumn]
+public typealias LECSColumn = Int
 public typealias LECSQuery = [LECSComponent.Type]
-
 public typealias LECSColumnPositions = [Int]
 
 /// The world is the facade for the ECS system. All or nearly all access to the ECS system goes through world.

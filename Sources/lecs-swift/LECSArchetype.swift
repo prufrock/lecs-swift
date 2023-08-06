@@ -7,16 +7,6 @@
 
 import Foundation
 
-public typealias LECSEntityId = UInt
-public typealias LECSArchetypeId = LECSEntityId
-public typealias LECSComponentId = LECSEntityId
-public typealias LECSSystemId = LECSEntityId
-public typealias LECSType = [LECSComponentId]
-public typealias LECSSize = Int
-public typealias LECSRowId = Int
-public typealias LECSRow = [LECSComponent]
-public typealias LECSColumns = [Int]
-typealias LECSColumn = Int
 typealias LECSColumnTypes = [LECSComponent.Type]
 
 /// An Archetype manages the storage of entities with a specific set of components.
