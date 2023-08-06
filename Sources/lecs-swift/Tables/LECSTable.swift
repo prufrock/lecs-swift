@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol LECSTable: Sequence {
+protocol LECSTable {
     var count: LECSSize { get }
 
     func read(_ rowId: LECSRowId) throws -> LECSRow?

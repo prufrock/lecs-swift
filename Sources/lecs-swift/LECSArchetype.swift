@@ -32,8 +32,6 @@ protocol LECSArchetype {
     /// - Throws: If there is an error reading the row, usually because the row id is out of bounds.
     func read(_ rowId: LECSRowId) throws -> LECSRow?
 
-    func readAll(_ block: (LECSRowId, LECSRow) -> Void) throws
-
     /// Updates the column of the row with the component.
     /// - Parameters:
     ///   - rowId: The id of the row to update.
@@ -107,10 +105,6 @@ class LECSArchetypeFixedSize: LECSArchetype {
         self.id = id
         self.type = type
         self.columns = columns
-
-        // total of all the strides of the components
-        let elementSize = columns.reduce(0) { $0 + MemoryLayout.stride(ofValue: $1) }
-
         self.table = LECSArrayTable(size: size, columns: columns)
     }
 
@@ -133,17 +127,6 @@ class LECSArchetypeFixedSize: LECSArchetype {
 
     func read(_ rowId: LECSRowId) throws -> LECSRow? {
         try! table.read(rowId)
-    }
-
-    func readAll(_ block: (LECSRowId, LECSRow) -> Void) throws {
-        // iterate from 0 to table.count
-        for i in table {
-            // read the row
-            guard let row = try read(i) else {
-                continue
-            }
-            block(i, row)
-        }
     }
 
     func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) throws {

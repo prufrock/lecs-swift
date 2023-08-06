@@ -25,20 +25,4 @@ final class RecyclingRowManagerTests: XCTestCase {
         XCTAssertTrue(manager.freeRow(0))
         XCTAssertEqual(0, manager.emptyRow())
     }
-
-    func testIterator() {
-        var manager = RecyclingRowManager()
-
-        for _ in 0..<3 {
-            let _ = manager.emptyRow()
-        }
-
-        var rowsIterated = 0
-
-        for _ in manager {
-            rowsIterated += 1
-        }
-
-        XCTAssertEqual(3, rowsIterated)
-    }
 }

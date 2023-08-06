@@ -33,34 +33,7 @@ struct RecyclingRowManager: RowManager {
         return true
     }
 
-    func makeIterator() -> RowIterator {
-        RowIterator(count: count)
-    }
-
     func vacant(_ rowId: LECSRowId) -> Bool {
         freed.contains(rowId) || rowId > count
-    }
-}
-
-struct RowIterator: IteratorProtocol {
-    private let count: LECSSize
-    private var index = 0
-
-    init(count: LECSSize) {
-        self.count = count
-    }
-
-    mutating func next() -> LECSSize? {
-        if index >= count {
-            index = 0
-            return nil
-        }
-
-        defer {
-            index = index + 1
-        }
-
-        //TODO: skip freed elements
-        return index
     }
 }

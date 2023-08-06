@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol RowManager: Sequence {
+protocol RowManager {
     /// An empty row. The rows do not have to be consecutive.
     /// - Returns: The next available empty row, if there is one otherwise nil.
     mutating func emptyRow() -> LECSRowId?

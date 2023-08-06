@@ -67,22 +67,6 @@ struct LECSArrayTable: LECSTable {
         let _ = rowManager.freeRow(id)
     }
 
-    func makeIterator() -> Iterator {
-        return Iterator(rowManager.makeIterator())
-    }
-
-    struct Iterator: IteratorProtocol {
-        private var iterator: RowIterator
-
-        init(_ iterator: RowIterator) {
-            self.iterator = iterator
-        }
-
-        mutating func next() -> LECSSize? {
-            iterator.next()
-        }
-    }
-
     mutating private func emptyRow() -> LECSRowId {
         return rowManager.emptyRow()!
     }
