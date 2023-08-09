@@ -257,7 +257,6 @@ public class LECSWorldFixedSize: LECSWorld {
     }
 
     public func select(_ query: [LECSComponent.Type], _ block: (LECSWorld, LECSRow, LECSColumns) -> Void) {
-//        let components: LECSQuery = query.map{ typeComponent[$0]! }
         select(query.map{ typeComponent[$0]! }, block)
     }
 
@@ -328,6 +327,9 @@ public class LECSWorldFixedSize: LECSWorld {
 
     private func createArchetype(columns: LECSColumnTypes, type: LECSType) -> LECSArchetype {
         let id = entity()
+
+        newArchetypeCreated()
+
         return LECSArchetypeFixedSize(
             id: id,
             type: type,
@@ -355,7 +357,6 @@ public class LECSWorldFixedSize: LECSWorld {
     private var queryCache: [String: [LECSArchetypeId:[LECSArchetypeRecord]]] = [:]
 
     private func findArchetypesWithComponents(_ query: LECSQuery) -> [LECSArchetypeId:[LECSArchetypeRecord]] {
-        // TODO: hashing queries would be easier if they were converted to [Int] first and passed around in systems as that.
         if let positions =  queryCache[queryHash(query)] {
             return positions
         }
@@ -379,6 +380,11 @@ public class LECSWorldFixedSize: LECSWorld {
 
     private func queryHash(_ query: LECSQuery) -> String {
         query.map { String($0) }.joined(separator: ":")
+    }
+
+    private func newArchetypeCreated() {
+        // wipe the query cache for now, eventually it may be worth only clearing queries cached with same components as the archetype
+        queryCache = [:]
     }
 }
 
