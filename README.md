@@ -4,6 +4,20 @@
 
 A little Entity-Component-System library in Swift.
 
+## Features
+
+* Create entities with any combination of components.
+* Create components from your own types(structs highly recommended).
+* Quickly update or select entitites with systems using component based queries.
+
+### Future Features
+
+* Dynamically resizing archetypes
+* System scheduler
+* Query optimizations
+* Thread safety
+* Spatial queries
+
 ## Basic Usage
 
 When you get started with lecs-swift the first thing to do is to add the package to you project and then add the package to the target.
