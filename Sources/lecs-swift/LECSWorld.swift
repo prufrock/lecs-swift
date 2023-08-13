@@ -20,10 +20,8 @@ public typealias LECSColumn = Int
 public typealias LECSQuery = LECSType
 public typealias LECSColumnPositions = [Int]
 
-/// The world is the facade for the ECS system. All or nearly all access to the ECS system goes through world.
+/// The world is the facade for the ECS system. All or nearly all access to the ECS system goes through LECSWorld.
 public protocol LECSWorld {
-    // MARK: Entities
-
     /// Creates an entity, adds it to the ECS, and returns its id.
     /// - Parameters:
     ///   - name: The name of the entity.
@@ -35,8 +33,6 @@ public protocol LECSWorld {
     ///   - entityId: The id of the entity to delete
     /// - Returns: void
     func deleteEntity(_ entityId: LECSEntityId)
-
-    // MARK: Querying Entities
 
     /// Checks to see if the entity has a component.
     /// - Parameters:
@@ -52,8 +48,6 @@ public protocol LECSWorld {
     /// - Returns: The component requested if it exists on the entity.
     func getComponent<T>(_ entityId: LECSEntityId, _ component: T.Type) throws -> T?
 
-    // MARK: Components
-
     /// Adds a component to the entity.
     /// - Parameters:
     ///   - entityId: The id of the entity to add the component to.
@@ -65,8 +59,6 @@ public protocol LECSWorld {
     ///   - entityId: The id of the entity to remove the component from.
     ///   - component: The Type of the component to remove.
     func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type)
-
-    // MARK: Systems
 
     /// Adds a system to the world.
     /// - Parameters:
@@ -172,7 +164,6 @@ public class LECSWorldFixedSize: LECSWorld {
         archetype.table.remove(record.row)
     }
 
-    // MARK: Querying Entities
     public func hasComponent(_ entityId: LECSEntityId, _ component: LECSComponent.Type) -> Bool {
         // Find the id of the component
         guard let componentId = typeComponent[component] else {
@@ -190,7 +181,6 @@ public class LECSWorldFixedSize: LECSWorld {
         return try record.getComponent(entityId, typeComponent[T.self]!, T.self)
     }
 
-    //MARK: Components
     public func addComponent<T: LECSComponent>(_ entityId: LECSEntityId, _ component: T) throws {
         // Get the entity's record
         // Remove the row from the archetype returning the value
@@ -214,7 +204,6 @@ public class LECSWorldFixedSize: LECSWorld {
         let componentId = typeComponent[T.self] ?? createComponent(T.self)
 
         let newArchetype = oldArchetype.addComponent(componentId) ?? createArchetype(
-            //TODO: Do I need to keep the columns sorted by componentId?
             columns: oldArchetype.columns + [T.self],
             type: oldArchetype.type + [componentId]
         )
@@ -237,7 +226,6 @@ public class LECSWorldFixedSize: LECSWorld {
         fatalError("not implemented")
     }
 
-    // MARK: Systems
     public func addSystem(_ name: String, selector: [LECSComponentId], block: @escaping (LECSWorld, LECSRow, [Int]) -> [LECSComponent]) -> LECSSystemId {
         let system = LECSSystem(name: name, selector: selector, lambda: block)
         let id = entity()
