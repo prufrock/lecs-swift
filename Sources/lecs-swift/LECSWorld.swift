@@ -107,19 +107,11 @@ public func LECSCreateWorld(archetypeSize: LECSSize = 2000) -> LECSWorld {
 }
 
 public class LECSWorldFixedSize: LECSWorld {
-    private let archetypeSize: LECSSize
+    private var archetypeManager: LECSArchetypeManager
 
     private var entityCounter: LECSEntityId = 2
 
     private var rootEntity: LECSEntityId = 0
-
-    // archetypes
-    private var emptyArchetype: LECSArchetype = LECSArchetypeFixedSize(
-        id: 1,
-        type: [],
-        columns: [],
-        table: LECSArrayTable(size: 0, columns: [])
-    )
 
     //systems
     private var systems: [LECSSystemId: LECSSystem] = [:]
@@ -129,22 +121,16 @@ public class LECSWorldFixedSize: LECSWorld {
     private var entityRecord: [LECSEntityId: LECSRecord] = [:]
     // typeComponent maps the Swift Type of a Component to a ComponentId
     private var typeComponent: [MetatypeWrapper: LECSComponentId] = [:]
-    // archetypeIndex maps archetype ids to archetypes
-    private var archetypeIndex: [LECSArchetypeId: LECSArchetype] = [:]
-    // componentArchetype maps component ids to the archetypes their in and the column they are in.
-    // this makes determining if a component is in an archetype and retrieval fast
-    private var componentArchetype: [LECSComponentId : LECSArchetypeMap] = [:]
 
     public init(archetypeSize: LECSSize = 10) {
-        self.archetypeSize = archetypeSize
+        let archetypeManager = LECSArchetypeManager(archetypeSize: archetypeSize)
+        self.archetypeManager = archetypeManager
 
         entityRecord[rootEntity] = LECSRecord(
             entityId: rootEntity,
-            archetype: emptyArchetype,
+            archetype: archetypeManager.emptyArchetype,
             row: 0
         )
-
-        archetypeIndex[emptyArchetype.id] = emptyArchetype
     }
 
     public func createEntity(_ name: String) throws -> LECSEntityId {
@@ -157,7 +143,7 @@ public class LECSWorldFixedSize: LECSWorld {
     }
 
     public func deleteEntity(_ entityId: LECSEntityId) {
-        guard let record = entityRecord[entityId], var archetype = archetypeIndex[record.archetype.id] else {
+        guard let record = entityRecord[entityId], var archetype = archetypeManager.find(record.archetype.id) else {
             return
         }
 
@@ -172,7 +158,7 @@ public class LECSWorldFixedSize: LECSWorld {
         guard let archetype = entityRecord[entityId]?.archetype else {
             return false
         }
-        return componentArchetype[componentId]?[archetype.id] != nil
+        return archetypeManager.componentOf(archetype, componentId: componentId)
     }
 
     public func getComponent<T>(_ entityId: LECSEntityId, _ component: T.Type) throws -> T? {
@@ -196,19 +182,14 @@ public class LECSWorldFixedSize: LECSWorld {
         guard let record = entityRecord[entityId] else {
             throw LECSWorldErrors.entityDoesNotExist
         }
+        let componentId = typeComponent[T.self] ?? createComponent(T.self)
 
         let oldArchetype = record.archetype
         guard let row = try oldArchetype.remove(record.row) else {
             throw LECSWorldErrors.rowDoesNotExist
         }
-        let componentId = typeComponent[T.self] ?? createComponent(T.self)
 
-        let newArchetype = oldArchetype.addComponent(componentId) ?? createArchetype(
-            columns: oldArchetype.columns + [T.self],
-            type: oldArchetype.type + [componentId]
-        )
-        oldArchetype.setAddEdge(componentId, newArchetype)
-        newArchetype.setRemoveEdge(componentId, oldArchetype)
+        let newArchetype = archetypeManager.nearestArchetype(to: oldArchetype, with: componentId, component: component)
 
         let newRow = try newArchetype.insert(row + [component])
 
@@ -217,9 +198,6 @@ public class LECSWorldFixedSize: LECSWorld {
             archetype: newArchetype,
             row: newRow
         )
-
-        updateComponentArchetypeMap(newArchetype)
-        archetypeIndex[newArchetype.id] = newArchetype
     }
 
     public func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) {
@@ -255,7 +233,7 @@ public class LECSWorldFixedSize: LECSWorld {
         }
 
         for (archetypeId, archetypeRecords) in findArchetypesWithComponents(query) {
-            let archetype = archetypeIndex[archetypeId]!
+            let archetype = archetypeManager.find(archetypeId)!
             (0..<archetype.table.count).forEach { rowId in
                 let columns: [Int] = archetypeRecords.map { $0.column }
                 if archetype.table.exists(rowId) {
@@ -272,7 +250,7 @@ public class LECSWorldFixedSize: LECSWorld {
         }
 
         for (archetypeId, archetypeRecords) in findArchetypesWithComponents(query) {
-            var archetype = archetypeIndex[archetypeId]!
+            var archetype = archetypeManager.find(archetypeId)!
             (0..<archetype.table.count).forEach { rowId in
                 let columns: [Int] = archetypeRecords.map { $0.column }
                 if archetype.table.exists(rowId) {
@@ -295,10 +273,10 @@ public class LECSWorldFixedSize: LECSWorld {
 
     private func createEntity() -> LECSEntityId {
         let id = entity()
-        let rowId = try! emptyArchetype.insert([])
+        let rowId = try! archetypeManager.emptyArchetype.insert([])
         entityRecord[id] = LECSRecord(
             entityId: id,
-            archetype: emptyArchetype,
+            archetype: archetypeManager.emptyArchetype,
             row: rowId
         )
         return id
@@ -314,32 +292,11 @@ public class LECSWorldFixedSize: LECSWorld {
     }
 
     private func createArchetype(columns: LECSColumnTypes, type: LECSType) -> LECSArchetype {
-        let id = entity()
+        let archetype = archetypeManager.createArchetype(columns: columns, type: type)
 
         newArchetypeCreated()
 
-        return LECSArchetypeFixedSize(
-            id: id,
-            type: type,
-            columns: columns,
-            size: archetypeSize
-        )
-    }
-
-    private func updateComponentArchetypeMap(_ archetype: LECSArchetype) {
-        // iterate over the type in the archetype
-        for (column, componentId) in archetype.type.enumerated() {
-            // get the map for the component
-            var map = componentArchetype[componentId] ?? [:]
-            // add the archetype to the map
-            map[archetype.id] = LECSArchetypeRecord(column: column)
-            // update the map in the index
-            componentArchetype[componentId] = map
-        }
-    }
-
-    private func findArchetypesWithComponent(_ component: LECSComponentId) -> LECSArchetypeMap {
-        componentArchetype[component]!
+        return archetype
     }
 
     private var queryCache: [String: [LECSArchetypeId:[LECSArchetypeRecord]]] = [:]
@@ -355,7 +312,7 @@ public class LECSWorldFixedSize: LECSWorld {
         // Find the archetype that matches the query
         // Process in component order so they can be read out in order
         query.forEach { componentType in
-            findArchetypesWithComponent(componentType).forEach { archetypeId, archetypeRecord in
+            archetypeManager.findArchetypesWithComponent(componentType).forEach { archetypeId, archetypeRecord in
                 archetypePositions.updateCollection(archetypeRecord, forKey: archetypeId)
             }
         }
@@ -379,4 +336,3 @@ public class LECSWorldFixedSize: LECSWorld {
 struct LECSArchetypeRecord{
     let column: Int
 }
-typealias LECSArchetypeMap = [LECSArchetypeId: LECSArchetypeRecord]
