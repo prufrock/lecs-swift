@@ -10,7 +10,7 @@ import Foundation
 typealias LECSArchetypeMap = [LECSArchetypeId: LECSArchetypeRecord]
 
 struct LECSArchetypeManager {
-    private var archetypeCounter: LECSArchetypeId = 1
+    private var archetypeCounter: LECSArchetypeId = 2
 
     let emptyArchetype: LECSArchetype = LECSArchetypeFixedSize(
         id: 1,
@@ -50,10 +50,10 @@ struct LECSArchetypeManager {
         componentArchetype[component]!
     }
 
-    mutating func createArchetype(columns: LECSColumnTypes, type: LECSType) -> LECSArchetype {
+    mutating func createArchetype(columns: LECSColumnTypes, type: LECSType, back: LECSArchetype? = nil) -> LECSArchetype {
         let id = newId()
 
-        return archetype(id: id, columns: columns, type: type)
+        return archetype(id: id, columns: columns, type: type, back: back)
     }
 
     mutating func updateComponentArchetypeMap(_ archetype: LECSArchetype) {
@@ -72,13 +72,43 @@ struct LECSArchetypeManager {
         archetypeIndex[archetype.id] = archetype
     }
     
-    mutating func nearestArchetype<T: LECSComponent>(to archetype: LECSArchetype, with componentId: LECSComponentId, component: T) -> LECSArchetype {
-        let newArchetype = archetype.addComponent(componentId) ?? createArchetype(
-            columns: archetype.columns + [T.self],
-            type: archetype.type + [componentId]
-        )
-        archetype.setAddEdge(componentId, newArchetype)
-        newArchetype.setRemoveEdge(componentId, archetype)
+    mutating func nearestArchetype<T: LECSComponent>(to archetype: LECSArchetype, with componentId: LECSComponentId, component: T.Type) -> LECSArchetype {
+
+        let newArchetype: LECSArchetype
+        if ((archetype.type.last ?? 0) <= componentId) {
+            /// When the componentId is greater than the last
+            /// component in the archetype ordering can be
+            /// maintained following the current archetype's
+            /// add edge. The two components should not be equal.
+            newArchetype = archetype.addComponent(componentId) ?? createArchetype(
+                columns: archetype.columns + [component],
+                type: archetype.type + [componentId],
+                back: archetype
+            )
+        } else {
+            /// When the componentId is less than the last
+            /// component in the archetype order has to be
+            /// maintained by backing up and finding a path
+            /// to the archetype with the new component.
+            let sorted = (archetype.type + [componentId]).sorted()
+
+            var currentArchetype = emptyArchetype
+            var componentsSoFar: [LECSComponentId] = []
+            sorted.forEach {
+                componentsSoFar.append($0)
+                currentArchetype = currentArchetype.addComponent($0) ??
+                createArchetype(
+                    columns: componentsSoFar.map {
+                    currentArchetype.columns[componentArchetype[$0]![currentArchetype.id]!.column]
+                    },
+                    type: componentsSoFar,
+                    back: currentArchetype
+                )
+            }
+
+            newArchetype = currentArchetype
+        }
+
         store(archetype: newArchetype)
         updateComponentArchetypeMap(newArchetype)
         return newArchetype
@@ -90,12 +120,20 @@ struct LECSArchetypeManager {
         return id
     }
 
-    private func archetype(id: LECSArchetypeId, columns: LECSColumnTypes, type: LECSType) -> LECSArchetype {
-        LECSArchetypeFixedSize(
+    private func archetype(id: LECSArchetypeId, columns: LECSColumnTypes, type: LECSType, back: LECSArchetype? = nil) -> LECSArchetype {
+        let a = LECSArchetypeFixedSize(
             id: id,
             type: type,
             columns: columns,
             size: archetypeSize
         )
+        if let edge = back {
+            if let id = type.last {
+                edge.setAddEdge(id, a)
+                a.setRemoveEdge(id, edge)
+            }
+        }
+
+        return a
     }
 }

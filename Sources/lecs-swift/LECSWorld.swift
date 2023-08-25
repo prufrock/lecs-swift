@@ -189,9 +189,13 @@ public class LECSWorldFixedSize: LECSWorld {
             throw LECSWorldErrors.rowDoesNotExist
         }
 
-        let newArchetype = archetypeManager.nearestArchetype(to: oldArchetype, with: componentId, component: component)
+        let newArchetype = archetypeManager.nearestArchetype(to: oldArchetype, with: componentId, component: T.self)
 
-        let newRow = try newArchetype.insert(row + [component])
+        let unorderedRow = row + [component]
+        let unorderedComponents = oldArchetype.type + [componentId]
+        let newRow = try newArchetype.insert(
+            unorderedComponents.aligned(to: unorderedRow).map { $0.1 }
+        )
 
         entityRecord[entityId] = LECSRecord(
             entityId: entityId,

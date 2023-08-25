@@ -26,3 +26,10 @@ extension Collection {
         !isEmpty
     }
 }
+
+extension Array where Element: Comparable {
+    func aligned<T>(to other: Array<T>) -> [(Element, T)] {
+        let aligned = zip(self, other)
+        return aligned.sorted { $0.0 < $1.0 }
+    }
+}

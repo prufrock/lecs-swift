@@ -78,6 +78,39 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         XCTAssertEqual("player", foundName)
     }
 
+    func testSelectTwoComponentsAfterAddingThemInADifferentOrder() throws {
+        let world: LECSWorld = LECSWorldFixedSize()
+
+        let player = try world.createEntity("player")
+        let enemy = try world.createEntity("enemy")
+
+        try! world.addComponent(player, LECSPosition2d(x: 0.1, y: 0.5))
+        try! world.addComponent(player, LECSVelocity2d(x: 0.3, y: 0.8))
+
+        try! world.addComponent(enemy, LECSVelocity2d(x: 0.2, y: 0.4))
+        try! world.addComponent(enemy, LECSPosition2d(x: 1.0, y: 2.0))
+
+        var activated = false
+        var foundPositionX: [Float] = []
+        var foundVelocityX: [Float] = []
+
+        let cloze = { (world: LECSWorld, row: LECSRow, columns: LECSColumns) in
+            activated = true
+            let position = row.component(at: 0, columns, LECSPosition2d.self)
+            let velocity = row.component(at: 1, columns, LECSVelocity2d.self)
+            foundPositionX.append(position.x)
+            foundVelocityX.append(velocity.velocity.x)
+        }
+
+        world.select([LECSPosition2d.self, LECSVelocity2d.self], cloze)
+
+        XCTAssertTrue(activated)
+        XCTAssertEqual(0.1, foundPositionX[0])
+        XCTAssertEqual(0.3, foundVelocityX[0])
+        XCTAssertEqual(1.0, foundPositionX[1])
+        XCTAssertEqual(0.2, foundVelocityX[1])
+    }
+
     func testProcessOneComponent() throws {
         let world: LECSWorld = LECSWorldFixedSize()
 

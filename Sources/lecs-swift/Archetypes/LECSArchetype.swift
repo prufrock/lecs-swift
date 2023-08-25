@@ -86,6 +86,7 @@ class LECSArchetypeFixedSize: LECSArchetype {
     let id: LECSArchetypeId
     let type: LECSType
     public var table: LECSArrayTable
+    // TODO: get rid of columns? Then rename type to columns?
     let columns: LECSColumnTypes
     private var edges: [LECSComponentId:ArchetypeEdge] = [:]
 
