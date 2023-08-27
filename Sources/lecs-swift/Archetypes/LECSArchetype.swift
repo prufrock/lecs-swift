@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  LECSArchetype.swift
 //  
 //
 //  Created by David Kanenwisher on 6/10/23.
@@ -15,10 +15,9 @@ protocol LECSArchetype {
     var id: LECSArchetypeId { get }
     // The ordered list of components in the archetype.
     var type: LECSType { get }
-    // The ordered list of component types in the archetype.
-    var columns: LECSColumnTypes { get }
 
-    var table: LECSArrayTable { get set }
+    // The number of rows in the Archetype.
+    var count: Int { get }
 
     /// Inserts a new row into the archetype.
     /// - Parameter values: A list of components to insert into the archetype.
@@ -43,6 +42,7 @@ protocol LECSArchetype {
     /// - Parameter rowId: The id of the row to remove.
     /// - Returns: The row removed
     /// - Throws: If there is an error removing the row.
+    @discardableResult/// 
     func remove(_ rowId: LECSRowId) throws -> LECSRow?
 
     /// Checks to see if the archetype has a component.
@@ -80,63 +80,81 @@ protocol LECSArchetype {
     ///   - id: The id of the component to set as a remove edge.
     ///   - archetype: The archetype to go to when the component is removed.
     func setRemoveEdge(_ id: LECSComponentId, _ archetype: LECSArchetype)
+
+    /// Read a row from the archetype.
+    /// - Parameter rowId: The id of the row to read.
+    /// - Returns: The row requested if it exists otherwise nil.
+    func row(_ rowId: LECSRowId) -> LECSRow?
+
+
+    /// Checks to see if the row exists in the archetype.
+    /// - Parameter rowId: THe id of the row to check for.
+    /// - Returns: Whether or not the row exists.
+    func exists(_ rowId: LECSRowId) -> Bool
 }
 
+/// An archetype whose size never changes.
 class LECSArchetypeFixedSize: LECSArchetype {
     let id: LECSArchetypeId
     let type: LECSType
-    public var table: LECSArrayTable
-    // TODO: get rid of columns? Then rename type to columns?
-    let columns: LECSColumnTypes
+    let size: LECSSize
+
+    private var table: LECSArrayTable?
     private var edges: [LECSComponentId:ArchetypeEdge] = [:]
 
-    //TODO: Think about ways to reduce the number of arguments on here
+    var count: Int {
+        get {
+            table?.count ?? 0
+        }
+    }
+
     /// Creates a new Archetype to hold the specified type.
     /// - Parameters:
     ///   - id: The id of the Archetype, generated externally, must be unique.
     ///   - type: The component ids stored in the archetype. Determines the order the components are stored.
-    ///   - columns: The types of the components stored in the archetype. Must match the order of the component ids in type.
     ///   - size: The maximum number of records the archetype can hold.
     init(
         id: LECSArchetypeId,
         type: LECSType,
-        columns: LECSColumnTypes,
         size: LECSSize
     ) {
         self.id = id
         self.type = type
-        self.columns = columns
-        self.table = LECSArrayTable(size: size, columns: columns)
+        self.size = size
+        self.table = nil
     }
 
     /// Creates a new archetype of the specified type, allowing the table to be explicitly provided.
     /// - Parameters:
     ///   - id: The id of the Archetype, generated externally, must be unique.
     ///   - type: The component ids stored in the archetype. Determines the order the components are stored.
-    ///   - columns: The types of the components stored in the archetype. Must match the order of the component ids in type.
     ///   - table: The table to store the components in.
-    init(id: LECSArchetypeId, type: LECSType, columns: LECSColumnTypes, table: LECSArrayTable) {
+    init(id: LECSArchetypeId, type: LECSType, table: LECSArrayTable) {
         self.id = id
         self.type = type
-        self.columns = columns
         self.table = table
+        self.size = table.size
     }
 
     func insert(_ values: LECSRow) throws -> LECSRowId {
-        return try table.insert(values)
+        if table == nil {
+            initTable(with: values)
+        }
+        return try table!.insert(values)
     }
 
     func read(_ rowId: LECSRowId) throws -> LECSRow? {
-        try! table.read(rowId)
+        try! table?.read(rowId)
     }
 
     func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) throws {
-        try table.update(rowId, column: column, component: component)
+        table?.rows[rowId][column] = component
     }
 
+    @discardableResult
     func remove(_ rowId: LECSRowId) throws -> LECSRow? {
         let row = try read(rowId)
-        table.remove(rowId)
+        table?.remove(rowId)
         return row
     }
 
@@ -178,6 +196,17 @@ class LECSArchetypeFixedSize: LECSArchetype {
         }
     }
 
+    func row(_ rowId: LECSRowId) -> LECSRow? {
+        table?.rows[rowId]
+    }
+
+    func exists(_ rowId: LECSRowId) -> Bool {
+        table?.exists(rowId) ?? false
+    }
+
+    private func initTable(with row: LECSRow) {
+        table = LECSArrayTable(size: self.size, columnTypes: row.types())
+    }
 }
 
 struct ArchetypeEdge {
@@ -188,5 +217,9 @@ struct ArchetypeEdge {
 extension LECSRow {
     func component<T>(at position: LECSSize, _ columns: LECSColumnPositions, _ type: T.Type) -> T {
         self[columns[position]] as! T
+    }
+
+    func types() -> LECSColumnTypes {
+        map { type(of: $0) }
     }
 }

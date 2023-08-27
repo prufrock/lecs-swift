@@ -9,28 +9,35 @@ import Foundation
 
 /// Stores components in an array.
 struct LECSArrayTable: LECSTable {
-    private let size: LECSSize
-    public let columns: LECSColumnTypes
+    public let size: LECSSize
     public var rows: [LECSRow]
     private var rowManager = RecyclingRowManager()
+    private var isFake: Bool {
+        get {
+            size == 0
+        }
+    }
+    private var notFake: Bool {
+        get {
+            size != 0
+        }
+    }
     var count: LECSSize {
         rowManager.count
     }
 
-    init(size: LECSSize, columns: LECSColumnTypes) {
+    init(size: LECSSize, columnTypes: LECSColumnTypes) {
         self.size = size
-        self.columns = columns
 
         var tempRows: [LECSRow] = []
         for _ in 0..<size {
             var row: LECSRow = []
-            for i in 0..<columns.count {
-                let componentType = columns[i]
+            for i in 0..<columnTypes.count {
+                let componentType = columnTypes[i]
                 row.append(componentType.init())
             }
             tempRows.append(row)
         }
-
 
         rows = tempRows
     }
@@ -41,7 +48,7 @@ struct LECSArrayTable: LECSTable {
 
     func read(_ rowId: LECSRowId) throws -> LECSRow? {
         // for the empty archetype that has nothing to read from it
-        if columns.isEmpty {
+        if isFake {
             return []
         }
         
@@ -73,14 +80,14 @@ struct LECSArrayTable: LECSTable {
     }
 
     mutating private func writeToArrays(_ row: LECSSize, _ values: LECSRow) {
-        guard !columns.isEmpty else {
+        guard notFake else {
             return
         }
         rows[row] = values
     }
 
     mutating private func writeToColumn(_ row: LECSSize, column: LECSColumn, value: LECSComponent) {
-        guard !columns.isEmpty else {
+        guard notFake else {
             return
         }
         rows[row][column] = value

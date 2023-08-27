@@ -21,12 +21,10 @@ final class LECSArchetypeFixedSizeTests: XCTestCase {
         let idComponent: LECSComponentId = entityCounter()
         
         let type: LECSType = [idComponent]
-        let columns: LECSColumnTypes = [LECSId.self]
         let archetypeId: LECSArchetypeId = entityCounter()
         let archetype: LECSArchetypeFixedSize = LECSArchetypeFixedSize(
             id: archetypeId,
             type: type,
-            columns: columns,
             size: 1
         )
 
@@ -43,12 +41,10 @@ final class LECSArchetypeFixedSizeTests: XCTestCase {
         let positionComponent = entityCounter()
 
         let type: LECSType = [positionComponent]
-        let columns: LECSColumnTypes = [LECSPosition2d.self]
         let archetypeId: LECSArchetypeId = entityCounter()
         let archetype: LECSArchetypeFixedSize = LECSArchetypeFixedSize(
             id: archetypeId,
             type: type,
-            columns: columns,
             size: 1
         )
 
@@ -64,12 +60,10 @@ final class LECSArchetypeFixedSizeTests: XCTestCase {
         let positionComponent = entityCounter()
 
         let type: LECSType = [positionComponent]
-        let columns: LECSColumnTypes = [LECSId.self, LECSName.self, LECSPosition2d.self]
         let archetypeId: LECSArchetypeId = entityCounter()
         let archetype: LECSArchetypeFixedSize = LECSArchetypeFixedSize(
             id: archetypeId,
             type: type,
-            columns: columns,
             size: 1
         )
 

@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  LECSArchetypeManager.swift
 //  
 //
 //  Created by David Kanenwisher on 8/14/23.
@@ -15,8 +15,7 @@ struct LECSArchetypeManager {
     let emptyArchetype: LECSArchetype = LECSArchetypeFixedSize(
         id: 1,
         type: [],
-        columns: [],
-        table: LECSArrayTable(size: 0, columns: [])
+        table: LECSArrayTable(size: 0, columnTypes: [])
     )
 
     private let archetypeSize: LECSSize
@@ -50,10 +49,10 @@ struct LECSArchetypeManager {
         componentArchetype[component]!
     }
 
-    mutating func createArchetype(columns: LECSColumnTypes, type: LECSType, back: LECSArchetype? = nil) -> LECSArchetype {
+    mutating func createArchetype(type: LECSType, back: LECSArchetype? = nil) -> LECSArchetype {
         let id = newId()
 
-        return archetype(id: id, columns: columns, type: type, back: back)
+        return archetype(id: id, type: type, back: back)
     }
 
     mutating func updateComponentArchetypeMap(_ archetype: LECSArchetype) {
@@ -72,7 +71,7 @@ struct LECSArchetypeManager {
         archetypeIndex[archetype.id] = archetype
     }
     
-    mutating func nearestArchetype<T: LECSComponent>(to archetype: LECSArchetype, with componentId: LECSComponentId, component: T.Type) -> LECSArchetype {
+    mutating func nearestArchetype(to archetype: LECSArchetype, with componentId: LECSComponentId) -> LECSArchetype {
 
         let newArchetype: LECSArchetype
         if ((archetype.type.last ?? 0) <= componentId) {
@@ -81,7 +80,6 @@ struct LECSArchetypeManager {
             /// maintained following the current archetype's
             /// add edge. The two components should not be equal.
             newArchetype = archetype.addComponent(componentId) ?? createArchetype(
-                columns: archetype.columns + [component],
                 type: archetype.type + [componentId],
                 back: archetype
             )
@@ -98,9 +96,6 @@ struct LECSArchetypeManager {
                 componentsSoFar.append($0)
                 currentArchetype = currentArchetype.addComponent($0) ??
                 createArchetype(
-                    columns: componentsSoFar.map {
-                    currentArchetype.columns[componentArchetype[$0]![currentArchetype.id]!.column]
-                    },
                     type: componentsSoFar,
                     back: currentArchetype
                 )
@@ -120,11 +115,10 @@ struct LECSArchetypeManager {
         return id
     }
 
-    private func archetype(id: LECSArchetypeId, columns: LECSColumnTypes, type: LECSType, back: LECSArchetype? = nil) -> LECSArchetype {
+    private func archetype(id: LECSArchetypeId, type: LECSType, back: LECSArchetype? = nil) -> LECSArchetype {
         let a = LECSArchetypeFixedSize(
             id: id,
             type: type,
-            columns: columns,
             size: archetypeSize
         )
         if let edge = back {

@@ -13,7 +13,7 @@ final class LECSArrayTableTests: XCTestCase {
     func testAddAComponentToATable() throws {
         var table = LECSArrayTable(
             size: 1,
-            columns: [LECSId.self]
+            columnTypes: [LECSId.self]
         )
 
         let id = LECSId(id: 1)
@@ -29,7 +29,7 @@ final class LECSArrayTableTests: XCTestCase {
     func testAddManyComponentsToATable() throws {
         var table = LECSArrayTable(
             size: 5,
-            columns: [LECSId.self]
+            columnTypes: [LECSId.self]
         )
 
         // insert 5 LECSIds into the table
@@ -53,7 +53,7 @@ final class LECSArrayTableTests: XCTestCase {
         let size = 10000
         var table = LECSArrayTable(
             size: size,
-            columns: [LECSId.self]
+            columnTypes: [LECSId.self]
         )
 
         // insert 5 LECSIds into the table

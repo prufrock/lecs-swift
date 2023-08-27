@@ -19,13 +19,12 @@ final class LECSArchetypeManagerTests: XCTestCase {
         let startingArchetype = manager.emptyArchetype
 
         let addArchetype = manager.createArchetype(
-            columns: [LECSId.self],
             type: [1]
         )
 
         startingArchetype.setAddEdge(1, addArchetype)
 
-        let newArchetype = manager.nearestArchetype(to: startingArchetype, with: 1, component: LECSId.self)
+        let newArchetype = manager.nearestArchetype(to: startingArchetype, with: 1)
 
         XCTAssertEqual(addArchetype.id, newArchetype.id)
     }
@@ -35,7 +34,7 @@ final class LECSArchetypeManagerTests: XCTestCase {
         let startingArchetype = manager.emptyArchetype
 
 
-        let newArchetype = manager.nearestArchetype(to: startingArchetype, with: 1, component: LECSId.self)
+        let newArchetype = manager.nearestArchetype(to: startingArchetype, with: 1)
 
         XCTAssertNotEqual(startingArchetype.id, newArchetype.id)
     }
@@ -45,14 +44,14 @@ final class LECSArchetypeManagerTests: XCTestCase {
         let startingArchetype = manager.emptyArchetype
 
 
-        let idArchetype = manager.nearestArchetype(to: startingArchetype, with: 1, component: LECSId.self)
-        let idNameArchetype = manager.nearestArchetype(to: idArchetype, with: 2, component: LECSName.self)
+        let idArchetype = manager.nearestArchetype(to: startingArchetype, with: 1)
+        let idNameArchetype = manager.nearestArchetype(to: idArchetype, with: 2)
 
-        let idNamePosition = manager.nearestArchetype(to: idNameArchetype, with: 3, component: LECSPosition2d.self)
-        let idNamePositionVelocity = manager.nearestArchetype(to: idNamePosition, with: 4, component: LECSVelocity2d.self)
+        let idNamePosition = manager.nearestArchetype(to: idNameArchetype, with: 3)
+        let idNamePositionVelocity = manager.nearestArchetype(to: idNamePosition, with: 4)
 
-        let idNameVelocity = manager.nearestArchetype(to: idNameArchetype, with: 4, component: LECSVelocity2d.self)
-        let idNameVelocityPosition = manager.nearestArchetype(to: idNameVelocity, with: 3, component: LECSPosition2d.self)
+        let idNameVelocity = manager.nearestArchetype(to: idNameArchetype, with: 4)
+        let idNameVelocityPosition = manager.nearestArchetype(to: idNameVelocity, with: 3)
 
         XCTAssertEqual(idNamePositionVelocity.id, idNameVelocityPosition.id)
     }
