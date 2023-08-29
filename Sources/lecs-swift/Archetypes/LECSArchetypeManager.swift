@@ -79,6 +79,7 @@ struct LECSArchetypeManager {
             /// component in the archetype ordering can be
             /// maintained following the current archetype's
             /// add edge. The two components should not be equal.
+            //TODO: should still be able to follow add edges, the work just changes when creating the new Archetype.
             newArchetype = archetype.addComponent(componentId) ?? createArchetype(
                 type: archetype.type + [componentId],
                 back: archetype
@@ -107,6 +108,37 @@ struct LECSArchetypeManager {
         store(archetype: newArchetype)
         updateComponentArchetypeMap(newArchetype)
         return newArchetype
+    }
+
+    mutating func removeComponent(from record: LECSRecord, componentId: LECSComponentId) throws -> LECSRecord {
+        let oldArchetype = record.archetype
+        guard var row = try oldArchetype.remove(record.row) else {
+            throw LECSWorldErrors.rowDoesNotExist
+        }
+
+        // If we've already gone back this way before save some work.
+        if let backArchetype = record.archetype.removeComponent(componentId) {
+            let rowId = try! backArchetype.insert(row)
+            return LECSRecord(entityId: record.entityId, archetype: backArchetype, row: rowId)
+        }
+
+        // Don't make a new archetype as a back edge, instead start from the empty archetype. If one already exists use it.
+        // Avoids Archetypes with duplicate Types hanging off of different edges.
+        var newComponents = oldArchetype.type
+        newComponents.remove(at: findArchetypesWithComponent(componentId)[oldArchetype.id]!.column)
+        var newArchetype: LECSArchetype = emptyArchetype
+        newComponents.forEach {
+            newArchetype = newArchetype.addComponent($0) ?? createArchetype(type: newArchetype.type + [$0], back: newArchetype)
+        }
+
+        // Next time there will be a back edge to follow.
+        oldArchetype.setRemoveEdge(componentId, newArchetype)
+
+        // store the row
+        row.remove(at: findArchetypesWithComponent(componentId)[oldArchetype.id]!.column)
+        let rowId = try! newArchetype.insert(row)
+
+        return LECSRecord(entityId: record.entityId, archetype: newArchetype, row: rowId)
     }
 
     mutating private func newId() -> LECSArchetypeId {

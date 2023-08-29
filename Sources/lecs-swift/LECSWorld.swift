@@ -58,7 +58,7 @@ public protocol LECSWorld {
     /// - Parameters:
     ///   - entityId: The id of the entity to remove the component from.
     ///   - component: The Type of the component to remove.
-    func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type)
+    func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) throws
 
     /// Adds a system to the world.
     /// - Parameters:
@@ -97,6 +97,7 @@ public protocol LECSWorld {
 enum LECSWorldErrors: Error {
     case entityDoesNotExist
     case rowDoesNotExist
+    case componentDoesNotExist
 }
 
 /// Create a LECSWorld with archetypes of size.
@@ -173,6 +174,7 @@ public class LECSWorldFixedSize: LECSWorld {
         }
         let componentId = typeComponent[T.self] ?? createComponent(T.self)
 
+        //TODO: Move all of this into the ArchetypeManager
         let oldArchetype = record.archetype
         guard let row = try oldArchetype.remove(record.row) else {
             throw LECSWorldErrors.rowDoesNotExist
@@ -193,8 +195,16 @@ public class LECSWorldFixedSize: LECSWorld {
         )
     }
 
-    public func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) {
-        fatalError("not implemented")
+    public func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) throws {
+        guard let record = entityRecord[entityId] else {
+            throw LECSWorldErrors.entityDoesNotExist
+        }
+        guard let componentId = typeComponent[component] else {
+            throw LECSWorldErrors.componentDoesNotExist
+        }
+
+        entityRecord[entityId] = try! archetypeManager.removeComponent(from: record, componentId: componentId)
+        //TODO: Return the row
     }
 
     public func addSystem(_ name: String, selector: [LECSComponentId], block: @escaping (LECSWorld, LECSRow, [Int]) -> [LECSComponent]) -> LECSSystemId {

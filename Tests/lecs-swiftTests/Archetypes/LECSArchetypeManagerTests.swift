@@ -55,4 +55,25 @@ final class LECSArchetypeManagerTests: XCTestCase {
 
         XCTAssertEqual(idNamePositionVelocity.id, idNameVelocityPosition.id)
     }
+
+    func testRemoveAComponent() throws {
+        var manager = LECSArchetypeManager()
+        let startingArchetype = manager.emptyArchetype
+        let idComponent: LECSComponentId = 1
+        let nameComponent: LECSComponentId = 2
+        let positionComponent: LECSComponentId = 3
+
+        let idArchetype = manager.nearestArchetype(to: startingArchetype, with: idComponent)
+        let idNameArchetype = manager.nearestArchetype(to: idArchetype, with: nameComponent)
+        let idNamePositionArchetype = manager.nearestArchetype(to: idNameArchetype, with: positionComponent)
+        let idPositionArchetype = manager.nearestArchetype(to: idArchetype, with: positionComponent)
+
+        let rowId = try idNamePositionArchetype.insert([LECSId(id: 1), LECSName(name: "Catherine"), LECSPosition2d(x: 2.0, y: 3.1)])
+
+        let record = LECSRecord(entityId: 1, archetype: idNamePositionArchetype, row: rowId)
+
+        let alteredRecord = try manager.removeComponent(from: record, componentId: nameComponent)
+
+        XCTAssertEqual(idPositionArchetype.id, alteredRecord.archetype.id)
+    }
 }
