@@ -42,7 +42,7 @@ protocol LECSArchetype {
     /// - Parameter rowId: The id of the row to remove.
     /// - Returns: The row removed
     /// - Throws: If there is an error removing the row.
-    @discardableResult/// 
+    @discardableResult 
     func remove(_ rowId: LECSRowId) throws -> LECSRow?
 
     /// Checks to see if the archetype has a component.
@@ -215,7 +215,7 @@ struct ArchetypeEdge {
 }
 
 extension LECSRow {
-    func component<T>(at position: LECSSize, _ columns: LECSColumnPositions, _ type: T.Type) -> T {
+    func component<T>(at position: LECSSize, _ columns: LECSColumns, _ type: T.Type) -> T {
         self[columns[position]] as! T
     }
 

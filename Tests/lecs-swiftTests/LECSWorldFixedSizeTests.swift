@@ -44,7 +44,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
 
         let cloze = { (world: LECSWorld, row: LECSRow, columns: LECSColumns) in
             activated = true
-            let id = row[0] as! LECSId
+            let id = row.component(at: 0, columns, LECSId.self)
             foundId = id.id
         }
 
@@ -65,8 +65,8 @@ final class LECSWorldFixedSizeTests: XCTestCase {
 
         let cloze = { (world: LECSWorld, row: LECSRow, columns: LECSColumns) in
             activated = true
-            let id = row[0] as! LECSId
-            let name = row[1] as! LECSName
+            let id = row.component(at: 0, columns, LECSId.self)
+            let name = row.component(at: 1, columns, LECSName.self)
             foundId = id.id
             foundName = name.name
         }

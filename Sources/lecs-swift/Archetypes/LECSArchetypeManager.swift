@@ -148,18 +148,16 @@ struct LECSArchetypeManager {
     }
 
     private func archetype(id: LECSArchetypeId, type: LECSType, back: LECSArchetype? = nil) -> LECSArchetype {
-        let a = LECSArchetypeFixedSize(
+        let archetype = LECSArchetypeFixedSize(
             id: id,
             type: type,
             size: archetypeSize
         )
-        if let edge = back {
-            if let id = type.last {
-                edge.setAddEdge(id, a)
-                a.setRemoveEdge(id, edge)
-            }
+        if let previousArchetype = back, let id = type.last {
+            previousArchetype.setAddEdge(id, archetype)
+            archetype.setRemoveEdge(id, previousArchetype)
         }
 
-        return a
+        return archetype
     }
 }
