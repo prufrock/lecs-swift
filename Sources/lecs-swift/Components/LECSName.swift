@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct LECSName: LECSComponent, Codable {
+public struct LECSName: LECSComponent {
     var name: String
 
     public init() {
@@ -19,15 +19,5 @@ public struct LECSName: LECSComponent, Codable {
             fatalError("I'm lazy so this blows up if you make LECSName larger than 15 characters.")
         }
         self.name = name
-    }
-
-    public init(from decoder: Decoder) throws {
-        var container = try decoder.unkeyedContainer()
-        name = try container.decode(String.self)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.unkeyedContainer()
-        try container.encode(name)
     }
 }
