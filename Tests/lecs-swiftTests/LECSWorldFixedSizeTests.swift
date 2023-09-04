@@ -214,6 +214,20 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         XCTAssertEqual(1, processed)
     }
 
+    func testUpdateAComponent() throws {
+        let world = LECSWorldFixedSize()
+
+        let e1 = try world.createEntity("e1")
+
+        try! world.addComponent(e1, LECSPosition2d(x: 4, y: 3))
+
+        XCTAssertEqual(4.0, try! world.getComponent(e1, LECSPosition2d.self)!.x)
+
+        try! world.addComponent(e1, LECSPosition2d(x: 5, y: 3))
+
+        XCTAssertEqual(5.0, try! world.getComponent(e1, LECSPosition2d.self)!.x)
+    }
+
     func testASystemOnlyProcessesNotDeletedEntities() throws {
         let world = LECSWorldFixedSize()
 

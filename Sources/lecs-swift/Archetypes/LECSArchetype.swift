@@ -215,7 +215,7 @@ struct ArchetypeEdge {
 }
 
 extension LECSRow {
-    func component<T>(at position: LECSSize, _ columns: LECSColumns, _ type: T.Type) -> T {
+    public func component<T>(at position: LECSSize, _ columns: LECSColumns, _ type: T.Type) -> T {
         self[columns[position]] as! T
     }
 

@@ -179,6 +179,12 @@ public class LECSWorldFixedSize: LECSWorld {
         }
         let componentId = typeComponent[T.self] ?? createComponent(T.self)
 
+        // if the records archetype already has the component just updated the row
+        if let archetypeMap = archetypeManager.findArchetypesWithComponent(componentId), let archetypeRecord = archetypeMap[record.archetype.id]{
+            try! record.archetype.update(record.row, column: archetypeRecord.column, component: component)
+            return
+        }
+
         //TODO: Move all of this into the ArchetypeManager
         let oldArchetype = record.archetype
         guard let row = try oldArchetype.remove(record.row) else {
@@ -321,7 +327,7 @@ public class LECSWorldFixedSize: LECSWorld {
         // Find the archetype that matches the query
         // Process in component order so they can be read out in order
         query.forEach { componentType in
-            archetypeManager.findArchetypesWithComponent(componentType).forEach { archetypeId, archetypeRecord in
+            archetypeManager.findArchetypesWithComponent(componentType)?.forEach { archetypeId, archetypeRecord in
                 archetypePositions.updateCollection(archetypeRecord, forKey: archetypeId)
             }
         }
