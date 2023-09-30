@@ -8,7 +8,7 @@
 import Foundation
 
 public struct LECSId: LECSComponent {
-    var id: UInt
+    public var id: UInt
 
     public init() {
         self.id = 0

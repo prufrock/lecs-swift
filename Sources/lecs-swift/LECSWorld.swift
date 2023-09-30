@@ -39,6 +39,12 @@ public protocol LECSWorld {
     /// - Returns: void
     func deleteEntity(_ entityId: LECSEntityId)
 
+    /// Finds the entity with the name
+    /// - Parameters:
+    ///   - named: The name of the entity
+    /// - Returns: The id of the found entity.
+    func entity(named: LECSName) -> LECSEntityId?
+
     /// Checks to see if the entity has a component.
     /// - Parameters:
     ///   - entityId: The id of the entity to check.
@@ -127,6 +133,8 @@ public class LECSWorldFixedSize: LECSWorld {
     private var entityRecord: [LECSEntityId: LECSRecord] = [:]
     // typeComponent maps the Swift Type of a Component to a ComponentId
     private var typeComponent: [MetatypeWrapper: LECSComponentId] = [:]
+    // nameEntityId maps the name of the entity to it's id
+    private var nameEntityId: [LECSName:LECSEntityId] = [:]
 
     public init(archetypeSize: LECSSize = 10) {
         let archetypeManager = LECSArchetypeManager(archetypeSize: archetypeSize)
@@ -145,6 +153,8 @@ public class LECSWorldFixedSize: LECSWorld {
         try addComponent(id, LECSId(id: id))
         try addComponent(id, LECSName(name: name))
 
+        nameEntityId[LECSName(name: name)] = id
+
         return id
     }
 
@@ -154,6 +164,10 @@ public class LECSWorldFixedSize: LECSWorld {
         }
 
         try! archetype.remove(record.row)
+    }
+
+    public func entity(named: LECSName) -> LECSEntityId? {
+        nameEntityId[named]
     }
 
     public func hasComponent(_ entityId: LECSEntityId, _ component: LECSComponent.Type) -> Bool {

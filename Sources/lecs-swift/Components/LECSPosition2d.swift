@@ -33,6 +33,10 @@ public struct LECSPosition2d: LECSComponent {
         position = SIMD2<Float>(0, 0)
     }
 
+    public init(_ position: SIMD2<Float>) {
+        self.position = position
+    }
+
     public init(x: Float, y: Float) {
         position = SIMD2<Float>(x, y)
     }

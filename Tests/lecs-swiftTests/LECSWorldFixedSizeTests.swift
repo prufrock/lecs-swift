@@ -22,6 +22,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         let playerName = try world.getComponent(player, LECSName.self)
         XCTAssertEqual(player, playerId?.id)
         XCTAssertEqual("player", playerName?.name)
+        XCTAssertEqual(player, world.entity(named: LECSName(name: "player")))
 
         let enemy = try world.createEntity("enemy")
 

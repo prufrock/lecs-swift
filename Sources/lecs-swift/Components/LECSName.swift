@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct LECSName: LECSComponent {
+public struct LECSName: LECSComponent, Hashable {
     var name: String
 
     public init() {
