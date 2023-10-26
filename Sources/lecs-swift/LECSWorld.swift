@@ -23,6 +23,7 @@ public typealias LECSColumn = Int
 public typealias LECSColumns = [LECSColumn]
 public typealias LECSUpdate = (LECSWorld, LECSRow, LECSColumns) -> [LECSComponent]
 public typealias LECSSelect = (LECSWorld, LECSRow, LECSColumns) -> Void
+public typealias LECSSelector = [LECSComponent.Type]
 
 
 /// The world is the facade for the ECS system. All access to the ECS system goes through LECSWorld.
