@@ -252,6 +252,27 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         XCTAssertEqual(2, ids.count)
     }
 
+    func testMovingEntityBetweenArchetypes() throws {
+        let world = LECSWorldFixedSize()
+
+        let e1 = try world.createEntity("e1")
+        try world.addComponent(e1, LECSPosition2d(x: 1, y: 2))
+
+        var firstCount = 0
+        world.select([LECSPosition2d.self]) { _,_,_ in
+            firstCount = firstCount + 1
+        }
+
+        try world.addComponent(e1, LECSVelocity2d())
+
+        var secondCount = 0
+        world.select([LECSPosition2d.self]) { _,_,_ in
+            secondCount = secondCount + 1
+        }
+
+        XCTAssertEqual(firstCount, secondCount)
+    }
+
     func testPerformanceOfProcess() throws {
         let size = 10000
         let world = LECSWorldFixedSize(archetypeSize: size)

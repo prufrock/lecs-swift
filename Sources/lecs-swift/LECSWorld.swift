@@ -223,6 +223,8 @@ public class LECSWorldFixedSize: LECSWorld {
             archetype: newArchetype,
             row: newRow
         )
+        // ☎️ the archetype manager needs a way to tell the world a new archetype has been created so dump cache
+        newArchetypeCreated()
         //TODO: Return the row
     }
 
