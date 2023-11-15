@@ -164,6 +164,10 @@ public class LECSWorldFixedSize: LECSWorld {
             return
         }
 
+        //TODO: process for updating indexes
+        let name = try! getComponent(entityId, LECSName.self)!
+        nameEntityId.removeValue(forKey: name)
+
         try! archetype.remove(record.row)
     }
 

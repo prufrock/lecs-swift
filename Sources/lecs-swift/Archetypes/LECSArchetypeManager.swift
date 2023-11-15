@@ -22,7 +22,7 @@ struct LECSArchetypeManager {
 
     // archetypeIndex maps archetype ids to archetypes
     private var archetypeIndex: [LECSArchetypeId: LECSArchetype] = [:]
-    // componentArchetype maps component ids to the archetypes their in and the column they are in.
+    // componentArchetype maps component ids to the archetypes they're in and the column they're in.
     // this makes determining if a component is in an archetype and retrieval fast
     private var componentArchetype: [LECSComponentId : LECSArchetypeMap] = [:]
 
