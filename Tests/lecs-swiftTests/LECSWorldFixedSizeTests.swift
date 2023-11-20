@@ -302,6 +302,39 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         XCTAssertEqual(firstCount, secondCount)
     }
 
+    /**
+     This reveals a bug with making sure components are removed when removing a component when the archetype needed doesn't
+     exist yet and when you need to follow a backedge to an existing component.
+     */
+    func testRemoveComponentTheSameComponentsFromTwoDifferentEntities() throws {
+        let world = LECSWorldFixedSize()
+
+        let e1 = try world.createEntity("e1")
+        try world.addComponent(e1, LECSVelocity2d())
+        try world.addComponent(e1, Velocity())
+        try world.addComponent(e1, LECSPosition2d(x: 1, y: 2))
+        let e2 = try world.createEntity("e2")
+        try world.addComponent(e2, LECSVelocity2d())
+        try world.addComponent(e2, Velocity())
+        try world.addComponent(e2, LECSPosition2d(x: 2, y: 3))
+
+        var firstCount = 0
+        world.select([LECSPosition2d.self]) { _,_,_ in
+            firstCount = firstCount + 1
+        }
+
+        try world.removeComponent(e1, component: Velocity.self)
+        try world.removeComponent(e2, component: Velocity.self)
+
+        var secondCount = 0
+        world.select([LECSPosition2d.self]) { world, row, columns in
+            let _ = row.component(at: 0, columns, LECSPosition2d.self)
+            secondCount = secondCount + 1
+        }
+
+        XCTAssertEqual(firstCount, secondCount)
+    }
+
     func testPerformanceOfProcess() throws {
         let size = 10000
         let world = LECSWorldFixedSize(archetypeSize: size)

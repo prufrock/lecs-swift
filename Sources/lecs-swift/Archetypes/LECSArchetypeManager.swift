@@ -123,6 +123,9 @@ struct LECSArchetypeManager {
         guard var row = try oldArchetype.remove(record.row) else {
             throw LECSWorldErrors.rowDoesNotExist
         }
+        let componentPosition = findArchetypesWithComponent(componentId)![oldArchetype.id]!.column
+        // remove the component from the row
+        row.remove(at: componentPosition)
 
         // If we've already gone back this way before save some work.
         if let backArchetype = record.archetype.removeComponent(componentId) {
@@ -133,7 +136,7 @@ struct LECSArchetypeManager {
         // Don't make a new archetype as a back edge, instead start from the empty archetype. If one already exists use it.
         // Avoids Archetypes with duplicate Types hanging off of different edges.
         var newComponents = oldArchetype.type
-        newComponents.remove(at: findArchetypesWithComponent(componentId)![oldArchetype.id]!.column)
+        newComponents.remove(at: componentPosition)
         var newArchetype: LECSArchetype = emptyArchetype
         newComponents.forEach {
             newArchetype = newArchetype.addComponent($0) ?? createArchetype(type: newArchetype.type + [$0], back: newArchetype)
@@ -143,7 +146,6 @@ struct LECSArchetypeManager {
         oldArchetype.setRemoveEdge(componentId, newArchetype)
 
         // store the row
-        row.remove(at: findArchetypesWithComponent(componentId)![oldArchetype.id]!.column)
         let rowId = try! newArchetype.insert(row)
 
         return LECSRecord(entityId: record.entityId, archetype: newArchetype, row: rowId)
