@@ -114,6 +114,11 @@ struct LECSArchetypeManager {
     }
 
     mutating func removeComponent(from record: LECSRecord, componentId: LECSComponentId) throws -> LECSRecord {
+        // don't do anything if the component isn't in the current archetype
+        guard findArchetypesWithComponent(componentId)![record.archetype.id] != nil else {
+            return record
+        }
+
         let oldArchetype = record.archetype
         guard var row = try oldArchetype.remove(record.row) else {
             throw LECSWorldErrors.rowDoesNotExist
