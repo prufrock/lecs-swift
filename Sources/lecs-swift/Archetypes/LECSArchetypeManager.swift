@@ -52,7 +52,12 @@ struct LECSArchetypeManager {
     mutating func createArchetype(type: LECSType, back: LECSArchetype? = nil) -> LECSArchetype {
         let id = newId()
 
-        return archetype(id: id, type: type, back: back)
+        let newArchetype = archetype(id: id, type: type, back: back)
+
+        store(archetype: newArchetype)
+        updateComponentArchetypeMap(newArchetype)
+
+        return newArchetype
     }
 
     mutating func updateComponentArchetypeMap(_ archetype: LECSArchetype) {
@@ -105,8 +110,6 @@ struct LECSArchetypeManager {
             newArchetype = currentArchetype
         }
 
-        store(archetype: newArchetype)
-        updateComponentArchetypeMap(newArchetype)
         return newArchetype
     }
 

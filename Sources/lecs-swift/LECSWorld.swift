@@ -137,6 +137,9 @@ public class LECSWorldFixedSize: LECSWorld {
     // nameEntityId maps the name of the entity to it's id
     private var nameEntityId: [LECSName:LECSEntityId] = [:]
 
+    // caches
+    private var queryCache: [String: [LECSArchetypeId:[LECSArchetypeRecord]]] = [:]
+
     public init(archetypeSize: LECSSize = 10) {
         let archetypeManager = LECSArchetypeManager(archetypeSize: archetypeSize)
         self.archetypeManager = archetypeManager
@@ -237,6 +240,10 @@ public class LECSWorldFixedSize: LECSWorld {
         }
 
         entityRecord[entityId] = try! archetypeManager.removeComponent(from: record, componentId: componentId)
+
+        //dump the cache
+        newArchetypeCreated()
+
         //TODO: Return the row
     }
 
@@ -335,7 +342,6 @@ public class LECSWorldFixedSize: LECSWorld {
         return archetype
     }
 
-    private var queryCache: [String: [LECSArchetypeId:[LECSArchetypeRecord]]] = [:]
 
     private func findArchetypesWithComponents(_ query: LECSQuery) -> [LECSArchetypeId:[LECSArchetypeRecord]] {
         if let positions =  queryCache[queryHash(query)] {

@@ -273,6 +273,35 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         XCTAssertEqual(firstCount, secondCount)
     }
 
+    /**
+     Found a bug where removing components in a different order then they were added
+     causes the next select to fail.
+
+     I'm pretty sure this is happening because the previous archetype does not exist.
+     */
+    func testRemoveComponentNotUsedBySelect() throws {
+        let world = LECSWorldFixedSize()
+
+        let e1 = try world.createEntity("e1")
+        try world.addComponent(e1, LECSPosition2d(x: 1, y: 2))
+        try world.addComponent(e1, Velocity())
+        try world.addComponent(e1, LECSVelocity2d())
+
+        var firstCount = 0
+        world.select([LECSPosition2d.self]) { _,_,_ in
+            firstCount = firstCount + 1
+        }
+
+        try world.removeComponent(e1, component: Velocity.self)
+
+        var secondCount = 0
+        world.select([LECSPosition2d.self]) { _,_,_ in
+            secondCount = secondCount + 1
+        }
+
+        XCTAssertEqual(firstCount, secondCount)
+    }
+
     func testPerformanceOfProcess() throws {
         let size = 10000
         let world = LECSWorldFixedSize(archetypeSize: size)
