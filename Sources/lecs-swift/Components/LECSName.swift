@@ -8,7 +8,7 @@
 import Foundation
 
 public struct LECSName: LECSComponent, Hashable {
-    var name: String
+    public var name: String
 
     public init() {
         self.name = ""
