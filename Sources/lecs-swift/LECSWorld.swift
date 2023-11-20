@@ -126,7 +126,7 @@ public class LECSWorldFixedSize: LECSWorld {
 
     private var rootEntity: LECSEntityId = 0
 
-    //systems
+    // systems
     private var systems: [LECSSystemId: LECSSystem] = [:]
 
     // indexes
@@ -202,7 +202,7 @@ public class LECSWorldFixedSize: LECSWorld {
         let componentId = typeComponent[T.self] ?? createComponent(T.self)
 
         // if the records archetype already has the component just updated the row
-        if let archetypeMap = archetypeManager.findArchetypesWithComponent(componentId), let archetypeRecord = archetypeMap[record.archetype.id]{
+        if let archetypeMap = archetypeManager.findArchetypesWithComponent(componentId), let archetypeRecord = archetypeMap[record.archetype.id] {
             try! record.archetype.update(record.row, column: archetypeRecord.column, component: component)
             return
         }
