@@ -1,0 +1,9 @@
+{
+  "toolchains": [
+    {
+      "name": "Xcode",
+    }
+  ],
+  "backend.maxHeapSizeMb": 4096,
+  "editor.formatOnSave": false
+}
