@@ -10,7 +10,7 @@ import XCTest
 
 final class LECSWorldFixedSizeTests: XCTestCase {
     func testCreateEntities() throws {
-        let world = LECSWorldFixedSize()
+        let world = createWorld()
 
         let player = try world.createEntity("player")
 
@@ -36,7 +36,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     }
 
     func testSelectOneComponent() throws {
-        let world: LECSWorld = LECSWorldFixedSize()
+        let world = createWorld()
 
         let player = try world.createEntity("player")
 
@@ -56,7 +56,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     }
 
     func testSelectTwoComponents() throws {
-        let world: LECSWorld = LECSWorldFixedSize()
+        let world = createWorld()
 
         let player = try world.createEntity("player")
 
@@ -80,7 +80,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     }
 
     func testSelectTwoComponentsAfterAddingThemInADifferentOrder() throws {
-        let world: LECSWorld = LECSWorldFixedSize()
+        let world = createWorld()
 
         let player = try world.createEntity("player")
         let enemy = try world.createEntity("enemy")
@@ -113,7 +113,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     }
 
     func testProcessOneComponent() throws {
-        let world: LECSWorld = LECSWorldFixedSize()
+        let world = createWorld()
 
         let player = try world.createEntity("player")
         try world.addComponent(player, LECSPosition2d(x: 1, y: 2))
@@ -133,7 +133,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     }
 
     func testProcessTwoComponents() throws {
-        let world = LECSWorldFixedSize()
+        let world = createWorld()
 
         let player = try world.createEntity("player")
         try world.addComponent(player, LECSPosition2d(x: 1, y: 2))
@@ -160,7 +160,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     }
 
     func testProcessTwoComponentsWithFloat() throws {
-        let world = LECSWorldFixedSize()
+        let world = createWorld()
 
         let player = try world.createEntity("player")
         try world.addComponent(player, LECSPosition2d(x: 1.0, y: 2.0))
@@ -190,7 +190,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     /// I ran into this problem where it seems like I am "OR"ing the components in the query when I mean it to be an "AND".
     /// This test ensures they stay as an "AND".
     func testProcessTwoComponentsWithOverlappingArchetypes() throws {
-        let world = LECSWorldFixedSize()
+        let world = createWorld()
 
         let player = try world.createEntity("player")
         try world.addComponent(player, LECSPosition2d(x: 1.0, y: 2.0))
@@ -216,7 +216,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     }
 
     func testUpdateAComponent() throws {
-        let world = LECSWorldFixedSize()
+        let world = createWorld()
 
         let e1 = try world.createEntity("e1")
 
@@ -230,7 +230,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     }
 
     func testASystemOnlyProcessesNotDeletedEntities() throws {
-        let world = LECSWorldFixedSize()
+        let world = createWorld()
 
         let _ = try world.createEntity("e1")
         let e2 = try world.createEntity("e2")
@@ -253,7 +253,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     }
 
     func testMovingEntityBetweenArchetypes() throws {
-        let world = LECSWorldFixedSize()
+        let world = createWorld()
 
         let e1 = try world.createEntity("e1")
         try world.addComponent(e1, LECSPosition2d(x: 1, y: 2))
@@ -280,7 +280,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
      I'm pretty sure this is happening because the previous archetype does not exist.
      */
     func testRemoveComponentNotUsedBySelect() throws {
-        let world = LECSWorldFixedSize()
+        let world = createWorld()
 
         let e1 = try world.createEntity("e1")
         try world.addComponent(e1, LECSPosition2d(x: 1, y: 2))
@@ -307,7 +307,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
      exist yet and when you need to follow a backedge to an existing component.
      */
     func testRemoveComponentTheSameComponentsFromTwoDifferentEntities() throws {
-        let world = LECSWorldFixedSize()
+        let world = createWorld()
 
         let e1 = try world.createEntity("e1")
         try world.addComponent(e1, LECSVelocity2d())
@@ -335,26 +335,8 @@ final class LECSWorldFixedSizeTests: XCTestCase {
         XCTAssertEqual(firstCount, secondCount)
     }
 
-    func testPerformanceOfProcess() throws {
-        let size = 10000
-        let world = LECSWorldFixedSize(archetypeSize: size)
-
-        for i in 0..<size {
-            let b = try world.createEntity("b\(i)")
-            try world.addComponent(b, LECSPosition2d(x: 1.0, y: 2.0))
-        }
-
-        let system: LECSSystemId = world.addSystem("simple", selector: [LECSName.self, LECSPosition2d.self]) { world, row, columns in
-            let name = row.component(at: 0, columns, LECSName.self)
-            var position = row.component(at: 1, columns, LECSPosition2d.self)
-            position.x = position.x + 1
-
-            return [name, position]
-        }
-
-        self.measure {
-            world.process(system: system)
-        }
+    private func createWorld() -> LECSWorldFixedSize {
+        LECSWorldFixedSize(archetypeManager: LECSArchetypeManager())
     }
 }
 

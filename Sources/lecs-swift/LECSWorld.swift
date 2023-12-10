@@ -116,12 +116,15 @@ enum LECSWorldErrors: Error {
 /// - Parameters
 ///   - archetypeSize: The size of the archetypes in LECSWorld.
 public func LECSCreateWorld(archetypeSize: LECSSize = 2000) -> LECSWorld {
-    return LECSWorldFixedSize(archetypeSize: archetypeSize)
+    return LECSWorldFixedSize(
+        archetypeManager: LECSArchetypeManager(archetypeSize: archetypeSize)
+    )
 }
 
 public class LECSWorldFixedSize: LECSWorld {
     private var archetypeManager: LECSArchetypeManager
 
+    // The 0 entity is reserved for future use
     private var entityCounter: LECSEntityId = 1
 
     private var rootEntity: LECSEntityId = 0
@@ -140,8 +143,7 @@ public class LECSWorldFixedSize: LECSWorld {
     // caches
     private var queryCache: [String: [LECSArchetypeId:[LECSArchetypeRecord]]] = [:]
 
-    public init(archetypeSize: LECSSize = 10) {
-        let archetypeManager = LECSArchetypeManager(archetypeSize: archetypeSize)
+    init(archetypeManager: LECSArchetypeManager) {
         self.archetypeManager = archetypeManager
 
         entityRecord[rootEntity] = LECSRecord(
