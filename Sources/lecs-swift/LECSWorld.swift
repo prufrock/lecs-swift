@@ -159,6 +159,7 @@ public class LECSWorldFixedSize: LECSWorld {
         try addComponent(id, LECSId(id: id))
         try addComponent(id, LECSName(name: name))
 
+        // When there's an index for a component and the component changes how does the index get updated?
         nameEntityId[LECSName(name: name)] = id
 
         return id
@@ -206,6 +207,7 @@ public class LECSWorldFixedSize: LECSWorld {
         // if the records archetype already has the component just updated the row
         if let archetypeMap = archetypeManager.findArchetypesWithComponent(componentId), let archetypeRecord = archetypeMap[record.archetype.id] {
             try! record.archetype.update(record.row, column: archetypeRecord.column, component: component)
+            // the component was changed--update indexes? event(component, update, previous value, new value)
             return
         }
 
@@ -231,6 +233,7 @@ public class LECSWorldFixedSize: LECSWorld {
         // ☎️ the archetype manager needs a way to tell the world a new archetype has been created so dump cache
         newArchetypeCreated()
         //TODO: Return the row
+        // updated indexes...
     }
 
     public func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) throws {

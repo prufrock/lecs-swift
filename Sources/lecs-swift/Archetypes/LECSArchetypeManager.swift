@@ -49,10 +49,10 @@ struct LECSArchetypeManager {
         componentArchetype[component]
     }
 
-    mutating func createArchetype(type: LECSType, back: LECSArchetype? = nil) -> LECSArchetype {
+    mutating func createArchetype(type: LECSType, parent: LECSArchetype? = nil) -> LECSArchetype {
         let id = newId()
 
-        let newArchetype = archetype(id: id, type: type, back: back)
+        let newArchetype = archetype(id: id, type: type, parent: parent)
 
         store(archetype: newArchetype)
         updateComponentArchetypeMap(newArchetype)
@@ -87,7 +87,7 @@ struct LECSArchetypeManager {
             //TODO: should still be able to follow add edges, the work just changes when creating the new Archetype.
             newArchetype = archetype.addComponent(componentId) ?? createArchetype(
                 type: archetype.type + [componentId],
-                back: archetype
+                parent: archetype
             )
         } else {
             /// When the componentId is less than the last
@@ -103,7 +103,7 @@ struct LECSArchetypeManager {
                 currentArchetype = currentArchetype.addComponent($0) ??
                 createArchetype(
                     type: componentsSoFar,
-                    back: currentArchetype
+                    parent: currentArchetype
                 )
             }
 
@@ -135,12 +135,9 @@ struct LECSArchetypeManager {
 
         // Don't make a new archetype as a back edge, instead start from the empty archetype. If one already exists use it.
         // Avoids Archetypes with duplicate Types hanging off of different edges.
-        var newComponents = oldArchetype.type
-        newComponents.remove(at: componentPosition)
-        var newArchetype: LECSArchetype = emptyArchetype
-        newComponents.forEach {
-            newArchetype = newArchetype.addComponent($0) ?? createArchetype(type: newArchetype.type + [$0], back: newArchetype)
-        }
+        var newType = oldArchetype.type
+        newType.remove(at: componentPosition)
+        let newArchetype = archetypeFor(type: newType)
 
         // Next time there will be a back edge to follow.
         oldArchetype.setRemoveEdge(componentId, newArchetype)
@@ -151,19 +148,28 @@ struct LECSArchetypeManager {
         return LECSRecord(entityId: record.entityId, archetype: newArchetype, row: rowId)
     }
 
+    private mutating func archetypeFor(type: LECSType) -> LECSArchetype {
+        var archetype = emptyArchetype
+        type.forEach {
+            archetype = archetype.addComponent($0) ?? createArchetype(type: archetype.type + [$0], parent: archetype)
+        }
+
+        return archetype
+    }
+
     mutating private func newId() -> LECSArchetypeId {
         let id = archetypeCounter
         archetypeCounter += 1
         return id
     }
 
-    private func archetype(id: LECSArchetypeId, type: LECSType, back: LECSArchetype? = nil) -> LECSArchetype {
+    private func archetype(id: LECSArchetypeId, type: LECSType, parent: LECSArchetype? = nil) -> LECSArchetype {
         let archetype = LECSArchetypeFixedSize(
             id: id,
             type: type,
             size: archetypeSize
         )
-        if let previousArchetype = back, let id = type.last {
+        if let previousArchetype = parent, let id = type.last {
             previousArchetype.setAddEdge(id, archetype)
             archetype.setRemoveEdge(id, previousArchetype)
         }
