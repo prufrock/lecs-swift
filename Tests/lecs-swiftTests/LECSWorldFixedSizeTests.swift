@@ -12,25 +12,25 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     func testCreateEntities() throws {
         let world = createWorld()
 
-        let player = try world.createEntity("player")
+        let player = world.createEntity("player")
 
         XCTAssertLessThanOrEqual(0, player, "Create an entity, get an Id.")
         XCTAssertTrue(world.hasComponent(player, LECSId.self))
         XCTAssertTrue(world.hasComponent(player, LECSName.self))
         XCTAssertFalse(world.hasComponent(player, Velocity.self))
-        let playerId = try world.getComponent(player, LECSId.self)
-        let playerName = try world.getComponent(player, LECSName.self)
+        let playerId = world.getComponent(player, LECSId.self)
+        let playerName = world.getComponent(player, LECSName.self)
         XCTAssertEqual(player, playerId?.id)
         XCTAssertEqual("player", playerName?.name)
         XCTAssertEqual(player, world.entity(named: LECSName(name: "player")))
 
-        let enemy = try world.createEntity("enemy")
+        let enemy = world.createEntity("enemy")
 
         XCTAssertLessThanOrEqual(0, enemy, "Create another entity, get another Id. The Id may not necessarily occur after the player, in case reuse needs to happen.")
         XCTAssertNotEqual(player, enemy, "The ids of player and enemy should not be equal.")
 
-        let enemyId = try world.getComponent(enemy, LECSId.self)
-        let enemyName = try world.getComponent(enemy, LECSName.self)
+        let enemyId = world.getComponent(enemy, LECSId.self)
+        let enemyName = world.getComponent(enemy, LECSName.self)
         XCTAssertEqual(enemy, enemyId?.id)
         XCTAssertEqual("enemy", enemyName?.name)
     }
@@ -38,7 +38,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     func testSelectOneComponent() throws {
         let world = createWorld()
 
-        let player = try world.createEntity("player")
+        let player = world.createEntity("player")
 
         var activated = false
         var foundId: UInt = 0
@@ -58,7 +58,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     func testSelectTwoComponents() throws {
         let world = createWorld()
 
-        let player = try world.createEntity("player")
+        let player = world.createEntity("player")
 
         var activated = false
         var foundId: UInt = 0
@@ -82,14 +82,14 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     func testSelectTwoComponentsAfterAddingThemInADifferentOrder() throws {
         let world = createWorld()
 
-        let player = try world.createEntity("player")
-        let enemy = try world.createEntity("enemy")
+        let player = world.createEntity("player")
+        let enemy = world.createEntity("enemy")
 
-        try! world.addComponent(player, LECSPosition2d(x: 0.1, y: 0.5))
-        try! world.addComponent(player, LECSVelocity2d(x: 0.3, y: 0.8))
+        world.addComponent(player, LECSPosition2d(x: 0.1, y: 0.5))
+        world.addComponent(player, LECSVelocity2d(x: 0.3, y: 0.8))
 
-        try! world.addComponent(enemy, LECSVelocity2d(x: 0.2, y: 0.4))
-        try! world.addComponent(enemy, LECSPosition2d(x: 1.0, y: 2.0))
+        world.addComponent(enemy, LECSVelocity2d(x: 0.2, y: 0.4))
+        world.addComponent(enemy, LECSPosition2d(x: 1.0, y: 2.0))
 
         var activated = false
         var foundPositionX: [Float] = []
@@ -115,8 +115,8 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     func testProcessOneComponent() throws {
         let world = createWorld()
 
-        let player = try world.createEntity("player")
-        try world.addComponent(player, LECSPosition2d(x: 1, y: 2))
+        let player = world.createEntity("player")
+        world.addComponent(player, LECSPosition2d(x: 1, y: 2))
 
         let system = world.addSystem("simple", selector: [LECSPosition2d.self]) { world, row, columns in
             var position = row.component(at: 0, columns, LECSPosition2d.self)
@@ -127,7 +127,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
 
         world.process(system: system)
 
-        let position = try world.getComponent(player, LECSPosition2d.self)!
+        let position = world.getComponent(player, LECSPosition2d.self)!
 
         XCTAssertEqual(2, position.x)
     }
@@ -135,11 +135,11 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     func testProcessTwoComponents() throws {
         let world = createWorld()
 
-        let player = try world.createEntity("player")
-        try world.addComponent(player, LECSPosition2d(x: 1, y: 2))
+        let player = world.createEntity("player")
+        world.addComponent(player, LECSPosition2d(x: 1, y: 2))
 
-        let enemy = try world.createEntity("enemy")
-        try world.addComponent(enemy, LECSPosition2d(x: 5, y: 2))
+        let enemy = world.createEntity("enemy")
+        world.addComponent(enemy, LECSPosition2d(x: 5, y: 2))
 
         let system = world.addSystem("simple", selector: [LECSName.self, LECSPosition2d.self]) { world, row, columns in
             let name = row.component(at: 0, columns, LECSName.self)
@@ -153,7 +153,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
 
         world.process(system: system)
 
-        let position = try world.getComponent(player, LECSPosition2d.self)!
+        let position = world.getComponent(player, LECSPosition2d.self)!
 
         XCTAssertEqual(4, position.x)
         XCTAssertEqual(2, position.y)
@@ -162,11 +162,11 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     func testProcessTwoComponentsWithFloat() throws {
         let world = createWorld()
 
-        let player = try world.createEntity("player")
-        try world.addComponent(player, LECSPosition2d(x: 1.0, y: 2.0))
+        let player = world.createEntity("player")
+        world.addComponent(player, LECSPosition2d(x: 1.0, y: 2.0))
 
-        let enemy = try world.createEntity("enemy")
-        try world.addComponent(enemy, LECSPosition2d(x: 5.0, y: 2.0))
+        let enemy = world.createEntity("enemy")
+        world.addComponent(enemy, LECSPosition2d(x: 5.0, y: 2.0))
 
         let system = world.addSystem("simple", selector: [LECSName.self, LECSPosition2d.self]) { world, row, columns in
             let name = row.component(at: 0, columns, LECSName.self)
@@ -180,7 +180,7 @@ final class LECSWorldFixedSizeTests: XCTestCase {
 
         world.process(system: system)
 
-        let position = try world.getComponent(player, LECSPosition2d.self)!
+        let position = world.getComponent(player, LECSPosition2d.self)!
 
         XCTAssertEqual(4.2, position.x)
         XCTAssertEqual(2, position.y)
@@ -192,12 +192,12 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     func testProcessTwoComponentsWithOverlappingArchetypes() throws {
         let world = createWorld()
 
-        let player = try world.createEntity("player")
-        try world.addComponent(player, LECSPosition2d(x: 1.0, y: 2.0))
-        try world.addComponent(player, LECSVelocity2d(x: 2.0, y: 1.0))
+        let player = world.createEntity("player")
+        world.addComponent(player, LECSPosition2d(x: 1.0, y: 2.0))
+        world.addComponent(player, LECSVelocity2d(x: 2.0, y: 1.0))
 
-        let enemy = try world.createEntity("enemy")
-        try world.addComponent(enemy, LECSPosition2d(x: 5.0, y: 2.0))
+        let enemy = world.createEntity("enemy")
+        world.addComponent(enemy, LECSPosition2d(x: 5.0, y: 2.0))
 
         var processed = 0
         let system = world.addSystem("simple", selector: [LECSPosition2d.self, LECSVelocity2d.self]) { world, row, columns in
@@ -218,23 +218,23 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     func testUpdateAComponent() throws {
         let world = createWorld()
 
-        let e1 = try world.createEntity("e1")
+        let e1 = world.createEntity("e1")
 
-        try! world.addComponent(e1, LECSPosition2d(x: 4, y: 3))
+        world.addComponent(e1, LECSPosition2d(x: 4, y: 3))
 
-        XCTAssertEqual(4.0, try! world.getComponent(e1, LECSPosition2d.self)!.x)
+        XCTAssertEqual(4.0, world.getComponent(e1, LECSPosition2d.self)!.x)
 
-        try! world.addComponent(e1, LECSPosition2d(x: 5, y: 3))
+        world.addComponent(e1, LECSPosition2d(x: 5, y: 3))
 
-        XCTAssertEqual(5.0, try! world.getComponent(e1, LECSPosition2d.self)!.x)
+        XCTAssertEqual(5.0, world.getComponent(e1, LECSPosition2d.self)!.x)
     }
 
     func testASystemOnlyProcessesNotDeletedEntities() throws {
         let world = createWorld()
 
-        let _ = try world.createEntity("e1")
-        let e2 = try world.createEntity("e2")
-        let _ = try world.createEntity("e3")
+        let _ = world.createEntity("e1")
+        let e2 = world.createEntity("e2")
+        let _ = world.createEntity("e3")
 
         var ids:[LECSId] = []
         let system = world.addSystem("ids", selector: [LECSId.self, LECSName.self]) { world, row, columns in
@@ -255,15 +255,15 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     func testMovingEntityBetweenArchetypes() throws {
         let world = createWorld()
 
-        let e1 = try world.createEntity("e1")
-        try world.addComponent(e1, LECSPosition2d(x: 1, y: 2))
+        let e1 = world.createEntity("e1")
+        world.addComponent(e1, LECSPosition2d(x: 1, y: 2))
 
         var firstCount = 0
         world.select([LECSPosition2d.self]) { _,_,_ in
             firstCount = firstCount + 1
         }
 
-        try world.addComponent(e1, LECSVelocity2d())
+        world.addComponent(e1, LECSVelocity2d())
 
         var secondCount = 0
         world.select([LECSPosition2d.self]) { _,_,_ in
@@ -282,17 +282,17 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     func testRemoveComponentNotUsedBySelect() throws {
         let world = createWorld()
 
-        let e1 = try world.createEntity("e1")
-        try world.addComponent(e1, LECSPosition2d(x: 1, y: 2))
-        try world.addComponent(e1, Velocity())
-        try world.addComponent(e1, LECSVelocity2d())
+        let e1 = world.createEntity("e1")
+        world.addComponent(e1, LECSPosition2d(x: 1, y: 2))
+        world.addComponent(e1, Velocity())
+        world.addComponent(e1, LECSVelocity2d())
 
         var firstCount = 0
         world.select([LECSPosition2d.self]) { _,_,_ in
             firstCount = firstCount + 1
         }
 
-        try world.removeComponent(e1, component: Velocity.self)
+        world.removeComponent(e1, component: Velocity.self)
 
         var secondCount = 0
         world.select([LECSPosition2d.self]) { _,_,_ in
@@ -309,22 +309,22 @@ final class LECSWorldFixedSizeTests: XCTestCase {
     func testRemoveComponentTheSameComponentsFromTwoDifferentEntities() throws {
         let world = createWorld()
 
-        let e1 = try world.createEntity("e1")
-        try world.addComponent(e1, LECSVelocity2d())
-        try world.addComponent(e1, Velocity())
-        try world.addComponent(e1, LECSPosition2d(x: 1, y: 2))
-        let e2 = try world.createEntity("e2")
-        try world.addComponent(e2, LECSVelocity2d())
-        try world.addComponent(e2, Velocity())
-        try world.addComponent(e2, LECSPosition2d(x: 2, y: 3))
+        let e1 = world.createEntity("e1")
+        world.addComponent(e1, LECSVelocity2d())
+        world.addComponent(e1, Velocity())
+        world.addComponent(e1, LECSPosition2d(x: 1, y: 2))
+        let e2 = world.createEntity("e2")
+        world.addComponent(e2, LECSVelocity2d())
+        world.addComponent(e2, Velocity())
+        world.addComponent(e2, LECSPosition2d(x: 2, y: 3))
 
         var firstCount = 0
         world.select([LECSPosition2d.self]) { _,_,_ in
             firstCount = firstCount + 1
         }
 
-        try world.removeComponent(e1, component: Velocity.self)
-        try world.removeComponent(e2, component: Velocity.self)
+        world.removeComponent(e1, component: Velocity.self)
+        world.removeComponent(e2, component: Velocity.self)
 
         var secondCount = 0
         world.select([LECSPosition2d.self]) { world, row, columns in

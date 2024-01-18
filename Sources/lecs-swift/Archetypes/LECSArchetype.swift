@@ -22,13 +22,14 @@ protocol LECSArchetype {
     /// Inserts a new row into the archetype.
     /// - Parameter values: A list of components to insert into the archetype.
     /// - Returns: The row id of the newly inserted row.
-    /// - Throws: If there is an error inserting the row, usually because the archetype is full.
+    /// - Throws: If there is an error inserting the row, like being out of space.
     func insert(_ values: LECSRow) throws -> LECSRowId
 
+    //TODO: read and row serve the same purpose, but at one time row was faster, is that still true?
     /// Reads a row from the archetype.
     /// - Parameter rowId: The id of the row to read.
-    /// - Returns: The row requested.
-    /// - Throws: If there is an error reading the row, usually because the row id is out of bounds.
+    /// - Returns: The row requested or none if the row doesn't exist.
+    /// - Throws: If there is an error reading the row, like being out-of-bounds.
     func read(_ rowId: LECSRowId) throws -> LECSRow?
 
     /// Updates the column of the row with the component.
@@ -99,6 +100,7 @@ class LECSArchetypeFixedSize: LECSArchetype {
     let type: LECSType
     let size: LECSSize
 
+    //TODO: After various performance improvements can this go back to being a protocol?
     private var table: LECSArrayTable?
     private var edges: [LECSComponentId:ArchetypeEdge] = [:]
 

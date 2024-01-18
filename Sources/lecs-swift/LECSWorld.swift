@@ -32,7 +32,7 @@ public protocol LECSWorld {
     /// - Parameters:
     ///   - name: The name of the entity.
     /// - Returns: The id of the new entity.
-    func createEntity(_ name: String) throws -> LECSEntityId
+    func createEntity(_ name: String) -> LECSEntityId
 
     /// Deletes the entity.
     /// - Parameters:
@@ -58,19 +58,19 @@ public protocol LECSWorld {
     ///   - entityId: The id of the entity to get the entity for.
     ///   - component: The Type of the component.
     /// - Returns: The component requested if it exists on the entity.
-    func getComponent<T>(_ entityId: LECSEntityId, _ component: T.Type) throws -> T?
+    func getComponent<T>(_ entityId: LECSEntityId, _ component: T.Type) -> T?
 
     /// Adds a component to the entity.
     /// - Parameters:
     ///   - entityId: The id of the entity to add the component to.
     ///   - component: The component to add to the entity.
-    func addComponent<T: LECSComponent>(_ entityId: LECSEntityId, _ component: T) throws
+    func addComponent<T: LECSComponent>(_ entityId: LECSEntityId, _ component: T)
 
     /// Removes a component from the entity.
     /// - Parameters:
     ///   - entityId: The id of the entity to remove the component from.
     ///   - component: The Type of the component to remove.
-    func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) throws
+    func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type)
 
     /// Adds a system to the world.
     /// - Parameters:
@@ -153,11 +153,11 @@ public class LECSWorldFixedSize: LECSWorld {
         )
     }
 
-    public func createEntity(_ name: String) throws -> LECSEntityId {
+    public func createEntity(_ name: String) -> LECSEntityId {
         let id = createEntity()
 
-        try addComponent(id, LECSId(id: id))
-        try addComponent(id, LECSName(name: name))
+        addComponent(id, LECSId(id: id))
+        addComponent(id, LECSName(name: name))
 
         // When there's an index for a component and the component changes how does the index get updated?
         nameEntityId[LECSName(name: name)] = id
@@ -171,7 +171,7 @@ public class LECSWorldFixedSize: LECSWorld {
         }
 
         //TODO: process for updating indexes
-        let name = try! getComponent(entityId, LECSName.self)!
+        let name = getComponent(entityId, LECSName.self)!
         nameEntityId.removeValue(forKey: name)
 
         try! archetype.remove(record.row)
@@ -192,15 +192,15 @@ public class LECSWorldFixedSize: LECSWorld {
         return archetypeManager.componentOf(archetype, componentId: componentId)
     }
 
-    public func getComponent<T>(_ entityId: LECSEntityId, _ component: T.Type) throws -> T? {
+    public func getComponent<T>(_ entityId: LECSEntityId, _ component: T.Type) -> T? {
         let record = entityRecord[entityId]!
 
-        return try record.getComponent(entityId, typeComponent[T.self]!, T.self)
+        return try! record.getComponent(entityId, typeComponent[T.self]!, T.self)
     }
 
-    public func addComponent<T: LECSComponent>(_ entityId: LECSEntityId, _ component: T) throws {
+    public func addComponent<T: LECSComponent>(_ entityId: LECSEntityId, _ component: T) {
         guard let record = entityRecord[entityId] else {
-            throw LECSWorldErrors.entityDoesNotExist
+            fatalError("Shoot, Entity:\(entityId) could not be found. Did you remove it for some reason before trying to add a component to it?")
         }
         let componentId = typeComponent[T.self] ?? createComponent(T.self)
 
@@ -213,15 +213,15 @@ public class LECSWorldFixedSize: LECSWorld {
 
         //TODO: Move all of this into the ArchetypeManager
         let oldArchetype = record.archetype
-        guard let row = try oldArchetype.remove(record.row) else {
-            throw LECSWorldErrors.rowDoesNotExist
+        guard let row = try? oldArchetype.remove(record.row) else {
+            fatalError("Dang, the row for Entity:\(entityId) could not be removed from the old archetype. It's strange because the record was found. Something may have gotten out of sync between the record and the archetype it was stored in. It's likely a bug in the package and not in your application.")
         }
 
         let newArchetype = archetypeManager.nearestArchetype(to: oldArchetype, with: componentId)
 
         let unorderedRow = row + [component]
         let unorderedComponents = oldArchetype.type + [componentId]
-        let newRow = try newArchetype.insert(
+        let newRow = try! newArchetype.insert(
             unorderedComponents.aligned(to: unorderedRow).map { $0.1 }
         )
 
@@ -236,12 +236,12 @@ public class LECSWorldFixedSize: LECSWorld {
         // updated indexes...
     }
 
-    public func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) throws {
+    public func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) {
         guard let record = entityRecord[entityId] else {
-            throw LECSWorldErrors.entityDoesNotExist
+            fatalError("Shoot, when trying to remove the Component:\(component) Entity:\(entityId) could not be found. Did you by chance delete the Entity earlier?")
         }
         guard let componentId = typeComponent[component] else {
-            throw LECSWorldErrors.componentDoesNotExist
+            fatalError("You never want to say it, but when trying to remove Component:\(component) from Entity:\(entityId) the component couldn't be found. Did you remember to add the component to an entity before trying to remove it?")
         }
 
         entityRecord[entityId] = try! archetypeManager.removeComponent(from: record, componentId: componentId)
