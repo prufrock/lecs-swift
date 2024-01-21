@@ -68,7 +68,7 @@ final class LECSArchetypeManagerTests: XCTestCase {
         let idNamePositionArchetype = manager.nearestArchetype(to: idNameArchetype, with: positionComponent)
         let idPositionArchetype = manager.nearestArchetype(to: idArchetype, with: positionComponent)
 
-        let rowId = try idNamePositionArchetype.insert([LECSId(id: 1), LECSName(name: "Catherine"), LECSPosition2d(x: 2.0, y: 3.1)])
+        let rowId = idNamePositionArchetype.insert([LECSId(id: 1), LECSName(name: "Catherine"), LECSPosition2d(x: 2.0, y: 3.1)])
 
         let record = LECSRecord(entityId: 1, archetype: idNamePositionArchetype, row: rowId)
 

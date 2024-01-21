@@ -46,7 +46,7 @@ struct LECSArrayTable: LECSTable {
         return rowId < size && !rowManager.vacant(rowId)
     }
 
-    func read(_ rowId: LECSRowId) throws -> LECSRow? {
+    func read(_ rowId: LECSRowId) -> LECSRow? {
         // for the empty archetype that has nothing to read from it
         if isFake {
             return []
@@ -59,11 +59,11 @@ struct LECSArrayTable: LECSTable {
         return rows[rowId]
     }
 
-    mutating func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) throws {
+    mutating func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) {
         writeToColumn(rowId, column: column, value: component)
     }
 
-    mutating func insert(_ values: LECSRow) throws -> LECSRowId {
+    mutating func insert(_ values: LECSRow) -> LECSRowId {
         let rowId = emptyRow()
 
         writeToArrays(rowId, values)

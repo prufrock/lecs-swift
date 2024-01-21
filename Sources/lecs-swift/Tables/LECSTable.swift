@@ -15,7 +15,7 @@ protocol LECSTable {
     /// Reads the row.
     /// - Parameter rowId: The Id of the row to read from.
     /// - Returns: The row read.
-    func read(_ rowId: LECSRowId) throws -> LECSRow?
+    func read(_ rowId: LECSRowId) -> LECSRow?
 
     /// Checks to see if the row exists in the table.
     /// - Parameter rowId: The row to check.
@@ -27,12 +27,12 @@ protocol LECSTable {
     ///   - rowId: The row to update.
     ///   - column: The index of the column to update.
     ///   - component: A LECSComponent to store in the column. Be careful it is the correct type.
-    mutating func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) throws
+    mutating func update(_ rowId: LECSRowId, column: Int, component: LECSComponent)
 
     /// Inserts a row.
     /// - Parameter values: The components to insert. Be sure they are correct for this table.
     /// - Returns: The Id of the row.
-    mutating func insert(_ values: LECSRow) throws -> LECSRowId
+    mutating func insert(_ values: LECSRow) -> LECSRowId
 
     /// Removes a row from the table.
     /// - Parameter id: The Id of the row to remove.

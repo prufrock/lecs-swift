@@ -23,28 +23,28 @@ protocol LECSArchetype {
     /// - Parameter values: A list of components to insert into the archetype.
     /// - Returns: The row id of the newly inserted row.
     /// - Throws: If there is an error inserting the row, like being out of space.
-    func insert(_ values: LECSRow) throws -> LECSRowId
+    func insert(_ values: LECSRow) -> LECSRowId
 
     //TODO: read and row serve the same purpose, but at one time row was faster, is that still true?
     /// Reads a row from the archetype.
     /// - Parameter rowId: The id of the row to read.
     /// - Returns: The row requested or none if the row doesn't exist.
     /// - Throws: If there is an error reading the row, like being out-of-bounds.
-    func read(_ rowId: LECSRowId) throws -> LECSRow?
+    func read(_ rowId: LECSRowId) -> LECSRow?
 
     /// Updates the column of the row with the component.
     /// - Parameters:
     ///   - rowId: The id of the row to update.
     ///   - column: The column to update.
     ///   - component: The component to write to the row and column.
-    func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) throws
+    func update(_ rowId: LECSRowId, column: Int, component: LECSComponent)
 
     /// Removes a row from the archetype.
     /// - Parameter rowId: The id of the row to remove.
     /// - Returns: The row removed
     /// - Throws: If there is an error removing the row.
     @discardableResult 
-    func remove(_ rowId: LECSRowId) throws -> LECSRow?
+    func remove(_ rowId: LECSRowId) -> LECSRow?
 
     /// Checks to see if the archetype has a component.
     /// - Parameter component: The id of the component to check.
@@ -58,7 +58,7 @@ protocol LECSArchetype {
     ///   - componentType: The type of the component to get.
     /// - Returns: The component requested or null if the component isn't in the archetype.
     /// - Throws: If there is an error getting the component, possibly a decoding error.
-    func getComponent<T>(rowId: LECSRowId, componentId: LECSComponentId, componentType: T.Type) throws -> T?
+    func getComponent<T>(rowId: LECSRowId, componentId: LECSComponentId, componentType: T.Type) -> T?
 
     /// Follows the add edge of the archetype to the archetype that contains the component.
     /// - Parameter id: The id of the component to add.
@@ -138,24 +138,24 @@ class LECSArchetypeFixedSize: LECSArchetype {
         self.size = table.size
     }
 
-    func insert(_ values: LECSRow) throws -> LECSRowId {
+    func insert(_ values: LECSRow) -> LECSRowId {
         if table == nil {
             initTable(with: values)
         }
-        return try table!.insert(values)
+        return table!.insert(values)
     }
 
-    func read(_ rowId: LECSRowId) throws -> LECSRow? {
-        try! table?.read(rowId)
+    func read(_ rowId: LECSRowId) -> LECSRow? {
+        table?.read(rowId)
     }
 
-    func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) throws {
+    func update(_ rowId: LECSRowId, column: Int, component: LECSComponent) {
         table?.rows[rowId][column] = component
     }
 
     @discardableResult
-    func remove(_ rowId: LECSRowId) throws -> LECSRow? {
-        let row = try read(rowId)
+    func remove(_ rowId: LECSRowId) -> LECSRow? {
+        let row = read(rowId)
         table?.remove(rowId)
         return row
     }
@@ -164,10 +164,10 @@ class LECSArchetypeFixedSize: LECSArchetype {
         type.contains(component)
     }
 
-    func getComponent<T>(rowId: LECSRowId, componentId: LECSComponentId, componentType: T.Type) throws -> T? {
+    func getComponent<T>(rowId: LECSRowId, componentId: LECSComponentId, componentType: T.Type) -> T? {
         var component: T? = nil
 
-        if let componentIndex = type.firstIndex(of: componentId), let row = try read(rowId) {
+        if let componentIndex = type.firstIndex(of: componentId), let row = read(rowId) {
             component = row[componentIndex] as? T
         }
 

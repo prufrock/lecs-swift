@@ -174,7 +174,7 @@ public class LECSWorldFixedSize: LECSWorld {
         let name = getComponent(entityId, LECSName.self)!
         nameEntityId.removeValue(forKey: name)
 
-        try! archetype.remove(record.row)
+        archetype.remove(record.row)
     }
 
     public func entity(named: LECSName) -> LECSEntityId? {
@@ -206,14 +206,14 @@ public class LECSWorldFixedSize: LECSWorld {
 
         // if the records archetype already has the component just updated the row
         if let archetypeMap = archetypeManager.findArchetypesWithComponent(componentId), let archetypeRecord = archetypeMap[record.archetype.id] {
-            try! record.archetype.update(record.row, column: archetypeRecord.column, component: component)
+            record.archetype.update(record.row, column: archetypeRecord.column, component: component)
             // the component was changed--update indexes? event(component, update, previous value, new value)
             return
         }
 
         //TODO: Move all of this into the ArchetypeManager
         let oldArchetype = record.archetype
-        guard let row = try? oldArchetype.remove(record.row) else {
+        guard let row = oldArchetype.remove(record.row) else {
             fatalError("Dang, the row for Entity:\(entityId) could not be removed from the old archetype. It's strange because the record was found. Something may have gotten out of sync between the record and the archetype it was stored in. It's likely a bug in the package and not in your application.")
         }
 
@@ -221,7 +221,7 @@ public class LECSWorldFixedSize: LECSWorld {
 
         let unorderedRow = row + [component]
         let unorderedComponents = oldArchetype.type + [componentId]
-        let newRow = try! newArchetype.insert(
+        let newRow = newArchetype.insert(
             unorderedComponents.aligned(to: unorderedRow).map { $0.1 }
         )
 
@@ -285,7 +285,7 @@ public class LECSWorldFixedSize: LECSWorld {
             (0..<(archetype.count)).forEach { rowId in
                 let columns: LECSColumns = archetypeRecords.map { $0.column }
                 if archetype.exists(rowId) {
-                    block(self, archetype.row(rowId)!, columns)
+                    block(self, archetype.read(rowId)!, columns)
                 }
             }
         }
@@ -302,10 +302,10 @@ public class LECSWorldFixedSize: LECSWorld {
             (0..<archetype.count).forEach { rowId in
                 let columns: LECSColumns = archetypeRecords.map { $0.column }
                 if archetype.exists(rowId) {
-                    let updatedComponents = block(self, archetype.row(rowId)!, columns)
+                    let updatedComponents = block(self, archetype.read(rowId)!, columns)
                     var uc = 0
                     columns.forEach {
-                        try! archetype.update(rowId, column: $0, component: updatedComponents[uc])
+                        archetype.update(rowId, column: $0, component: updatedComponents[uc])
                         uc += 1
                     }
                 }
@@ -321,7 +321,7 @@ public class LECSWorldFixedSize: LECSWorld {
 
     private func createEntity() -> LECSEntityId {
         let id = entity()
-        let rowId = try! archetypeManager.emptyArchetype.insert([])
+        let rowId = archetypeManager.emptyArchetype.insert([])
         entityRecord[id] = LECSRecord(
             entityId: id,
             archetype: archetypeManager.emptyArchetype,

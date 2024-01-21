@@ -17,6 +17,6 @@ struct LECSRecord {
     }
 
     func getComponent<T>(_ entityId: LECSEntityId, _ componentId: LECSComponentId, _ type: T.Type) throws -> T? {
-        return try archetype.getComponent(rowId: row, componentId: componentId, componentType: type)
+        return archetype.getComponent(rowId: row, componentId: componentId, componentType: type)
     }
 }

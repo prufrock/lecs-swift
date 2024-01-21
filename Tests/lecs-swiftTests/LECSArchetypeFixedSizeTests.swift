@@ -30,9 +30,9 @@ final class LECSArchetypeFixedSizeTests: XCTestCase {
 
         let firstEntity: LECSEntityId = entityCounter()
 
-        let rowId = try archetype.insert([LECSId(id: firstEntity)])
+        let rowId = archetype.insert([LECSId(id: firstEntity)])
         XCTAssertEqual(0, rowId)
-        let row = try archetype.read(rowId)!
+        let row = archetype.read(rowId)!
         let firstEntityId = row[0] as! LECSId
         XCTAssertEqual(firstEntity, firstEntityId.id)
     }
@@ -48,10 +48,10 @@ final class LECSArchetypeFixedSizeTests: XCTestCase {
             size: 1
         )
 
-        let rowId = try archetype.insert([LECSPosition2d(x: 2, y: 3)])
+        let rowId = archetype.insert([LECSPosition2d(x: 2, y: 3)])
         XCTAssertEqual(0, rowId)
-        try archetype.update(rowId, column: 0, component: LECSPosition2d(x: 10, y: 4))
-        let row = try archetype.read(rowId)!
+        archetype.update(rowId, column: 0, component: LECSPosition2d(x: 10, y: 4))
+        let row = archetype.read(rowId)!
         let updatedPosition = row[0] as! LECSPosition2d
         XCTAssertEqual(10, updatedPosition.x)
     }
@@ -67,14 +67,14 @@ final class LECSArchetypeFixedSizeTests: XCTestCase {
             size: 1
         )
 
-        let rowId = try archetype.insert(
+        let rowId = archetype.insert(
             [LECSId(id: 14), LECSName(name: "Bella"), LECSPosition2d(x: 2, y: 3)]
         )
         XCTAssertEqual(0, rowId)
         
-        try archetype.update(rowId, column: 1, component: LECSName(name: "Stella"))
-        try archetype.update(rowId, column: 2, component: LECSPosition2d(x: 10, y: 4))
-        let row = try archetype.read(rowId)!
+        archetype.update(rowId, column: 1, component: LECSName(name: "Stella"))
+        archetype.update(rowId, column: 2, component: LECSPosition2d(x: 10, y: 4))
+        let row = archetype.read(rowId)!
         let updatedName = row[1] as! LECSName
         let updatedPosition = row[2] as! LECSPosition2d
         XCTAssertEqual("Stella", updatedName.name)

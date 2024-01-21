@@ -18,11 +18,11 @@ final class LECSArrayTableTests: XCTestCase {
 
         let id = LECSId(id: 1)
         let entity: [LECSComponent] = [id]
-        let rowId = try table.insert(entity)
+        let rowId = table.insert(entity)
         XCTAssertEqual(0, rowId)
         XCTAssertEqual(1, table.count)
 
-        let first = try table.read(0)!
+        let first = table.read(0)!
         XCTAssertEqual(1, (first[0] as! LECSId).id)
     }
 
@@ -36,14 +36,14 @@ final class LECSArrayTableTests: XCTestCase {
         for i in 1...5 {
             let id = LECSId(id: UInt(i))
             let entity: [LECSComponent] = [id]
-            let rowId = try table.insert(entity)
+            let rowId = table.insert(entity)
             XCTAssertEqual(i - 1, rowId)
         }
         XCTAssertEqual(5, table.count)
 
         // read the 5 LECIds out of the table
         for i in 0..<5 {
-            let row = try table.read(i)!
+            let row = table.read(i)!
             let id = row[0] as! LECSId
             XCTAssertEqual(UInt(i + 1), id.id)
         }
@@ -60,15 +60,15 @@ final class LECSArrayTableTests: XCTestCase {
         for i in 1...size {
             let id = LECSId(id: UInt(i))
             let entity: [LECSComponent] = [id]
-            let rowId = try table.insert(entity)
+            let rowId = table.insert(entity)
             XCTAssertEqual(i - 1, rowId)
         }
         XCTAssertEqual(size, table.count)
 
         self.measure {
             for i in 0..<size {
-                try! table.update(i, column: 0, component: LECSId(id: UInt(i)))
-                let row = try! table.read(i)!
+                table.update(i, column: 0, component: LECSId(id: UInt(i)))
+                let row = table.read(i)!
                 let id = row[0] as! LECSId
                 XCTAssertEqual(UInt(i), id.id)
             }
