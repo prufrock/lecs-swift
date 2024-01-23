@@ -280,7 +280,7 @@ public class LECSWorldFixedSize: LECSWorld {
             return
         }
 
-        for (archetypeId, archetypeRecords) in findArchetypesWithComponents(query) {
+        findArchetypesWithComponents(query).forEach { archetypeId, archetypeRecords in
             let archetype = archetypeManager.find(archetypeId)!
             (0..<(archetype.count)).forEach { rowId in
                 let columns: LECSColumns = archetypeRecords.map { $0.column }
@@ -297,7 +297,7 @@ public class LECSWorldFixedSize: LECSWorld {
             return
         }
 
-        for (archetypeId, archetypeRecords) in findArchetypesWithComponents(query) {
+       findArchetypesWithComponents(query).forEach { archetypeId, archetypeRecords in
             let archetype = archetypeManager.find(archetypeId)!
             (0..<archetype.count).forEach { rowId in
                 let columns: LECSColumns = archetypeRecords.map { $0.column }
@@ -348,6 +348,7 @@ public class LECSWorldFixedSize: LECSWorld {
     }
 
 
+    // TODO: Can this be updated to process one archetype at a time?
     private func findArchetypesWithComponents(_ query: LECSQuery) -> [LECSArchetypeId:[LECSArchetypeRecord]] {
         if let positions =  queryCache[queryHash(query)] {
             return positions
