@@ -28,7 +28,10 @@ extension Collection {
 }
 
 extension Array where Element: Comparable {
-    func aligned<T>(to other: Array<T>) -> [(Element, T)] {
+    /// Combine both arrays into pairs and sort the result based on the first element.
+    /// - Parameter other: The array of elements to combine with.
+    /// - Returns: An array of pairs.
+    func aligned<T>(with other: Array<T>) -> [(Element, T)] {
         let aligned = zip(self, other)
         return aligned.sorted { $0.0 < $1.0 }
     }

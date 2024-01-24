@@ -49,6 +49,38 @@ struct LECSArchetypeManager {
         componentArchetype[component]
     }
 
+    mutating func updateArchetypeFor<T: LECSComponent>(
+        record: LECSRecord,
+        component: T,
+        componentId: LECSComponentId
+    ) -> LECSRecord {
+        // if the records archetype already has the component just updated the row
+        if let archetypeMap = findArchetypesWithComponent(componentId), let archetypeRecord = archetypeMap[record.archetype.id] {
+            record.archetype.update(record.row, column: archetypeRecord.column, component: component)
+            // the component was changed--update indexes? event(component, update, previous value, new value)
+            return record
+        }
+
+        let oldArchetype = record.archetype
+        guard let row = oldArchetype.remove(record.row) else {
+            fatalError("Dang, the row for Entity:\(record.entityId) could not be removed from the old archetype. It's strange because the record was found. Something may have gotten out of sync between the record and the archetype it was stored in. It's likely a bug in the package and not in your application.")
+        }
+
+        let newArchetype = nearestArchetype(to: oldArchetype, with: componentId)
+
+        let unorderedRow = row + [component]
+        let unorderedComponents = oldArchetype.type + [componentId]
+        let newRow = newArchetype.insert(
+            unorderedComponents.aligned(with: unorderedRow).map { $0.1 }
+        )
+
+        return LECSRecord(
+            entityId: record.entityId,
+            archetype: newArchetype,
+            row: newRow
+        )
+    }
+
     mutating func createArchetype(type: LECSType, parent: LECSArchetype? = nil) -> LECSArchetype {
         let id = newId()
 

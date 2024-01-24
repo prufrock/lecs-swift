@@ -202,38 +202,16 @@ public class LECSWorldFixedSize: LECSWorld {
         guard let record = entityRecord[entityId] else {
             fatalError("Shoot, Entity:\(entityId) could not be found. Did you remove it for some reason before trying to add a component to it?")
         }
-        let componentId = typeComponent[T.self] ?? createComponent(T.self)
 
-        // if the records archetype already has the component just updated the row
-        if let archetypeMap = archetypeManager.findArchetypesWithComponent(componentId), let archetypeRecord = archetypeMap[record.archetype.id] {
-            record.archetype.update(record.row, column: archetypeRecord.column, component: component)
-            // the component was changed--update indexes? event(component, update, previous value, new value)
-            return
-        }
-
-        //TODO: Move all of this into the ArchetypeManager
-        let oldArchetype = record.archetype
-        guard let row = oldArchetype.remove(record.row) else {
-            fatalError("Dang, the row for Entity:\(entityId) could not be removed from the old archetype. It's strange because the record was found. Something may have gotten out of sync between the record and the archetype it was stored in. It's likely a bug in the package and not in your application.")
-        }
-
-        let newArchetype = archetypeManager.nearestArchetype(to: oldArchetype, with: componentId)
-
-        let unorderedRow = row + [component]
-        let unorderedComponents = oldArchetype.type + [componentId]
-        let newRow = newArchetype.insert(
-            unorderedComponents.aligned(to: unorderedRow).map { $0.1 }
-        )
-
-        entityRecord[entityId] = LECSRecord(
-            entityId: entityId,
-            archetype: newArchetype,
-            row: newRow
+        // Update indexes...
+        entityRecord[entityId] = archetypeManager.updateArchetypeFor(
+            record: record,
+            component: component,
+            componentId: componentIdFor(T.self)
         )
         // ☎️ the archetype manager needs a way to tell the world a new archetype has been created so dump cache
         newArchetypeCreated()
         //TODO: Return the row
-        // updated indexes...
     }
 
     public func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) {
@@ -337,6 +315,10 @@ public class LECSWorldFixedSize: LECSWorld {
         typeComponent[componentType] = id
 
         return id
+    }
+
+    private func componentIdFor(_ type: LECSComponent.Type) -> LECSComponentId {
+        typeComponent[type.self] ?? createComponent(type.self)
     }
 
     private func createArchetype(type: LECSType) -> LECSArchetype {
