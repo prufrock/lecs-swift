@@ -211,7 +211,6 @@ public class LECSWorldFixedSize: LECSWorld {
         )
         // ☎️ the archetype manager needs a way to tell the world a new archetype has been created so dump cache
         newArchetypeCreated()
-        //TODO: Return the row
     }
 
     public func removeComponent(_ entityId: LECSEntityId, component: LECSComponent.Type) {
@@ -226,8 +225,6 @@ public class LECSWorldFixedSize: LECSWorld {
 
         //dump the cache
         newArchetypeCreated()
-
-        //TODO: Return the row
     }
 
     public func addSystem(_ name: String, selector: [LECSComponentId], block: @escaping LECSUpdate) -> LECSSystemId {
