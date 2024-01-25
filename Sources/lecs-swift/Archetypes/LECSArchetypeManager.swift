@@ -24,7 +24,7 @@ struct LECSArchetypeManager {
     private var archetypeIndex: [LECSArchetypeId: LECSArchetype] = [:]
     // componentArchetype maps component ids to the archetypes they're in and the column they're in.
     // this makes determining if a component is in an archetype and retrieval fast
-    private var componentArchetype: [LECSComponentId : LECSArchetypeMap] = [:]
+    private var componentArchetype: [LECSComponentId: LECSArchetypeMap] = [:]
 
     init(archetypeSize: LECSSize = 10) {
         self.archetypeSize = archetypeSize
@@ -54,31 +54,11 @@ struct LECSArchetypeManager {
         component: T,
         componentId: LECSComponentId
     ) -> LECSRecord {
-        // if the records archetype already has the component just updated the row
-        if let archetypeMap = findArchetypesWithComponent(componentId), let archetypeRecord = archetypeMap[record.archetype.id] {
-            record.archetype.update(record.row, column: archetypeRecord.column, component: component)
-            // the component was changed--update indexes? event(component, update, previous value, new value)
+        if let record = updateCurrentArchetype(record: record, component: component, componentId: componentId) {
             return record
+        } else {
+            return updateNearestArchetype(record: record, component: component, componentId: componentId)
         }
-
-        let oldArchetype = record.archetype
-        guard let row = oldArchetype.remove(record.row) else {
-            fatalError("Dang, the row for Entity:\(record.entityId) could not be removed from the old archetype. It's strange because the record was found. Something may have gotten out of sync between the record and the archetype it was stored in. It's likely a bug in the package and not in your application.")
-        }
-
-        let newArchetype = nearestArchetype(to: oldArchetype, with: componentId)
-
-        let unorderedRow = row + [component]
-        let unorderedComponents = oldArchetype.type + [componentId]
-        let newRow = newArchetype.insert(
-            unorderedComponents.aligned(with: unorderedRow).map { $0.1 }
-        )
-
-        return LECSRecord(
-            entityId: record.entityId,
-            archetype: newArchetype,
-            row: newRow
-        )
     }
 
     mutating func createArchetype(type: LECSType, parent: LECSArchetype? = nil) -> LECSArchetype {
@@ -195,6 +175,58 @@ struct LECSArchetypeManager {
         return id
     }
 
+    private mutating func updateCurrentArchetype<T: LECSComponent>(
+        record: LECSRecord,
+        component: T,
+        componentId: LECSComponentId
+    ) -> LECSRecord? {
+        // if the record's archetype already has the component just update the row
+        guard let column = column(of: record.archetype, for: componentId) else {
+            return nil
+        }
+
+        record.archetype.update(record.row, column: column, component: component)
+
+        return record
+    }
+
+    private mutating func updateNearestArchetype<T: LECSComponent>(
+        record: LECSRecord,
+        component: T,
+        componentId: LECSComponentId
+    ) -> LECSRecord {
+        let oldArchetype = record.archetype
+        guard let row = oldArchetype.remove(record.row) else {
+            fatalError("Dang, the row for Entity:\(record.entityId) could not be removed from the old archetype. It's strange because the record was found. Something may have gotten out of sync between the record and the archetype it was stored in. It's likely a bug in the package and not in your application.")
+        }
+
+        let newArchetype = nearestArchetype(to: oldArchetype, with: componentId)
+
+        // The componentIds on an archetype are ordered from smallest to largest.
+        // Append the new component to the old archetype and the row, so they are out of order in the same way.
+        // Then use the componentIds to order the components.
+        let newRow = newArchetype.insert(
+            alignComponentsTo(oldType: oldArchetype.type, with: componentId, oldRow: row, component: component)
+        )
+
+        return LECSRecord(
+            entityId: record.entityId,
+            archetype: newArchetype,
+            row: newRow
+        )
+    }
+
+    private func column(of archetype: LECSArchetype, for componentId: LECSComponentId) -> Int? {
+        guard
+            let archetypeMap = findArchetypesWithComponent(componentId),
+            let archetypeRecord = archetypeMap[archetype.id]
+        else {
+            return nil
+        }
+
+        return archetypeRecord.column
+    }
+
     private func archetype(id: LECSArchetypeId, type: LECSType, parent: LECSArchetype? = nil) -> LECSArchetype {
         let archetype = LECSArchetypeFixedSize(
             id: id,
@@ -207,5 +239,14 @@ struct LECSArchetypeManager {
         }
 
         return archetype
+    }
+
+    private func alignComponentsTo<T: LECSComponent>(
+        oldType type: LECSType,
+        with componentId: LECSComponentId,
+        oldRow: [LECSComponent],
+        component: T
+    ) -> LECSRow {
+        (type + [componentId]).aligned(with: (oldRow + [component])).map { $0.1 }
     }
 }
