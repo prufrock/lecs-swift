@@ -24,15 +24,15 @@ protocol LECSComponentChart {
     func delete(row rowId: LECSRowId)
 
     /// Adds the LECSCCComponent to the row.
-    /// This makes the provided LECSRowId stale, so the caller needs to use the return LECSRowId.
-    func addComponentTo(row rowId: LECSRowId, component: LECSCCComponent) -> LECSRowId
+    /// This makes the provided LECSCCRowId stale, so the caller needs to use the return LECSCCRowId.
+    func addComponentTo(row rowId: LECSRowId, component: LECSCCComponent) -> LECSCCRowId
 
     /// Removes the LECSCCComponent from the row.
-    /// This makes the provided LECSRowId stale, so the caller needs to use the return LECSRowId.
-    func removeComponentFrom<T: LECSCCComponent>(row rowId: LECSRowId, type: T.Type) -> LECSRowId
+    /// This makes the provided LECSCCRowId stale, so the caller needs to use the return LECSRowId.
+    func removeComponentFrom<T: LECSCCComponent>(row rowId: LECSRowId, type: T.Type) -> LECSCCRowId
 
     /// Read all rows that have the Components in the query.
-    /// For now, need to use LECSCCColumns to read from LECSRow in the order of LECSQuery: LECSRow[LECSCColumns[0].col]
+    /// For now, need to use LECSCCColumns to read from LECSCCRowId in the order of LECSQuery: LECSRow[LECSCColumns[0].col]
     func select(query: LECSQuery, block: (LECSRow, LECSCCColumns) -> Void)
 
     /// Allows updates of the LECSRows selected by the LECSQuery.
@@ -69,5 +69,61 @@ struct LECSCCArchetypeId: RawRepresentable {
 
     init(id: Int) {
         self.init(rawValue: id)
+    }
+}
+
+/// The Id of a LECSCCComponent
+struct LECSCCComponentId {
+    let id: Int
+}
+
+/// A LECSFixedComponentChart is a ComponentChart that has a fixed size.
+class LECSFixedComponentChart {
+    func createRow() -> LECSCCRowId {
+        return LECSCCRowId(id: 0, archetypeId: LECSCCArchetypeId(id: 0))
+    }
+
+    func readComponentFrom<T: LECSCCComponent>(row rowId: LECSRowId, type: T.Type) {
+
+    }
+
+    func delete(row rowId: LECSRowId) {
+
+    }
+
+    func addComponentTo(row rowId: LECSRowId, component: LECSCCComponent) -> LECSCCRowId {
+        return LECSCCRowId(id: 0, archetypeId: LECSCCArchetypeId(id: 0))
+    }
+
+    func removeComponentFrom<T: LECSCCComponent>(row rowId: LECSRowId, type: T.Type) -> LECSCCRowId {
+        return LECSCCRowId(id: 0, archetypeId: LECSCCArchetypeId(id: 0))
+    }
+
+    func select(query: LECSQuery, block: (LECSRow, LECSCCColumns) -> Void) {
+
+    }
+
+    func update(query: LECSQuery, block: (LECSRow, LECSCCColumns) -> LECSRow) {
+
+    }
+}
+
+protocol LECSCCTable {
+
+}
+
+class LECSCCArchetype {
+    let id: LECSCCArchetypeId
+    let type: [LECSCCComponentId]
+    let table: LECSCCTable
+
+    init(
+        id: LECSCCArchetypeId,
+        type: [LECSCCComponentId],
+        table: LECSCCTable
+    ) {
+        self.id = id
+        self.type = type
+        self.table = table
     }
 }
