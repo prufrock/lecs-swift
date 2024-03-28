@@ -10,3 +10,8 @@ import Foundation
 public protocol LECSComponent {
     init()
 }
+
+/// The Id of a LECSComponent
+struct LECSComponentId {
+    let id: Int
+}
