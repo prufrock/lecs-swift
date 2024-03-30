@@ -11,15 +11,15 @@ import Foundation
 /// If they were copies all of the edges would have to change when an archetype changes.
 /// You could use the ids as pointers to a map, but isn't that basically a manually managed reference?
 /// Might be worth doing some experiments on that some day.
-class LECSArchetype {
+class LECSArchetype<Table: LECSTable> {
     let id: LECSArchetypeId
     let type: [LECSComponentId]
-    let table: LECSTable
+    let table: Table
 
     init(
         id: LECSArchetypeId,
         type: [LECSComponentId],
-        table: LECSTable
+        table: Table
     ) {
         self.id = id
         self.type = type
