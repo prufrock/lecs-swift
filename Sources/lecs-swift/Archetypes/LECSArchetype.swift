@@ -11,10 +11,16 @@ import Foundation
 /// If they were copies all of the edges would have to change when an archetype changes.
 /// You could use the ids as pointers to a map, but isn't that basically a manually managed reference?
 /// Might be worth doing some experiments on that some day.
-class LECSArchetype<Table: LECSTable> {
+class LECSArchetype<Table: LECSTable>: Sequence {
     let id: LECSArchetypeId
-    let type: [LECSComponentId]
-    let table: Table
+    private let type: [LECSComponentId]
+    private let table: Table
+    private let edges: [LECSComponentId:LECSArchetypeId] = [:]
+    private var componentTypes: [LECSComponent.Type] {
+        get {
+            table.componentTypes
+        }
+    }
 
     init(
         id: LECSArchetypeId,
@@ -25,10 +31,45 @@ class LECSArchetype<Table: LECSTable> {
         self.type = type
         self.table = table
     }
+
+    func createRow() -> LECSRowId {
+        LECSRowId(archetypeId: id, id: table.create())
+    }
+
+    func read(_ rowId: LECSRowId) -> LECSRow {
+        table.read(rowId.id)
+    }
+
+    // TODO: Is it worth returning a value here?
+    @discardableResult
+    func delete(_ rowId: LECSRowId) -> LECSRow {
+        table.delete(rowId.id)
+    }
+
+    @discardableResult
+    func update(rowId: LECSRowId, column: LECSArchetypeColumn, component: LECSComponent) -> LECSRowId {
+        table.update(row: rowId.id, column: column.col, component: component)
+        return rowId
+    }
+
+    // TODO: should it be row: components:?
+    @discardableResult
+    func update(rowId: LECSRowId, row: LECSRow) -> LECSRowId {
+        table.update(row: rowId.id, components: row)
+        return rowId
+    }
+
+    func insert(row: LECSRow) -> LECSRowId {
+        LECSRowId(archetypeId: id, id: table.insert(row))
+    }
+
+    func makeIterator() -> Table.Iterator {
+        table.makeIterator()
+    }
 }
 
 /// The unique identifier of an Archetype or of an Archetype you'd like there to be.
-struct LECSArchetypeId: RawRepresentable {
+struct LECSArchetypeId: RawRepresentable, Equatable {
     var rawValue: Int
 
     init(rawValue: Int) {

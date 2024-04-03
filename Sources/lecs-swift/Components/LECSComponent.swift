@@ -12,6 +12,10 @@ public protocol LECSComponent {
 }
 
 /// The Id of a LECSComponent
-struct LECSComponentId {
+struct LECSComponentId: Hashable {
     let id: Int
+
+    init(_ id: Int) {
+        self.id = id
+    }
 }

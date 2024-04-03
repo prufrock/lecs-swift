@@ -18,7 +18,7 @@ protocol LECSTable: Sequence where Iterator.Element == LECSRow {
     var size: Int { get }
 
     /// The ordered list of Component types that together comprise the table's and it's Archetype's "type".
-    var type: [LECSComponent.Type] { get }
+    var componentTypes: [LECSComponent.Type] { get }
 
     /// Create a new row in the table.
     func create() -> Int
@@ -30,12 +30,15 @@ protocol LECSTable: Sequence where Iterator.Element == LECSRow {
     func read(_ i: Int) -> LECSRow
 
     /// Update a specific column of row i with the component.
+    @discardableResult
     func update(row i: Int, column: Int, component: LECSComponent) -> [LECSComponent]
 
     /// Update all of the components of row i.
+    @discardableResult
     func update(row i: Int, components: LECSRow) -> LECSRow
 
     /// Delete row i.
+    @discardableResult
     func delete(_ i: Int) -> LECSRow
 
     /// Check to see if row i exists.
@@ -47,17 +50,17 @@ class LECSSparseArrayTable: LECSTable {
     typealias Element = [LECSComponent]
 
     let size: Int
-    let type: [LECSComponent.Type]
+    let componentTypes: [LECSComponent.Type]
     fileprivate var index: Int = 0
     private var deleted: Set<Int> = []
     var items: [[LECSComponent]]
 
-    init(size: Int, type: [LECSComponent.Type]) {
+    init(size: Int, compnentTypes: [LECSComponent.Type]) {
         self.size = size
-        self.type = type
+        self.componentTypes = compnentTypes
         var row: LECSRow = []
-        for i in 0..<type.count {
-            let componentType = type[i]
+        for i in 0..<compnentTypes.count {
+            let componentType = compnentTypes[i]
             row.append(componentType.init())
         }
         self.items = Array(repeating: row, count: size)

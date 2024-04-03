@@ -12,7 +12,7 @@ final class LECSSparseArrayTableTests: XCTestCase {
     func testCreate() throws {
         let t = LECSSparseArrayTable(
             size: 1,
-            type: []
+            compnentTypes: []
         )
 
         let r = t.create()
@@ -24,7 +24,7 @@ final class LECSSparseArrayTableTests: XCTestCase {
     func testInsert() throws {
         let t = LECSSparseArrayTable(
             size: 1,
-            type: [LECSPosition.self]
+            compnentTypes: [LECSPosition.self]
         )
 
         let r = t.insert([LECSPosition(x: 3.0, y: -2.0)])
@@ -41,7 +41,7 @@ final class LECSSparseArrayTableTests: XCTestCase {
     func testDelete() throws {
         let t = LECSSparseArrayTable(
             size: 1,
-            type: [LECSPosition.self]
+            compnentTypes: [LECSPosition.self]
         )
 
         let r = t.insert([LECSPosition(x: 3.0, y: -2.0)])
@@ -66,7 +66,7 @@ final class LECSSparseArrayTableTests: XCTestCase {
     func testIterator() throws {
         let t = LECSSparseArrayTable(
             size: 3,
-            type: [LECSPosition.self]
+            compnentTypes: [LECSPosition.self]
         )
 
         _ = t.insert([LECSPosition(x: 1.2, y: -2.0)])
@@ -86,7 +86,7 @@ final class LECSSparseArrayTableTests: XCTestCase {
     func testUpdateRowColumnComponent() throws {
         let t = LECSSparseArrayTable(
             size: 1,
-            type: [LECSPosition.self, LECSVelocity.self]
+            compnentTypes: [LECSPosition.self, LECSVelocity.self]
         )
 
         let r = t.insert([
@@ -107,7 +107,7 @@ final class LECSSparseArrayTableTests: XCTestCase {
     func testUpdateRowComponents() throws {
         let t = LECSSparseArrayTable(
             size: 1,
-            type: [LECSPosition.self, LECSVelocity.self]
+            compnentTypes: [LECSPosition.self, LECSVelocity.self]
         )
 
         let r = t.insert([
