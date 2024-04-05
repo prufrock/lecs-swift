@@ -43,6 +43,8 @@ protocol LECSTable: Sequence where Iterator.Element == LECSRow {
 
     /// Check to see if row i exists.
     func exists(_ i: Int) -> Bool
+
+    func makeIterator() -> AnyIterator<LECSRow>
 }
 
 class LECSSparseArrayTable: LECSTable {
@@ -129,12 +131,14 @@ class LECSSparseArrayTable: LECSTable {
         return index - 1
     }
 
-    func makeIterator() -> SparseArrayTableIterator {
-        return SparseArrayTableIterator(self)
+    func makeIterator() -> AnyIterator<LECSRow> {
+        return AnyIterator(SparseArrayTableIterator(self))
     }
 }
 
 struct SparseArrayTableIterator: IteratorProtocol {
+    typealias Element = LECSRow
+
     private var table: LECSSparseArrayTable
     private var i = 0
 
@@ -150,7 +154,7 @@ struct SparseArrayTableIterator: IteratorProtocol {
         return i < table.index
     }
 
-    mutating func next() -> LECSRow? {
+    mutating func next() -> Element? {
         if (hasNext()) {
             let current = i
             i += 1

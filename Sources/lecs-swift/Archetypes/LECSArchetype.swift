@@ -11,10 +11,11 @@ import Foundation
 /// If they were copies all of the edges would have to change when an archetype changes.
 /// You could use the ids as pointers to a map, but isn't that basically a manually managed reference?
 /// Might be worth doing some experiments on that some day.
-class LECSArchetype<Table: LECSTable>: Sequence {
+class LECSArchetype: Sequence {
     let id: LECSArchetypeId
     let type: [LECSComponentId]
-    private let table: Table
+    //TODO: experiment with performance of "any" vs a specific type.
+    private let table: any LECSTable
     var edges: [LECSComponentId:LECSArchetypeId] = [:]
     var componentTypes: [LECSComponent.Type] {
         get {
@@ -25,7 +26,7 @@ class LECSArchetype<Table: LECSTable>: Sequence {
     init(
         id: LECSArchetypeId,
         type: [LECSComponentId],
-        table: Table
+        table: any LECSTable
     ) {
         self.id = id
         self.type = type
@@ -63,7 +64,7 @@ class LECSArchetype<Table: LECSTable>: Sequence {
         LECSRowId(archetypeId: id, id: table.insert(row))
     }
 
-    func makeIterator() -> Table.Iterator {
+    func makeIterator() -> AnyIterator<LECSRow> {
         table.makeIterator()
     }
 }

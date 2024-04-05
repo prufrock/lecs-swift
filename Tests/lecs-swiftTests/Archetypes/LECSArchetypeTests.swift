@@ -107,7 +107,7 @@ final class LECSArchetypeTests: XCTestCase {
         XCTAssertEqual(3, count)
     }
 
-    private func archetype(size: Int, type: [LECSComponentId]) -> LECSArchetype<LECSSparseArrayTable> {
+    private func archetype(size: Int, type: [LECSComponentId]) -> LECSArchetype {
         let t = LECSSparseArrayTable(
             size: size,
             compnentTypes: type.map { components[$0.id]! }

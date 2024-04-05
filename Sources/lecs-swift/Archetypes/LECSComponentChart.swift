@@ -38,11 +38,11 @@ protocol LECSComponentChart {
 /// A LECSFixedComponentChart is a ComponentChart that has a fixed size.
 class LECSFixedComponentChart {
 
-    private let root: LECSArchetype<LECSSparseArrayTable>
+    private let root: LECSArchetype
 
     private let factory: LECSArchetypeFactory
 
-    private var archetypes: [LECSArchetype<LECSSparseArrayTable>] = []
+    private var archetypes: [LECSArchetype] = []
 
     private var components: [MetatypeWrapper:LECSComponentId] = [:]
 
@@ -132,7 +132,7 @@ class LECSFixedComponentChart {
     }
 
     private func updateNearestArchetype(
-        archetype: LECSArchetype<LECSSparseArrayTable>,
+        archetype: LECSArchetype,
         rowId: LECSRowId,
         componentId: LECSComponentId,
         component: LECSComponent
@@ -150,7 +150,7 @@ class LECSFixedComponentChart {
     }
 
     private func findOrCreateArchetype(
-        archetype: LECSArchetype<LECSSparseArrayTable>,
+        archetype: LECSArchetype,
         componentId: LECSComponentId,
         row: LECSRow,
         type: [LECSComponentId],
@@ -164,7 +164,7 @@ class LECSFixedComponentChart {
         }
     }
 
-    private func nearestNeighborWithType(type: [LECSComponentId], components: [LECSComponent.Type]) -> LECSArchetype<LECSSparseArrayTable> {
+    private func nearestNeighborWithType(type: [LECSComponentId], components: [LECSComponent.Type]) -> LECSArchetype {
         var nextArchetype = root
         //TODO: is it faster to use forEach with a counter or to use for in?
         for i in type.indices {
@@ -185,10 +185,10 @@ class LECSFixedComponentChart {
     }
 
     private func createArchetypeForType(
-        previousArchetype: LECSArchetype<LECSSparseArrayTable>,
+        previousArchetype: LECSArchetype,
         type: [LECSComponentId],
         components: [LECSComponent.Type]
-    ) -> LECSArchetype<LECSSparseArrayTable> {
+    ) -> LECSArchetype {
         // Potential critical region because it takes many steps to create an LECSArchetype.
 
         // Create the archetype and add it to the list of archetypes
@@ -234,7 +234,7 @@ class LECSFixedComponentChart {
         componentArchetype[componentId]?[archetypeId]
     }
 
-    private func createArchetype(id: LECSArchetypeId, type: [LECSComponentId], components: [LECSComponent.Type]) -> LECSArchetype<LECSSparseArrayTable> {
+    private func createArchetype(id: LECSArchetypeId, type: [LECSComponentId], components: [LECSComponent.Type]) -> LECSArchetype {
         return factory.create(id: id, type: type, components: components)
     }
 }
@@ -242,7 +242,7 @@ class LECSFixedComponentChart {
 struct LECSArchetypeFactory {
     let size: Int
 
-    func create(id: LECSArchetypeId, type: [LECSComponentId], components: [LECSComponent.Type]) -> LECSArchetype<LECSSparseArrayTable> {
+    func create(id: LECSArchetypeId, type: [LECSComponentId], components: [LECSComponent.Type]) -> LECSArchetype {
 
         return LECSArchetype(id: id, type: type, table: LECSSparseArrayTable(size: size, compnentTypes: components))
     }
