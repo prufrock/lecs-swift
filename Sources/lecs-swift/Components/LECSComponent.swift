@@ -12,7 +12,11 @@ public protocol LECSComponent {
 }
 
 /// The Id of a LECSComponent
-struct LECSComponentId: Hashable {
+struct LECSComponentId: Comparable, Hashable {
+    static func < (lhs: LECSComponentId, rhs: LECSComponentId) -> Bool {
+        lhs.id < rhs.id
+    }
+    
     let id: Int
 
     init(_ id: Int) {

@@ -36,3 +36,13 @@ extension Array where Element: Comparable {
         return aligned.sorted { $0.0 < $1.0 }
     }
 }
+
+extension Array where Element == (LECSComponentId, LECSComponent) {
+    func type() -> [LECSComponentId] {
+        return self.map {$0.0}
+    }
+
+    func row() -> [LECSComponent] {
+        return self.map {$0.1}
+    }
+}

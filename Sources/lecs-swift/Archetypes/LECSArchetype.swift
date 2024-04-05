@@ -13,10 +13,10 @@ import Foundation
 /// Might be worth doing some experiments on that some day.
 class LECSArchetype<Table: LECSTable>: Sequence {
     let id: LECSArchetypeId
-    private let type: [LECSComponentId]
+    let type: [LECSComponentId]
     private let table: Table
-    private let edges: [LECSComponentId:LECSArchetypeId] = [:]
-    private var componentTypes: [LECSComponent.Type] {
+    var edges: [LECSComponentId:LECSArchetypeId] = [:]
+    var componentTypes: [LECSComponent.Type] {
         get {
             table.componentTypes
         }
@@ -69,7 +69,7 @@ class LECSArchetype<Table: LECSTable>: Sequence {
 }
 
 /// The unique identifier of an Archetype or of an Archetype you'd like there to be.
-struct LECSArchetypeId: RawRepresentable, Equatable {
+struct LECSArchetypeId: Equatable, Hashable, RawRepresentable {
     var rawValue: Int
 
     init(rawValue: Int) {
@@ -77,6 +77,10 @@ struct LECSArchetypeId: RawRepresentable, Equatable {
     }
 
     init(id: Int) {
+        self.init(rawValue: id)
+    }
+
+    init(_ id: Int) {
         self.init(rawValue: id)
     }
 }

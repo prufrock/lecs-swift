@@ -7,13 +7,7 @@
 
 import Foundation
 
-struct LECSRowId {
+struct LECSRowId: Equatable {
     let archetypeId: LECSArchetypeId
     let id: Int
-}
-
-/// The ID of a row in an Archetype.
-struct LECSCCRowId {
-    let id: Int
-    let archetypeId: LECSArchetypeId
 }
