@@ -49,7 +49,7 @@ protocol LECSTable: Sequence where Iterator.Element == LECSRow {
 
 class LECSSparseArrayTable: LECSTable {
 
-    typealias Element = [LECSComponent]
+    typealias Element = LECSRow
 
     let size: Int
     let componentTypes: [LECSComponent.Type]

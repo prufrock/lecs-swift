@@ -9,6 +9,21 @@ import XCTest
 @testable import lecs_swift
 
 final class LECSFixedComponentChartTests: XCTestCase {
+    private let pmName: [LECSName] = [
+        LECSName(),
+        LECSName("Arada")
+    ]
+
+    private let pmPosition: [LECSPosition] = [
+        LECSPosition(),
+        LECSPosition(x: 2.6, y: 3.8)
+    ]
+
+    private let pmVelocity: [LECSVelocity] = [
+        LECSVelocity(),
+        LECSVelocity(x: 1.8, y: 2.9)
+    ]
+
     func testCreateRow() throws {
         let chart = LECSFixedComponentChart()
         let row = chart.createRow()
@@ -71,5 +86,67 @@ final class LECSFixedComponentChartTests: XCTestCase {
         let rowAfterDelete = chart.createRow()
 
         XCTAssertEqual(row, rowAfterDelete)
+    }
+
+    func testSelectASingleRow() throws {
+        let chart = LECSFixedComponentChart()
+        let row = chart.createRow()
+
+        _ = chart.addComponentTo(row: row, component: LECSPosition(x: 2.1, y: 4.2))
+
+        var count = 0
+        var position: LECSPosition? = nil
+        chart.select([LECSPosition.self]) { components, columns in
+            count += 1
+            position = components[columns[0].col] as? LECSPosition
+        }
+
+        XCTAssertEqual(1, count)
+        XCTAssertEqual(LECSPosition(x: 2.1, y: 4.2), position)
+    }
+
+    func testSelectTwoQueries() throws {
+        let chart = LECSFixedComponentChart()
+        let firstRow = chart.createRow()
+
+        _ = chart.addComponentTo(row: firstRow, component: pmPosition[1])
+
+        let secondRow = chart.createRow()
+
+        _ = chart.addComponentTo(row: secondRow, component: pmVelocity[1])
+
+        var position: LECSPosition = LECSPosition()
+        chart.select([LECSPosition.self]) { components, columns in
+            position = components[columns[0].col] as! LECSPosition
+        }
+        XCTAssertEqual(pmPosition[1], position)
+
+        var velocity: LECSVelocity = LECSVelocity()
+        chart.select([LECSVelocity.self]) { components, columns in
+            velocity = components[columns[0].col] as! LECSVelocity
+        }
+        XCTAssertEqual(pmVelocity[1], velocity)
+    }
+
+    func testSelectAcrossThreeArchetypes() throws {
+
+        let chart = LECSFixedComponentChart()
+        var firstRow = chart.createRow()
+        firstRow = chart.addComponentTo(row: firstRow, component: pmPosition[1])
+
+        var secondRow = chart.createRow()
+        secondRow = chart.addComponentTo(row: secondRow, component: pmVelocity[1])
+        secondRow = chart.addComponentTo(row: secondRow, component: pmPosition[1])
+
+        var thirdRow = chart.createRow()
+        thirdRow = chart.addComponentTo(row: thirdRow, component: pmPosition[1])
+        thirdRow = chart.addComponentTo(row: thirdRow, component: pmName[1])
+
+        var count = 0
+        chart.select([LECSPosition.self]) { components, columns in
+            count += 1
+        }
+
+        XCTAssertEqual(3, count)
     }
 }

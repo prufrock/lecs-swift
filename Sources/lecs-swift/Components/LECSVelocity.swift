@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct LECSVelocity: LECSComponent {
+struct LECSVelocity: LECSComponent, Equatable {
     init() {
         x = 0
         y = 0

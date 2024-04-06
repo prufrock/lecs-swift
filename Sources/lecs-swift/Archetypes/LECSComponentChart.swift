@@ -28,7 +28,7 @@ protocol LECSComponentChart {
 
     /// Read all rows that have the Components in the query.
     /// For now, need to use LECSCCColumns to read from LECSCCRowId in the order of LECSQuery: LECSRow[LECSCColumns[0].col]
-    func select(query: LECSQuery, block: (LECSRow, LECSColumns) -> Void)
+    func select(_ query: LECSQuery, block: (LECSRow, LECSColumns) -> Void)
 
     /// Allows updates of the LECSRows selected by the LECSQuery.
     /// The block should return the modified LECSRow to be stored in the ComponentChart.
@@ -46,6 +46,7 @@ class LECSFixedComponentChart {
 
     private var components: [MetatypeWrapper:LECSComponentId] = [:]
 
+    // TODO: rename componentIdArchetype?
     private var componentArchetype: [LECSComponentId:[LECSArchetypeId:LECSArchetypeColumn]] = [:]
 
     init(factory: LECSArchetypeFactory = LECSArchetypeFactory(size: 1000)) {
@@ -123,12 +124,43 @@ class LECSFixedComponentChart {
         )
     }
 
-    func select(query: LECSQuery, block: (LECSRow, LECSColumns) -> Void) {
-
+    func select(_ query: LECSQuery, block: (LECSRow, LECSColumns) -> Void) {
+        self.query(queryComponentIds: sortedComponentIds(query: query), block: block)
     }
 
     func update(query: LECSQuery, block: (LECSRow, LECSColumns) -> LECSRow) {
 
+    }
+
+    private func query(queryComponentIds: [LECSComponentId], block: ([LECSComponent], [LECSArchetypeColumn]) -> Void) {
+        selectArchetypes(queryComponentIds: queryComponentIds).forEach { archetype in
+            archetype.forEach { row in
+                let columns:[LECSArchetypeColumn] = queryComponentIds.map { componentArchetype[$0]![archetype.id]! }
+                block(row, columns)
+            }
+        }
+    }
+
+    private func sortedComponentIds(query: LECSQuery) -> [LECSComponentId] {
+        query.compactMap { components[$0] }.sorted(by: { $0.id < $1.id })
+    }
+
+    private func selectArchetypes(queryComponentIds: [LECSComponentId]) -> [LECSArchetype] {
+        guard let firstComponentId = queryComponentIds.first else {
+            return []
+        }
+
+        return componentArchetype[firstComponentId]?.map { archetypeRecord in
+            let archetype = archetypes[archetypeRecord.key.rawValue]
+
+            // O(n) comparison of the elements. Query caching?
+            if queryComponentIds.allSatisfy({ archetype.type.contains($0) }) {
+                return archetype
+            } else {
+                return nil
+            }
+
+        }.compactMap { $0 } ?? []
     }
 
     private func updateNearestArchetype(
@@ -208,7 +240,10 @@ class LECSFixedComponentChart {
         // Update the component to archetype index making it possible to determine what archetypes have component.
         for column in type.indices {
             let componentId = type[column]
-            componentArchetype[componentId] = [archetypeId:LECSArchetypeColumn(col: column)]
+
+            // Need to make sure a component can have many archetypes,
+            // so ensure a dictionary exists before adding another archetype.
+            componentArchetype[componentId, default: [:]][archetypeId] = LECSArchetypeColumn(col: column)
         }
 
         return newArchetype

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct LECSPosition: LECSComponent {
+struct LECSPosition: LECSComponent, Equatable {
     init() {
         x = 0
         y = 0
