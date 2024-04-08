@@ -46,3 +46,14 @@ extension Array where Element == (LECSComponentId, LECSComponent) {
         return self.map {$0.1}
     }
 }
+
+extension Array where Element == LECSComponent {
+    func update(_ pairs: [(LECSArchetypeColumn, LECSComponent)]) -> LECSRow {
+        var newArray = self
+        pairs.forEach { column, component in
+            newArray[column.col] = component
+        }
+
+        return newArray
+    }
+}

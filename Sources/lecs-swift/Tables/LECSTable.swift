@@ -7,9 +7,10 @@
 
 import Foundation
 
+// TODO: need to sort out terminology on components vs row
 typealias LECSRow = [LECSComponent]
 
-protocol LECSTable: Sequence where Iterator.Element == LECSRow {
+protocol LECSTable: Sequence where Iterator.Element == LECSAddressableRow {
 
     /// The number of items in the table.
     var count: Int { get }
@@ -44,12 +45,13 @@ protocol LECSTable: Sequence where Iterator.Element == LECSRow {
     /// Check to see if row i exists.
     func exists(_ i: Int) -> Bool
 
-    func makeIterator() -> AnyIterator<LECSRow>
+    func makeIterator() -> AnyIterator<LECSAddressableRow>
 }
 
 class LECSSparseArrayTable: LECSTable {
 
-    typealias Element = LECSRow
+    //TODO: redundant, but worth reflecting on
+    typealias Element = LECSAddressableRow
 
     let size: Int
     let componentTypes: [LECSComponent.Type]
@@ -131,13 +133,13 @@ class LECSSparseArrayTable: LECSTable {
         return index - 1
     }
 
-    func makeIterator() -> AnyIterator<LECSRow> {
+    func makeIterator() -> AnyIterator<LECSAddressableRow> {
         return AnyIterator(SparseArrayTableIterator(self))
     }
 }
 
 struct SparseArrayTableIterator: IteratorProtocol {
-    typealias Element = LECSRow
+    typealias Element = LECSAddressableRow
 
     private var table: LECSSparseArrayTable
     private var i = 0
@@ -158,9 +160,18 @@ struct SparseArrayTableIterator: IteratorProtocol {
         if (hasNext()) {
             let current = i
             i += 1
-            return table.read(current)
+            return LECSAddressableRow(index: current, row: table.read(current))
         } else {
             return nil
         }
+    }
+}
+
+struct LECSAddressableRow {
+    let index: Int
+    let row: LECSRow
+
+    func update(_ row: LECSRow) -> LECSAddressableRow {
+        LECSAddressableRow(index: index, row: row)
     }
 }

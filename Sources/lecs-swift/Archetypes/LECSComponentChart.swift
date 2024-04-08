@@ -32,7 +32,7 @@ protocol LECSComponentChart {
 
     /// Allows updates of the LECSRows selected by the LECSQuery.
     /// The block should return the modified LECSRow to be stored in the ComponentChart.
-    func update(query: LECSQuery, block: (LECSRow, LECSColumns) -> LECSRow)
+    func update(_ query: LECSQuery, block: (LECSRow, LECSColumns) -> LECSRow)
 }
 
 /// A LECSFixedComponentChart is a ComponentChart that has a fixed size.
@@ -125,18 +125,26 @@ class LECSFixedComponentChart {
     }
 
     func select(_ query: LECSQuery, block: (LECSRow, LECSColumns) -> Void) {
+        // Convert to a block that returns a row, so it works with the same bit of code.
+        self.query(queryComponentIds: sortedComponentIds(query: query)) { components, columns in
+            block(components, columns)
+            return components
+        }
+    }
+
+    func update(_ query: LECSQuery, block: (LECSRow, LECSColumns) -> LECSRow) {
         self.query(queryComponentIds: sortedComponentIds(query: query), block: block)
     }
 
-    func update(query: LECSQuery, block: (LECSRow, LECSColumns) -> LECSRow) {
-
-    }
-
-    private func query(queryComponentIds: [LECSComponentId], block: ([LECSComponent], [LECSArchetypeColumn]) -> Void) {
+    private func query(queryComponentIds: [LECSComponentId], block: (LECSRow, LECSColumns) -> LECSRow) {
         selectArchetypes(queryComponentIds: queryComponentIds).forEach { archetype in
-            archetype.forEach { row in
+            archetype.forEach { addressableRow in
                 let columns:[LECSArchetypeColumn] = queryComponentIds.map { componentArchetype[$0]![archetype.id]! }
-                block(row, columns)
+                let newRow = block(addressableRow.row, columns)
+                // TODO: check performance here, may want to have a read-only flag to avoid unncessary updates.
+                archetype.update(
+                    addressableRow: addressableRow.update(newRow)
+                )
             }
         }
     }

@@ -149,4 +149,21 @@ final class LECSFixedComponentChartTests: XCTestCase {
 
         XCTAssertEqual(3, count)
     }
+
+    func testUpdateASingleRow() throws {
+        let chart = LECSFixedComponentChart()
+        var firstRow = chart.createRow()
+
+        firstRow = chart.addComponentTo(row: firstRow, component: LECSPosition(x: 2.1, y: 4.2))
+
+        chart.update([LECSPosition.self]) { components, columns in
+            var position = components[columns[0].col] as! LECSPosition
+            position.x = 5.2
+
+            return components.update([(columns[0], position)])
+        }
+
+        let position = chart.readComponentFrom(row: firstRow, type: LECSPosition.self)
+        XCTAssertEqual(LECSPosition(x: 5.2, y: 4.2), position)
+    }
 }

@@ -60,11 +60,16 @@ class LECSArchetype: Sequence {
         return rowId
     }
 
+    // TODO: does the archetypeId always need to be passed?
+    func update(addressableRow: LECSAddressableRow) {
+        table.update(row: addressableRow.index, components: addressableRow.row)
+    }
+
     func insert(row: LECSRow) -> LECSRowId {
         LECSRowId(archetypeId: id, id: table.insert(row))
     }
 
-    func makeIterator() -> AnyIterator<LECSRow> {
+    func makeIterator() -> AnyIterator<LECSAddressableRow> {
         table.makeIterator()
     }
 }
