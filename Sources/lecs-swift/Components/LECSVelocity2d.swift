@@ -1,13 +1,13 @@
 //
-//  Position.swift
+//  File.swift
+//  
 //
-//
-//  Created by David Kanenwisher on 3/28/24.
+//  Created by David Kanenwisher on 3/30/24.
 //
 
 import Foundation
 
-struct LECSPosition: LECSComponent, Equatable {
+struct LECSVelocity2d: LECSComponent, Equatable {
     init() {
         x = 0
         y = 0

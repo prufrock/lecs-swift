@@ -14,14 +14,14 @@ final class LECSFixedComponentChartTests: XCTestCase {
         LECSName("Arada")
     ]
 
-    private let pmPosition: [LECSPosition] = [
-        LECSPosition(),
-        LECSPosition(x: 2.6, y: 3.8)
+    private let pmPosition: [LECSPosition2d] = [
+        LECSPosition2d(),
+        LECSPosition2d(x: 2.6, y: 3.8)
     ]
 
-    private let pmVelocity: [LECSVelocity] = [
-        LECSVelocity(),
-        LECSVelocity(x: 1.8, y: 2.9)
+    private let pmVelocity: [LECSVelocity2d] = [
+        LECSVelocity2d(),
+        LECSVelocity2d(x: 1.8, y: 2.9)
     ]
 
     func testCreateRow() throws {
@@ -35,11 +35,11 @@ final class LECSFixedComponentChartTests: XCTestCase {
         let chart = LECSFixedComponentChart()
         let row = chart.createRow()
 
-        let newRow = chart.addComponentTo(row: row, component: LECSPosition(x: 1.2, y: 3.4))
+        let newRow = chart.addComponentTo(row: row, component: LECSPosition2d(x: 1.2, y: 3.4))
 
         XCTAssertNotEqual(row.archetypeId, newRow.archetypeId)
 
-        let updatedRow = chart.addComponentTo(row: newRow, component: LECSPosition(x: 2.5, y: 7.9))
+        let updatedRow = chart.addComponentTo(row: newRow, component: LECSPosition2d(x: 2.5, y: 7.9))
 
         XCTAssertEqual(newRow, updatedRow)
     }
@@ -48,13 +48,13 @@ final class LECSFixedComponentChartTests: XCTestCase {
         let chart = LECSFixedComponentChart()
         let row = chart.createRow()
 
-        let positionRow = chart.addComponentTo(row: row, component: LECSPosition(x: 2.8, y: 4.1))
+        let positionRow = chart.addComponentTo(row: row, component: LECSPosition2d(x: 2.8, y: 4.1))
 
         XCTAssertNotEqual(row.archetypeId, positionRow.archetypeId)
 
-        let positionVelocityRow = chart.addComponentTo(row: positionRow, component: LECSVelocity(x: 1.2, y: 3.4))
+        let positionVelocityRow = chart.addComponentTo(row: positionRow, component: LECSVelocity2d(x: 1.2, y: 3.4))
 
-        let removeVelocityRow = chart.removeComponentFrom(row: positionVelocityRow, type: LECSVelocity.self)
+        let removeVelocityRow = chart.removeComponentFrom(row: positionVelocityRow, type: LECSVelocity2d.self)
 
         XCTAssertEqual(positionRow.archetypeId, removeVelocityRow.archetypeId)
     }
@@ -63,15 +63,15 @@ final class LECSFixedComponentChartTests: XCTestCase {
         let chart = LECSFixedComponentChart()
         let row = chart.createRow()
 
-        let positionRow = chart.addComponentTo(row: row, component: LECSPosition(x: 2.8, y: 4.1))
-        let positionVelocityRow = chart.addComponentTo(row: positionRow, component: LECSVelocity(x: 1.2, y: 3.4))
+        let positionRow = chart.addComponentTo(row: row, component: LECSPosition2d(x: 2.8, y: 4.1))
+        let positionVelocityRow = chart.addComponentTo(row: positionRow, component: LECSVelocity2d(x: 1.2, y: 3.4))
 
-        let position = chart.readComponentFrom(row: positionVelocityRow, type: LECSPosition.self)
+        let position = chart.readComponentFrom(row: positionVelocityRow, type: LECSPosition2d.self)
 
         XCTAssertEqual(2.8, position.x)
         XCTAssertEqual(4.1, position.y)
 
-        let velocity = chart.readComponentFrom(row: positionVelocityRow, type: LECSVelocity.self)
+        let velocity = chart.readComponentFrom(row: positionVelocityRow, type: LECSVelocity2d.self)
 
         XCTAssertEqual(1.2, velocity.x)
         XCTAssertEqual(3.4, velocity.y)
@@ -92,17 +92,17 @@ final class LECSFixedComponentChartTests: XCTestCase {
         let chart = LECSFixedComponentChart()
         let row = chart.createRow()
 
-        _ = chart.addComponentTo(row: row, component: LECSPosition(x: 2.1, y: 4.2))
+        _ = chart.addComponentTo(row: row, component: LECSPosition2d(x: 2.1, y: 4.2))
 
         var count = 0
-        var position: LECSPosition? = nil
-        chart.select([LECSPosition.self]) { components, columns in
+        var position: LECSPosition2d? = nil
+        chart.select([LECSPosition2d.self]) { components, columns in
             count += 1
-            position = components[columns[0].col] as? LECSPosition
+            position = components[columns[0].col] as? LECSPosition2d
         }
 
         XCTAssertEqual(1, count)
-        XCTAssertEqual(LECSPosition(x: 2.1, y: 4.2), position)
+        XCTAssertEqual(LECSPosition2d(x: 2.1, y: 4.2), position)
     }
 
     func testSelectTwoQueries() throws {
@@ -115,15 +115,15 @@ final class LECSFixedComponentChartTests: XCTestCase {
 
         _ = chart.addComponentTo(row: secondRow, component: pmVelocity[1])
 
-        var position: LECSPosition = LECSPosition()
-        chart.select([LECSPosition.self]) { components, columns in
-            position = components[columns[0].col] as! LECSPosition
+        var position: LECSPosition2d = LECSPosition2d()
+        chart.select([LECSPosition2d.self]) { components, columns in
+            position = components[columns[0].col] as! LECSPosition2d
         }
         XCTAssertEqual(pmPosition[1], position)
 
-        var velocity: LECSVelocity = LECSVelocity()
-        chart.select([LECSVelocity.self]) { components, columns in
-            velocity = components[columns[0].col] as! LECSVelocity
+        var velocity: LECSVelocity2d = LECSVelocity2d()
+        chart.select([LECSVelocity2d.self]) { components, columns in
+            velocity = components[columns[0].col] as! LECSVelocity2d
         }
         XCTAssertEqual(pmVelocity[1], velocity)
     }
@@ -143,7 +143,7 @@ final class LECSFixedComponentChartTests: XCTestCase {
         thirdRow = chart.addComponentTo(row: thirdRow, component: pmName[1])
 
         var count = 0
-        chart.select([LECSPosition.self]) { components, columns in
+        chart.select([LECSPosition2d.self]) { components, columns in
             count += 1
         }
 
@@ -154,16 +154,16 @@ final class LECSFixedComponentChartTests: XCTestCase {
         let chart = LECSFixedComponentChart()
         var firstRow = chart.createRow()
 
-        firstRow = chart.addComponentTo(row: firstRow, component: LECSPosition(x: 2.1, y: 4.2))
+        firstRow = chart.addComponentTo(row: firstRow, component: LECSPosition2d(x: 2.1, y: 4.2))
 
-        chart.update([LECSPosition.self]) { components, columns in
-            var position = components[columns[0].col] as! LECSPosition
+        chart.update([LECSPosition2d.self]) { components, columns in
+            var position = components[columns[0].col] as! LECSPosition2d
             position.x = 5.2
 
             return components.update([(columns[0], position)])
         }
 
-        let position = chart.readComponentFrom(row: firstRow, type: LECSPosition.self)
-        XCTAssertEqual(LECSPosition(x: 5.2, y: 4.2), position)
+        let position = chart.readComponentFrom(row: firstRow, type: LECSPosition2d.self)
+        XCTAssertEqual(LECSPosition2d(x: 5.2, y: 4.2), position)
     }
 }

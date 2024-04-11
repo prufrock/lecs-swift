@@ -11,8 +11,8 @@ import XCTest
 final class LECSArchetypeTests: XCTestCase {
     var archetypeCounter: Int = 1
     var components: [Int:LECSComponent.Type] = [
-        1: LECSPosition.self,
-        2: LECSVelocity.self
+        1: LECSPosition2d.self,
+        2: LECSVelocity2d.self
     ]
 
 
@@ -31,13 +31,13 @@ final class LECSArchetypeTests: XCTestCase {
 
     func testRead() throws {
         let a = archetype(size: 1, type: [LECSComponentId(1)])
-        let r = a.insert(row: [LECSPosition(x: 2.1, y: 3.2)])
+        let r = a.insert(row: [LECSPosition2d(x: 2.1, y: 3.2)])
 
         XCTAssertEqual(1, a.id.rawValue)
         XCTAssertEqual(0, r.id)
         XCTAssertEqual(a.id, r.archetypeId)
 
-        let c = a.read(r)[0] as! LECSPosition
+        let c = a.read(r)[0] as! LECSPosition2d
 
         XCTAssertEqual(2.1, c.x)
         XCTAssertEqual(3.2, c.y)
@@ -59,11 +59,11 @@ final class LECSArchetypeTests: XCTestCase {
 
     func testUpdateRow() throws {
         let a = archetype(size: 1, type: [LECSComponentId(1)])
-        let r = a.insert(row: [LECSPosition(x: 2.1, y: 3.2)])
+        let r = a.insert(row: [LECSPosition2d(x: 2.1, y: 3.2)])
 
-        a.update(rowId: r, row: [LECSPosition(x: 3.4, y: 0.2)])
+        a.update(rowId: r, row: [LECSPosition2d(x: 3.4, y: 0.2)])
 
-        let c = a.read(r)[0] as! LECSPosition
+        let c = a.read(r)[0] as! LECSPosition2d
 
         XCTAssertEqual(3.4, c.x)
         XCTAssertEqual(0.2, c.y)
@@ -72,13 +72,13 @@ final class LECSArchetypeTests: XCTestCase {
     func testUpdateRowColumn() throws {
         let a = archetype(size: 1, type: [LECSComponentId(1), LECSComponentId(2)])
         let r = a.insert(row: [
-            LECSPosition(x: 2.1, y: 3.2),
-            LECSVelocity(x: 0.3, y: 4.5)
+            LECSPosition2d(x: 2.1, y: 3.2),
+            LECSVelocity2d(x: 0.3, y: 4.5)
         ])
 
-        a.update(rowId: r, column: LECSArchetypeColumn(col: 1), component: LECSVelocity(x: 0.5, y: 1.2))
+        a.update(rowId: r, column: LECSArchetypeColumn(col: 1), component: LECSVelocity2d(x: 0.5, y: 1.2))
 
-        let c = a.read(r)[1] as! LECSVelocity
+        let c = a.read(r)[1] as! LECSVelocity2d
 
         XCTAssertEqual(0.5, c.x)
         XCTAssertEqual(1.2, c.y)
@@ -87,16 +87,16 @@ final class LECSArchetypeTests: XCTestCase {
     func testIterator() throws {
         let a = archetype(size: 3, type: [LECSComponentId(1), LECSComponentId(2)])
         let _ = a.insert(row: [
-            LECSPosition(x: 2.1, y: 3.2),
-            LECSVelocity(x: 0.4, y: 4.5)
+            LECSPosition2d(x: 2.1, y: 3.2),
+            LECSVelocity2d(x: 0.4, y: 4.5)
         ])
         let _ = a.insert(row: [
-            LECSPosition(x: 2.2, y: 3.3),
-            LECSVelocity(x: 0.5, y: 5.5)
+            LECSPosition2d(x: 2.2, y: 3.3),
+            LECSVelocity2d(x: 0.5, y: 5.5)
         ])
         let _ = a.insert(row: [
-            LECSPosition(x: 2.3, y: 3.4),
-            LECSVelocity(x: 0.6, y: 6.5)
+            LECSPosition2d(x: 2.3, y: 3.4),
+            LECSVelocity2d(x: 0.6, y: 6.5)
         ])
 
         var count = 0

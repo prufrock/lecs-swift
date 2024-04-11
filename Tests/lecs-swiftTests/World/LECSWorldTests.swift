@@ -37,28 +37,28 @@ final class LECSWorldTests: XCTestCase {
         let entity = world.createEntity("spear")
         let otherEntity = world.createEntity("sheild")
 
-        world.addComponent(otherEntity, LECSVelocity())
+        world.addComponent(otherEntity, LECSVelocity2d())
 
         XCTAssertTrue(world.hasComponent(entity, LECSName.self))
-        XCTAssertFalse(world.hasComponent(entity, LECSVelocity.self))
+        XCTAssertFalse(world.hasComponent(entity, LECSVelocity2d.self))
 
-        world.removeComponent(otherEntity, component: LECSVelocity.self)
+        world.removeComponent(otherEntity, component: LECSVelocity2d.self)
 
-        XCTAssertFalse(world.hasComponent(otherEntity, LECSVelocity.self))
+        XCTAssertFalse(world.hasComponent(otherEntity, LECSVelocity2d.self))
     }
 
     func testAddSystem() {
         let world = LECSWorldFixedSize()
 
         let spear = world.createEntity("spear")
-        world.addComponent(spear, LECSPosition())
+        world.addComponent(spear, LECSPosition2d())
 
         let system = world.addSystem(
             "spear system",
-            selector: [LECSPosition.self]
+            selector: [LECSPosition2d.self]
         ) { components, columns in
             return components.update(
-                [(columns[0], LECSPosition(x: 2, y: 0))]
+                [(columns[0], LECSPosition2d(x: 2, y: 0))]
             )
         }
 
@@ -66,7 +66,7 @@ final class LECSWorldTests: XCTestCase {
 
         let position = world.getComponent(
             spear,
-            LECSPosition.self
+            LECSPosition2d.self
         )!
 
         XCTAssertEqual(2.0, position.x)
