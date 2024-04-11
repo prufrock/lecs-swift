@@ -8,4 +8,4 @@
 import Foundation
 
 /// Holds a list of the LECSComponents to match when querying the LECSComponentChart.
-typealias LECSQuery = [LECSComponent.Type]
+public typealias LECSQuery = [LECSComponent.Type]

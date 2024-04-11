@@ -13,10 +13,14 @@ protocol LECSComponentChart {
     func createRow() -> LECSRowId
 
     /// Reads Component of the type from the given row.
+    /// TODO: do these need to be generic?
     func readComponentFrom<T: LECSComponent>(row rowId: LECSRowId, type: T.Type)
 
     /// Deletes the row.
     func delete(row rowId: LECSRowId)
+
+    /// Checks to see if a LECSRowId has a component
+    func component(in row: LECSRowId, type: LECSComponent.Type) -> Bool
 
     /// Adds the LECSCCComponent to the row.
     /// This makes the provided LECSCCRowId stale, so the caller needs to use the return LECSCCRowId.
@@ -24,6 +28,7 @@ protocol LECSComponentChart {
 
     /// Removes the LECSCCComponent from the row.
     /// This makes the provided LECSCCRowId stale, so the caller needs to use the return LECSRowId.
+    /// TODO: do these need to be generic?
     func removeComponentFrom<T: LECSComponent>(row rowId: LECSRowId, type: T.Type) -> LECSRowId
 
     /// Read all rows that have the Components in the query.
@@ -66,6 +71,14 @@ class LECSFixedComponentChart {
     func delete(row rowId: LECSRowId) {
         // TODO: don't really like this rawValue
         archetypes[rowId.archetypeId.rawValue].delete(rowId)
+    }
+
+    func component(in row: LECSRowId, type: LECSComponent.Type) -> Bool {
+        guard let componentId = components[type] else {
+            fatalError("The type:[\(type)] hasn't been added yet. Do you need to adjust your code to add it?")
+        }
+
+        return componentArchetype[componentId]?[row.archetypeId] != nil
     }
 
     func addComponentTo(row rowId: LECSRowId, component: LECSComponent) -> LECSRowId {

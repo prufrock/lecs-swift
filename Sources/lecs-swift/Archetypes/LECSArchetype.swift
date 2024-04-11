@@ -92,8 +92,8 @@ struct LECSArchetypeId: Equatable, Hashable, RawRepresentable {
 }
 
 // The column the LECSComponent is stored in a LECSArchetype.
-struct LECSArchetypeColumn {
+public struct LECSArchetypeColumn {
     let col: Int
 }
 
-typealias LECSColumns = [LECSArchetypeColumn]
+public typealias LECSColumns = [LECSArchetypeColumn]

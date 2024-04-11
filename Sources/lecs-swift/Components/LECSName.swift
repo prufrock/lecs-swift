@@ -7,14 +7,14 @@
 
 import Foundation
 
-struct LECSName: LECSComponent {
+public struct LECSName: LECSComponent {
     var name: String
 
-    init() {
+    public init() {
         name = "i am the default name"
     }
 
-    init(_ name: String) {
+    public init(_ name: String) {
         self.name = name
     }
 }

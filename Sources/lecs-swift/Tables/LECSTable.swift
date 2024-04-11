@@ -8,7 +8,7 @@
 import Foundation
 
 // TODO: need to sort out terminology on components vs row
-typealias LECSRow = [LECSComponent]
+public typealias LECSRow = [LECSComponent]
 
 protocol LECSTable: Sequence where Iterator.Element == LECSAddressableRow {
 
