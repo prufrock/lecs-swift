@@ -59,12 +59,12 @@ class LECSSparseArrayTable: LECSTable {
     private var deleted: Set<Int> = []
     var items: [[LECSComponent]]
 
-    init(size: Int, compnentTypes: [LECSComponent.Type]) {
+    init(size: Int, componentTypes: [LECSComponent.Type]) {
         self.size = size
-        self.componentTypes = compnentTypes
+        self.componentTypes = componentTypes
         var row: LECSRow = []
-        for i in 0..<compnentTypes.count {
-            let componentType = compnentTypes[i]
+        for i in 0..<componentTypes.count {
+            let componentType = componentTypes[i]
             row.append(componentType.init())
         }
         self.items = Array(repeating: row, count: size)

@@ -308,6 +308,6 @@ struct LECSArchetypeFactory {
 
     func create(id: LECSArchetypeId, type: [LECSComponentId], components: [LECSComponent.Type]) -> LECSArchetype {
 
-        return LECSArchetype(id: id, type: type, table: LECSSparseArrayTable(size: size, compnentTypes: components))
+        return LECSArchetype(id: id, type: type, table: LECSSparseArrayTable(size: size, componentTypes: components))
     }
 }
