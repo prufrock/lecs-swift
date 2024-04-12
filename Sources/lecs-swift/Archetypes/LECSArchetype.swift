@@ -14,7 +14,8 @@ import Foundation
 class LECSArchetype: Sequence {
     let id: LECSArchetypeId
     let type: [LECSComponentId]
-    //TODO: experiment with performance of "any" vs a specific type.
+    // Testing shows a small but noticeable improvement when using a concrete type rather than `any`. I might have to do some more experiments
+    // to find a good way to generalize it while still being a concrete type. Maybe delegation?
     let table: LECSSparseArrayTable
     var edges: [LECSComponentId:LECSArchetypeId] = [:]
     var componentTypes: [LECSComponent.Type] {

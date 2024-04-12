@@ -166,7 +166,7 @@ class LECSFixedComponentChart {
         selectArchetypes(queryComponentIds: queryComponentIds).forEach { archetype in
             let columns:[LECSArchetypeColumn] = queryComponentIds.map { componentArchetype[$0]![archetype.id]! }
 
-            // Using indexes appears to be ~30 faster than using iterators.
+            // Using indexes appears to be ~30% faster than using iterators.
             // It seems way better then to keep using direct access over using an iterator.
             (0..<archetype.table.items.count).forEach { index in
                 if !archetype.table.exists(index) {
