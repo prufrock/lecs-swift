@@ -182,7 +182,8 @@ class LECSWorldFixedSize: LECSWorld {
         // critical region
         let systemId = systemCounter
         systemCounter += 1
-        systemMap[systemId] = LECSSystem(query: selector, block: block)
+        let componentIds = chart.convertQueryToComponentIds(selector)
+        systemMap[systemId] = LECSSystem(componentIds: componentIds, block: block)
 
         return systemId
     }
@@ -206,7 +207,7 @@ class LECSWorldFixedSize: LECSWorld {
             fatalError("SystemId[\(id)] doesn't exist.")
         }
 
-        chart.update(system.query, block: system.block)
+        chart.update(system.componentIds, block: system.block)
     }
     
 
@@ -225,6 +226,6 @@ class LECSWorldFixedSize: LECSWorld {
 
 
 private struct LECSSystem {
-    let query: LECSQuery
+    let componentIds: [LECSComponentId]
     let block: LECSUpdate
 }
