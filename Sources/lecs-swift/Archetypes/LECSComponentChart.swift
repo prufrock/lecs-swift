@@ -138,7 +138,6 @@ class LECSFixedComponentChart {
     }
 
     func select(_ query: LECSQuery, block: (LECSRow, LECSColumns) -> Void) {
-        // Convert to a block that returns a row, so it works with the same bit of code.
         self.query(queryComponentIds: sortedComponentIds(query: query), readOnly: true) { components, columns in
             block(components, columns)
             return []
@@ -154,7 +153,6 @@ class LECSFixedComponentChart {
             archetype.forEach { addressableRow in
                 let columns:[LECSArchetypeColumn] = queryComponentIds.map { componentArchetype[$0]![archetype.id]! }
                 let changeSet: LECSRow = block(addressableRow.row, columns)
-                // TODO: check performance here, may want to have a read-only flag to avoid unncessary updates.
                 var idx = 0
                 if !readOnly {
                     columns.forEach {
