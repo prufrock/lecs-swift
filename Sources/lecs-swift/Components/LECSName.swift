@@ -14,6 +14,10 @@ public struct LECSName: LECSComponent {
         name = "i am the default name"
     }
 
+    public init(name: String) {
+        self.name = name
+    }
+
     public init(_ name: String) {
         self.name = name
     }

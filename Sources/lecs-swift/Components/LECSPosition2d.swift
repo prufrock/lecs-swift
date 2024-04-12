@@ -7,17 +7,17 @@
 
 import Foundation
 
-struct LECSPosition2d: LECSComponent, Equatable {
-    init() {
+public struct LECSPosition2d: LECSComponent, Equatable {
+    public init() {
         x = 0
         y = 0
     }
 
-    init(x: Float, y: Float) {
+    public init(x: Float, y: Float) {
         self.x = x
         self.y = y
     }
 
-    var x: Float
-    var y: Float
+    public var x: Float
+    public var y: Float
 }

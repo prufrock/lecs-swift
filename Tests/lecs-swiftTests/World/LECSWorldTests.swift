@@ -10,7 +10,7 @@ import XCTest
 
 final class LECSWorldTests: XCTestCase {
     func testCreateAndDeleteEntity() {
-        let world = LECSWorldFixedSize()
+        let world = LECSWorldFixedSize(archetypeSize: 10)
 
         _ = world.createEntity("spear")
 
@@ -32,7 +32,7 @@ final class LECSWorldTests: XCTestCase {
     }
 
     func testHasComponent() {
-        let world = LECSWorldFixedSize()
+        let world = LECSWorldFixedSize(archetypeSize: 10)
 
         let entity = world.createEntity("spear")
         let otherEntity = world.createEntity("sheild")
@@ -48,18 +48,17 @@ final class LECSWorldTests: XCTestCase {
     }
 
     func testAddSystem() {
-        let world = LECSWorldFixedSize()
+        let world = LECSWorldFixedSize(archetypeSize: 10)
 
         let spear = world.createEntity("spear")
+        world.addComponent(spear, LECSVelocity2d())
         world.addComponent(spear, LECSPosition2d())
 
         let system = world.addSystem(
             "spear system",
             selector: [LECSPosition2d.self]
         ) { components, columns in
-            return components.update(
-                [(columns[0], LECSPosition2d(x: 2, y: 0))]
-            )
+            return [LECSPosition2d(x: 2, y: 0)]
         }
 
         world.process(system: system)

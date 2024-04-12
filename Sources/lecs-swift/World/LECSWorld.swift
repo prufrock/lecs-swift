@@ -94,9 +94,13 @@ public protocol LECSWorld {
     func process(system: LECSSystemId)
 }
 
+public func LECSCreateWorld(archetypeSize: Int) -> LECSWorld {
+    LECSWorldFixedSize(archetypeSize: archetypeSize)
+}
+
 class LECSWorldFixedSize: LECSWorld {
 
-    private let chart = LECSFixedComponentChart()
+    private let chart: LECSFixedComponentChart
 
     private var entityCounter:UInt = 0 // reserve 0
     private var entityMap: [LECSEntityId:LECSRowId] = [:]
@@ -107,6 +111,10 @@ class LECSWorldFixedSize: LECSWorld {
 
     // Indexes map LECSEntityId to another attribute.
     private var indexEntityName: [String:LECSEntityId] = [:]
+
+    init(archetypeSize: Int) {
+        chart = LECSFixedComponentChart(factory: LECSArchetypeFactory(size: archetypeSize))
+    }
 
     func createEntity(_ name: String) -> LECSEntityId {
         // critical region

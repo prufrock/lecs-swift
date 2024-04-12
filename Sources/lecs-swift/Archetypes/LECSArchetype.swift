@@ -65,6 +65,10 @@ class LECSArchetype: Sequence {
         table.update(row: addressableRow.index, components: addressableRow.row)
     }
 
+    func update(index: Int, column: LECSArchetypeColumn, component: LECSComponent) {
+        table.update(row: index, column: column.col, component: component)
+    }
+
     func insert(row: LECSRow) -> LECSRowId {
         LECSRowId(archetypeId: id, id: table.insert(row))
     }
@@ -93,7 +97,7 @@ struct LECSArchetypeId: Equatable, Hashable, RawRepresentable {
 
 // The column the LECSComponent is stored in a LECSArchetype.
 public struct LECSArchetypeColumn {
-    let col: Int
+    public let col: Int
 }
 
 public typealias LECSColumns = [LECSArchetypeColumn]

@@ -169,9 +169,24 @@ struct SparseArrayTableIterator: IteratorProtocol {
 
 struct LECSAddressableRow {
     let index: Int
-    let row: LECSRow
+    var row: LECSRow
 
-    func update(_ row: LECSRow) -> LECSAddressableRow {
-        LECSAddressableRow(index: index, row: row)
+    func update(_ newRow: LECSRow) -> LECSAddressableRow {
+        LECSAddressableRow(index: index, row: newRow)
+    }
+
+    func update(for columns: LECSColumns, changes: LECSRow) -> LECSAddressableRow {
+        var newRow = row
+        for i in columns.indices {
+            newRow[columns[i].col] = changes[i]
+        }
+
+        return LECSAddressableRow(index: index, row: newRow)
+    }
+
+    mutating func update(forColumns columns: LECSColumns, changes: LECSRow) {
+        for i in columns.indices {
+            row[columns[i].col] = changes[i]
+        }
     }
 }

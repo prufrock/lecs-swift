@@ -7,17 +7,20 @@
 
 import Foundation
 
-struct LECSVelocity2d: LECSComponent, Equatable {
-    init() {
-        x = 0
-        y = 0
+public struct LECSVelocity2d: LECSComponent, Equatable {
+    public init() {
+        velocity = SIMD2<Float>(x: 0, y: 0)
     }
 
-    init(x: Float, y: Float) {
-        self.x = x
-        self.y = y
+    public init(x: Float, y: Float) {
+        velocity = SIMD2<Float>(x: x, y: y)
     }
 
-    var x: Float
-    var y: Float
+    public var x: Float {
+        velocity.x
+    }
+    public var y: Float {
+        velocity.y
+    }
+    public var velocity: SIMD2<Float>
 }

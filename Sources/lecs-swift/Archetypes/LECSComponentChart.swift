@@ -139,25 +139,33 @@ class LECSFixedComponentChart {
 
     func select(_ query: LECSQuery, block: (LECSRow, LECSColumns) -> Void) {
         // Convert to a block that returns a row, so it works with the same bit of code.
-        self.query(queryComponentIds: sortedComponentIds(query: query)) { components, columns in
+        self.query(queryComponentIds: sortedComponentIds(query: query), readOnly: true) { components, columns in
             block(components, columns)
-            return components
+            return []
         }
     }
 
     func update(_ query: LECSQuery, block: (LECSRow, LECSColumns) -> LECSRow) {
-        self.query(queryComponentIds: sortedComponentIds(query: query), block: block)
+        self.query(queryComponentIds: sortedComponentIds(query: query), readOnly: false, block: block)
     }
 
-    private func query(queryComponentIds: [LECSComponentId], block: (LECSRow, LECSColumns) -> LECSRow) {
+    private func query(queryComponentIds: [LECSComponentId], readOnly: Bool, block: (LECSRow, LECSColumns) -> LECSRow) {
         selectArchetypes(queryComponentIds: queryComponentIds).forEach { archetype in
             archetype.forEach { addressableRow in
                 let columns:[LECSArchetypeColumn] = queryComponentIds.map { componentArchetype[$0]![archetype.id]! }
-                let newRow = block(addressableRow.row, columns)
+                let changeSet: LECSRow = block(addressableRow.row, columns)
                 // TODO: check performance here, may want to have a read-only flag to avoid unncessary updates.
-                archetype.update(
-                    addressableRow: addressableRow.update(newRow)
-                )
+                var idx = 0
+                if !readOnly {
+                    columns.forEach {
+                        archetype.update(
+                            index: addressableRow.index,
+                            column: $0,
+                            component: changeSet[idx]
+                        )
+                        idx += 1
+                    }
+                }
             }
         }
     }
