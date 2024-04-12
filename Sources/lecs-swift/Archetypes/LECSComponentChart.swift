@@ -163,17 +163,18 @@ class LECSFixedComponentChart {
     }
 
     private func query(queryComponentIds: [LECSComponentId], readOnly: Bool, block: (LECSRow, LECSColumns) -> LECSRow) {
+        //TODO: find a way with a low start-up time way(or one that can be prepared ahead of time) to spread archetype queries across a thread pool.
         selectArchetypes(queryComponentIds: queryComponentIds).forEach { archetype in
             let columns:[LECSArchetypeColumn] = queryComponentIds.map { componentArchetype[$0]![archetype.id]! }
 
             // Using indexes appears to be ~30% faster than using iterators.
             // It seems way better then to keep using direct access over using an iterator.
-            (0..<archetype.table.items.count).forEach { index in
-                if !archetype.table.exists(index) {
+            (0..<archetype.rowCount).forEach { index in
+                if !archetype.rowExists(at: index) {
                     return
                 }
 
-                let changeSet: LECSRow = block(archetype.table.read(index), columns)
+                let changeSet: LECSRow = block(archetype.readRow(at: index), columns)
                 var idx = 0
                 if !readOnly {
                     columns.forEach {

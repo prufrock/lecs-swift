@@ -16,11 +16,16 @@ class LECSArchetype: Sequence {
     let type: [LECSComponentId]
     // Testing shows a small but noticeable improvement when using a concrete type rather than `any`. I might have to do some more experiments
     // to find a good way to generalize it while still being a concrete type. Maybe delegation?
-    let table: LECSSparseArrayTable
+    private let table: LECSSparseArrayTable
     var edges: [LECSComponentId:LECSArchetypeId] = [:]
     var componentTypes: [LECSComponent.Type] {
         get {
             table.componentTypes
+        }
+    }
+    var rowCount: Int {
+        get {
+            table.count
         }
     }
 
@@ -40,6 +45,14 @@ class LECSArchetype: Sequence {
 
     func read(_ rowId: LECSRowId) -> LECSRow {
         table.read(rowId.id)
+    }
+
+    func readRow(at index: Int) -> LECSRow {
+        table.read(index)
+    }
+
+    func rowExists(at index: Int) -> Bool {
+        table.exists(index)
     }
 
     // TODO: Is it worth returning a value here?

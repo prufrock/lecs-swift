@@ -18,6 +18,8 @@ protocol LECSTable: Sequence where Iterator.Element == LECSAddressableRow {
     /// The maximum number of elements the table can hold.
     var size: Int { get }
 
+    var items: [LECSRow] { get }
+
     /// The ordered list of Component types that together comprise the table's and it's Archetype's "type".
     var componentTypes: [LECSComponent.Type] { get }
 
