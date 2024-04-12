@@ -15,7 +15,7 @@ class LECSArchetype: Sequence {
     let id: LECSArchetypeId
     let type: [LECSComponentId]
     //TODO: experiment with performance of "any" vs a specific type.
-    private let table: any LECSTable
+    let table: LECSSparseArrayTable
     var edges: [LECSComponentId:LECSArchetypeId] = [:]
     var componentTypes: [LECSComponent.Type] {
         get {
@@ -26,7 +26,7 @@ class LECSArchetype: Sequence {
     init(
         id: LECSArchetypeId,
         type: [LECSComponentId],
-        table: any LECSTable
+        table: LECSSparseArrayTable
     ) {
         self.id = id
         self.type = type

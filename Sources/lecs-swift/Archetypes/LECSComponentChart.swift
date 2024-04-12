@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import os.log
 
 /// Stores Components grouped into Archetypes as rows.
 protocol LECSComponentChart {
@@ -48,10 +47,6 @@ protocol LECSComponentChart {
 /// A LECSFixedComponentChart is a ComponentChart that has a fixed size.
 class LECSFixedComponentChart {
 
-    let signpostID: OSSignpostID
-    let pointsOfInterest = OSLog(subsystem: "com.dkanen.lecs-swift", category: .pointsOfInterest)
-    let signposter: OSSignposter
-
     private let root: LECSArchetype
 
     private let factory: LECSArchetypeFactory
@@ -66,9 +61,6 @@ class LECSFixedComponentChart {
     private var componentArchetype: [LECSComponentId:[LECSArchetypeId:LECSArchetypeColumn]] = [:]
 
     init(factory: LECSArchetypeFactory = LECSArchetypeFactory(size: 1000)) {
-        self.signposter = OSSignposter()
-        self.signpostID = signposter.makeSignpostID(from: pointsOfInterest)
-
         self.factory = factory
         root = factory.create(id: LECSArchetypeId(0), type: [], components: [])
         archetypes.append(root)
@@ -171,16 +163,22 @@ class LECSFixedComponentChart {
     }
 
     private func query(queryComponentIds: [LECSComponentId], readOnly: Bool, block: (LECSRow, LECSColumns) -> LECSRow) {
-        os_signpost(.begin, log: pointsOfInterest, name: "query", signpostID: signpostID)
         selectArchetypes(queryComponentIds: queryComponentIds).forEach { archetype in
             let columns:[LECSArchetypeColumn] = queryComponentIds.map { componentArchetype[$0]![archetype.id]! }
-            archetype.forEach { addressableRow in
-                let changeSet: LECSRow = block(addressableRow.row, columns)
+
+            // Using indexes appears to be ~30 faster than using iterators.
+            // It seems way better then to keep using direct access over using an iterator.
+            (0..<archetype.table.items.count).forEach { index in
+                if !archetype.table.exists(index) {
+                    return
+                }
+
+                let changeSet: LECSRow = block(archetype.table.read(index), columns)
                 var idx = 0
                 if !readOnly {
                     columns.forEach {
                         archetype.update(
-                            index: addressableRow.index,
+                            index: index,
                             column: $0,
                             component: changeSet[idx]
                         )
@@ -189,7 +187,6 @@ class LECSFixedComponentChart {
                 }
             }
         }
-        os_signpost(.end, log: pointsOfInterest, name: "query", signpostID: signpostID)
     }
 
     private func sortedComponentIds(query: LECSQuery) -> [LECSComponentId] {
