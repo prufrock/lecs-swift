@@ -150,8 +150,8 @@ class LECSFixedComponentChart {
 
     private func query(queryComponentIds: [LECSComponentId], readOnly: Bool, block: (LECSRow, LECSColumns) -> LECSRow) {
         selectArchetypes(queryComponentIds: queryComponentIds).forEach { archetype in
+            let columns:[LECSArchetypeColumn] = queryComponentIds.map { componentArchetype[$0]![archetype.id]! }
             archetype.forEach { addressableRow in
-                let columns:[LECSArchetypeColumn] = queryComponentIds.map { componentArchetype[$0]![archetype.id]! }
                 let changeSet: LECSRow = block(addressableRow.row, columns)
                 var idx = 0
                 if !readOnly {
