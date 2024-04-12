@@ -110,7 +110,7 @@ final class LECSArchetypeTests: XCTestCase {
     private func archetype(size: Int, type: [LECSComponentId]) -> LECSArchetype {
         let t = LECSSparseArrayTable(
             size: size,
-            compnentTypes: type.map { components[$0.id]! }
+            componentTypes: type.map { components[$0.id]! }
         )
 
         let id = LECSArchetypeId(id: archetypeCounter)

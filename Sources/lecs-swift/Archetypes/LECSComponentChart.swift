@@ -51,6 +51,8 @@ class LECSFixedComponentChart {
 
     private var components: [MetatypeWrapper:LECSComponentId] = [:]
 
+    private var queryCache: [String:[LECSArchetype]] = [:]
+
     // TODO: rename componentIdArchetype?
     private var componentArchetype: [LECSComponentId:[LECSArchetypeId:LECSArchetypeColumn]] = [:]
 
@@ -177,10 +179,15 @@ class LECSFixedComponentChart {
             return []
         }
 
-        return componentArchetype[firstComponentId]?.map { archetypeRecord in
+        let queryHash = queryHash(queryComponentIds)
+
+        if let selectedArchetypes = queryCache[queryHash] {
+            return selectedArchetypes
+        }
+
+        let selectedArchetypes: [LECSArchetype] = componentArchetype[firstComponentId]?.map { archetypeRecord in
             let archetype = archetypes[archetypeRecord.key.rawValue]
 
-            // O(n) comparison of the elements. Query caching?
             if queryComponentIds.allSatisfy({ archetype.type.contains($0) }) {
                 return archetype
             } else {
@@ -188,6 +195,11 @@ class LECSFixedComponentChart {
             }
 
         }.compactMap { $0 } ?? []
+
+        // update the cache
+        queryCache[queryHash] = selectedArchetypes
+
+        return selectedArchetypes
     }
 
     private func updateNearestArchetype(
@@ -297,7 +309,14 @@ class LECSFixedComponentChart {
     }
 
     private func createArchetype(id: LECSArchetypeId, type: [LECSComponentId], components: [LECSComponent.Type]) -> LECSArchetype {
+        // invalidate the query cache, since the new archetype may have components in one of the indexes
+        queryCache = [:]
+        
         return factory.create(id: id, type: type, components: components)
+    }
+
+    private func queryHash(_ query: [LECSComponentId]) -> String {
+        query.map { String($0.hashValue) }.joined(separator: ":")
     }
 }
 
