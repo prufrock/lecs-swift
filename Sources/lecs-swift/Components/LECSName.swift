@@ -8,7 +8,7 @@
 import Foundation
 
 public struct LECSName: LECSComponent {
-    var name: String
+    public var name: String
 
     public init() {
         name = "i am the default name"

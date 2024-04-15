@@ -119,7 +119,7 @@ class LECSSparseArrayTable: LECSTable {
             fatalError("Row \(i) couldn't be found in the table. Did the row get created?")
         }
         if deleted.contains(i) {
-            fatalError("Row \(i) couldn't be found in the table. It has been deleted. Should it have been deleted?")
+            fatalError("Row \(i) couldn't be found in the table. It has been deleted. This tends to happen after a component is added or removed and the old LECSRowId is used instead of the new one.")
         }
     }
 
@@ -190,5 +190,11 @@ struct LECSAddressableRow {
         for i in columns.indices {
             row[columns[i].col] = changes[i]
         }
+    }
+}
+
+extension LECSRow {
+    public func component<T: LECSComponent>(at index: Int, _ columns: LECSColumns, _ component: T.Type) -> T {
+        self[columns[0].col] as! T
     }
 }

@@ -157,7 +157,7 @@ final class LECSFixedComponentChartTests: XCTestCase {
         firstRow = chart.addComponentTo(row: firstRow, component: LECSPosition2d(x: 2.1, y: 4.2))
 
         chart.update([LECSPosition2d.self]) { components, columns in
-            var position = components[columns[0].col] as! LECSPosition2d
+            var position = components.component(at: 0, columns, LECSPosition2d.self)
             position.x = 5.2
 
             return components.update([(columns[0], position)])

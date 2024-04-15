@@ -8,16 +8,34 @@
 import Foundation
 
 public struct LECSPosition2d: LECSComponent, Equatable {
+    public var position: SIMD2<Float>
+
     public init() {
-        x = 0
-        y = 0
+        position = SIMD2<Float>(x: 0, y: 0)
     }
 
     public init(x: Float, y: Float) {
-        self.x = x
-        self.y = y
+        self.position = SIMD2<Float>(x: x, y: y)
     }
 
-    public var x: Float
-    public var y: Float
+    public init(_ position: SIMD2<Float>) {
+        self.position = position
+    }
+
+    public var x: Float {
+        set {
+            position.x = newValue
+        }
+        get {
+            position.x
+        }
+    }
+    public var y: Float {
+        set {
+            position.y = newValue
+        }
+        get {
+            position.y
+        }
+    }
 }

@@ -16,6 +16,10 @@ public struct LECSVelocity2d: LECSComponent, Equatable {
         velocity = SIMD2<Float>(x: x, y: y)
     }
 
+    public init(_ velocity: SIMD2<Float>) {
+        self.velocity = velocity
+    }
+
     public var x: Float {
         velocity.x
     }

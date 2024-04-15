@@ -123,13 +123,15 @@ class LECSWorldFixedSize: LECSWorld {
         guard indexEntityName[name] == nil else {
             fatalError("An index already has the name:[\(name)]. Did you forget to delete the previous instance?")
         }
-        row = chart.addComponentTo(row: row, component: LECSName(name))
 
         entityCounter += 1
         let entityId = entityCounter
-        entityMap[entityId] = row
 
-        // Update index
+        row = chart.addComponentTo(row: row, component: LECSId(entityId))
+        row = chart.addComponentTo(row: row, component: LECSName(name))
+
+        // Update indexes
+        entityMap[entityId] = row
         indexEntityName[name] = entityId
 
         return entityId
