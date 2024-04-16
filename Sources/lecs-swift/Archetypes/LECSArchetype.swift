@@ -23,9 +23,9 @@ class LECSArchetype: Sequence {
             table.componentTypes
         }
     }
-    var rowCount: Int {
+    var largestIndex: Int {
         get {
-            table.count
+            table.largestIndex
         }
     }
 

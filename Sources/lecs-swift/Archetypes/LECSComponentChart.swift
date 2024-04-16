@@ -144,14 +144,14 @@ class LECSFixedComponentChart {
     }
 
     func select(_ query: LECSQuery, block: (LECSRow, LECSColumns) -> Void) {
-        self.query(queryComponentIds: sortedComponentIds(query: query), readOnly: true) { components, columns in
+        self.query(queryComponentIds: convertTypesToComponentIds(query: query), readOnly: true) { components, columns in
             block(components, columns)
             return []
         }
     }
 
     func update(_ query: LECSQuery, block: (LECSRow, LECSColumns) -> LECSRow) {
-        self.query(queryComponentIds: sortedComponentIds(query: query), readOnly: false, block: block)
+        self.query(queryComponentIds: convertTypesToComponentIds(query: query), readOnly: false, block: block)
     }
 
     func update(_ componentIds: [LECSComponentId], block: (LECSRow, LECSColumns) -> LECSRow) {
@@ -159,39 +159,45 @@ class LECSFixedComponentChart {
     }
 
     func convertQueryToComponentIds(_ query: LECSQuery) -> [LECSComponentId] {
-        sortedComponentIds(query: query)
+        convertTypesToComponentIds(query: query)
     }
 
     private func query(queryComponentIds: [LECSComponentId], readOnly: Bool, block: (LECSRow, LECSColumns) -> LECSRow) {
         //TODO: find a way with a low start-up time way(or one that can be prepared ahead of time) to spread archetype queries across a thread pool.
-        selectArchetypes(queryComponentIds: queryComponentIds).forEach { archetype in
+        // Only sort when selecting, otherwise the original order needs to maintained to ensure they can be mapped to columns correctly.
+        selectArchetypes(queryComponentIds: sortedComponentIds(queryComponentIds)).forEach { archetype in
             let columns:[LECSArchetypeColumn] = queryComponentIds.map { componentArchetype[$0]![archetype.id]! }
 
             // Using indexes appears to be ~30% faster than using iterators.
             // It seems way better then to keep using direct access over using an iterator.
-            (0..<archetype.rowCount).forEach { index in
-                if !archetype.rowExists(at: index) {
-                    return
-                }
+            (0..<archetype.largestIndex).forEach { index in
+                if archetype.rowExists(at: index) {
 
-                let changeSet: LECSRow = block(archetype.readRow(at: index), columns)
-                var idx = 0
-                if !readOnly {
-                    columns.forEach {
-                        archetype.update(
-                            index: index,
-                            column: $0,
-                            component: changeSet[idx]
-                        )
-                        idx += 1
+
+
+                    let changeSet: LECSRow = block(archetype.readRow(at: index), columns)
+                    var idx = 0
+                    if !readOnly {
+                        columns.forEach {
+                            archetype.update(
+                                index: index,
+                                column: $0,
+                                component: changeSet[idx]
+                            )
+                            idx += 1
+                        }
                     }
                 }
             }
         }
     }
 
-    private func sortedComponentIds(query: LECSQuery) -> [LECSComponentId] {
-        query.compactMap { components[$0] }.sorted(by: { $0.id < $1.id })
+    private func sortedComponentIds(_ componentIds: [LECSComponentId]) -> [LECSComponentId] {
+        componentIds.sorted(by: { $0.id < $1.id })
+    }
+
+    private func convertTypesToComponentIds(query: LECSQuery) -> [LECSComponentId] {
+        query.map { components[$0]! }
     }
 
     private func selectArchetypes(queryComponentIds: [LECSComponentId]) -> [LECSArchetype] {

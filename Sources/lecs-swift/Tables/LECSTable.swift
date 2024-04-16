@@ -15,6 +15,9 @@ protocol LECSTable: Sequence where Iterator.Element == LECSAddressableRow {
     /// The number of items in the table.
     var count: Int { get }
 
+    // The largest index assigned so far.
+    var largestIndex: Int { get }
+
     /// The maximum number of elements the table can hold.
     var size: Int { get }
 
@@ -74,6 +77,10 @@ class LECSSparseArrayTable: LECSTable {
 
     var count: Int {
         return index - deleted.count
+    }
+
+    var largestIndex: Int {
+        return index
     }
 
     func create() -> Int {
@@ -195,6 +202,6 @@ struct LECSAddressableRow {
 
 extension LECSRow {
     public func component<T: LECSComponent>(at index: Int, _ columns: LECSColumns, _ component: T.Type) -> T {
-        self[columns[0].col] as! T
+        self[columns[index].col] as! T
     }
 }

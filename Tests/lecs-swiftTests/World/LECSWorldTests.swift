@@ -70,4 +70,13 @@ final class LECSWorldTests: XCTestCase {
 
         XCTAssertEqual(2.0, position.x)
     }
+
+
+    struct TagWall: LECSComponent {
+        let wall = true
+    }
+
+    struct TagCollides: LECSComponent {
+        let collides = true
+    }
 }

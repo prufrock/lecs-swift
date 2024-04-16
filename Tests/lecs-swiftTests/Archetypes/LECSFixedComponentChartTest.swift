@@ -128,6 +128,28 @@ final class LECSFixedComponentChartTests: XCTestCase {
         XCTAssertEqual(pmVelocity[1], velocity)
     }
 
+    func testSelectAfterDeleting() throws {
+        let chart = LECSFixedComponentChart()
+        var firstRow = chart.createRow()
+        firstRow = chart.addComponentTo(row: firstRow, component: pmPosition[1])
+
+        var secondRow = chart.createRow()
+        secondRow = chart.addComponentTo(row: secondRow, component: pmPosition[1])
+
+        var thirdRow = chart.createRow()
+        thirdRow = chart.addComponentTo(row: thirdRow, component: pmPosition[1])
+
+        chart.delete(row: firstRow)
+        chart.delete(row: secondRow)
+
+        var count = 0
+        chart.select([LECSPosition2d.self]) { components, columns in
+            count += 1
+        }
+
+        XCTAssertEqual(1, count)
+    }
+
     func testSelectAcrossThreeArchetypes() throws {
 
         let chart = LECSFixedComponentChart()
