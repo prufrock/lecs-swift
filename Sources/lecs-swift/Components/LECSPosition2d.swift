@@ -39,3 +39,9 @@ public struct LECSPosition2d: LECSComponent, Equatable {
         }
     }
 }
+
+extension LECSPosition2d {
+    public var position3d: SIMD3<Float> {
+        SIMD3<Float>(x: position.x, y: position.y, z: 0)
+    }
+}
