@@ -92,6 +92,11 @@ public protocol LECSWorld {
     /// - Parameters:
     ///   - system: The system to run.
     func process(system: LECSSystemId)
+
+    /// Adds an obverser that receives information about the operations of LECSWorld.
+    /// - Parameters:
+    ///   - observer: The observer to update.
+    func addObserver(_ observer: LECSWorldObserver)
 }
 
 public func LECSCreateWorld(archetypeSize: Int) -> LECSWorld {
@@ -111,6 +116,8 @@ class LECSWorldFixedSize: LECSWorld {
 
     // Indexes map LECSEntityId to another attribute.
     private var indexEntityName: [String:LECSEntityId] = [:]
+
+   private var observers: [LECSWorldObserver] = []
 
     init(archetypeSize: Int) {
         chart = LECSFixedComponentChart(factory: LECSArchetypeFactory(size: archetypeSize))
@@ -133,6 +140,8 @@ class LECSWorldFixedSize: LECSWorld {
         // Update indexes
         entityMap[entityId] = row
         indexEntityName[name] = entityId
+
+        observers.forEach { $0.entityCreated(name: name, id: entityId) }
 
         return entityId
     }
@@ -211,7 +220,10 @@ class LECSWorldFixedSize: LECSWorld {
 
         chart.update(system.componentIds, block: system.block)
     }
-    
+
+    func addObserver(_ observer: LECSWorldObserver) {
+       observers.append(observer)
+    }
 
     private func getRow(for entityId: LECSEntityId) -> LECSRowId {
         guard let row = entityMap[entityId] else {
