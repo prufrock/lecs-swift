@@ -117,7 +117,7 @@ class LECSWorldFixedSize: LECSWorld {
     // Indexes map LECSEntityId to another attribute.
     private var indexEntityName: [String:LECSEntityId] = [:]
 
-   private var observers: [LECSWorldObserver] = []
+    private var observers: [LECSWorldObserver] = []
 
     init(archetypeSize: Int) {
         chart = LECSFixedComponentChart(factory: LECSArchetypeFactory(size: archetypeSize))
@@ -181,6 +181,8 @@ class LECSWorldFixedSize: LECSWorld {
         let newRow = chart.addComponentTo(row: row, component: component)
 
         update(entityId: entityId, newRow: newRow)
+
+        observers.forEach { $0.componentAdded(id: entityId, component: component) }
     }
 
     func removeComponent(_ entityId: LECSEntityId, component: any LECSComponent.Type) {
