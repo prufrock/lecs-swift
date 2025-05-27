@@ -157,6 +157,8 @@ class LECSWorldFixedSize: LECSWorld {
         indexEntityName.removeValue(forKey: name.name)
 
         chart.delete(row: row)
+
+        observers.forEach { $0.entityDeleted(id: entityId, name: name.name) }
     }
     
     func entity(named: LECSName) -> LECSEntityId? {

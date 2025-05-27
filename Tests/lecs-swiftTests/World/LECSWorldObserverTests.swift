@@ -14,16 +14,25 @@ final class LECSWorldObserverTests: XCTestCase {
         let observer = Watcher()
         world.addObserver(observer)
 
-        _ = world.createEntity("spear")
+        let spear = world.createEntity("spear")
 
         XCTAssertEqual(1, observer.entitiesCreated.count)
+
+        world.deleteEntity(spear)
+
+        XCTAssertEqual(1, observer.entitiesDeleted.count)
     }
 }
 
 class Watcher: LECSWorldObserver {
     var entitiesCreated: [String:LECSEntityId] = [:]
+    var entitiesDeleted: [String:LECSEntityId] = [:]
 
     func entityCreated(id: LECSEntityId, name: String) {
         entitiesCreated[name] = id
+    }
+
+    func entityDeleted(id: LECSEntityId, name: String) {
+        entitiesDeleted[name] = id
     }
 }
