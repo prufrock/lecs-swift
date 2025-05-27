@@ -6,5 +6,5 @@
 //
 
 public protocol LECSWorldObserver {
-  func entityCreated(name: String, id: LECSEntityId)
+    func entityCreated(id: LECSEntityId, name: String)
 }

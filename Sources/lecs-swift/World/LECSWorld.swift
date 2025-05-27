@@ -141,7 +141,7 @@ class LECSWorldFixedSize: LECSWorld {
         entityMap[entityId] = row
         indexEntityName[name] = entityId
 
-        observers.forEach { $0.entityCreated(name: name, id: entityId) }
+        observers.forEach { $0.entityCreated(id: entityId, name: name) }
 
         return entityId
     }

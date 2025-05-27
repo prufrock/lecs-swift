@@ -21,9 +21,9 @@ final class LECSWorldObserverTests: XCTestCase {
 }
 
 class Watcher: LECSWorldObserver {
-  var entitiesCreated: [String:LECSEntityId] = [:]
+    var entitiesCreated: [String:LECSEntityId] = [:]
 
-  func entityCreated(name: String, id: LECSEntityId) {
-    entitiesCreated[name] = id
-  }
+    func entityCreated(id: LECSEntityId, name: String) {
+        entitiesCreated[name] = id
+    }
 }
