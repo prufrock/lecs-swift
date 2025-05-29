@@ -55,6 +55,11 @@ final class LECSWorldObserverTests: XCTestCase {
         XCTAssertEqual(1, observer.systemsAdded.count)
         XCTAssertEqual(("collisions"), observer.systemsAdded[systemId]!.0)
         XCTAssertEqual(("[lecs_swift.LECSPosition2d]"), observer.systemsAdded[systemId]!.1)
+
+        world.select([LECSPosition2d.self], { rows, columns in _ = rows.count })
+
+        XCTAssertEqual(1, observer.selectsBegan.count)
+        XCTAssertEqual(1, observer.selectsEnded.count)
     }
 }
 
@@ -64,6 +69,8 @@ class Watcher: LECSWorldObserver {
     var componentsAdded: [LECSEntityId: String] = [:]
     var componentsRemoved: [LECSEntityId: String] = [:]
     var systemsAdded: [LECSSystemId: (String, String)] = [:]
+    var selectsBegan: [UInt: LECSQuery] = [:]
+    var selectsEnded: [UInt: LECSQuery] = [:]
 
     func entityCreated(id: LECSEntityId, name: String) {
         entitiesCreated[name] = id
@@ -83,5 +90,13 @@ class Watcher: LECSWorldObserver {
 
     func systemAdded(id: LECSSystemId, name: String, selector: LECSQuery) {
         systemsAdded[id] = (name, "\(selector)")
+    }
+
+    func selectBegin(id: UInt, query: LECSQuery) {
+        selectsBegan[id] = query
+    }
+
+    func selectEnd(id: UInt, query: LECSQuery) {
+        selectsEnded[id] = query
     }
 }

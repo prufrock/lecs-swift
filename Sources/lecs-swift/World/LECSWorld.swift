@@ -119,6 +119,9 @@ class LECSWorldFixedSize: LECSWorld {
 
     private var observers: [LECSWorldObserver] = []
 
+    // Used to create a unique identifier for each select.
+    private var selectCounter: UInt = 0
+
     init(archetypeSize: Int) {
         chart = LECSFixedComponentChart(factory: LECSArchetypeFactory(size: archetypeSize))
     }
@@ -213,7 +216,16 @@ class LECSWorldFixedSize: LECSWorld {
     }
     
     func select(_ query: LECSQuery, _ block: (LECSRow, LECSColumns) -> Void) {
+        // might need synchronization here, but it might be good enough to assign it here then increment it.
+        // it would be nice to have some sort of atomic int...
+        let count = selectCounter
+        selectCounter += 1
+
+        observers.forEach { $0.selectBegin(id: count, query: query) }
+
         chart.select(query, block: block)
+
+        observers.forEach { $0.selectEnd(id: count, query: query) }
     }
     
     func select(_ query: [Int], _ block: (LECSRow, LECSColumns) -> Void) {

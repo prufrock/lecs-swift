@@ -15,4 +15,8 @@ public protocol LECSWorldObserver {
     func componentRemoved(id: LECSEntityId, component: any LECSComponent.Type)
 
     func systemAdded(id: LECSSystemId, name: String, selector: LECSQuery)
+
+    func selectBegin(id: UInt, query: LECSQuery)
+
+    func selectEnd(id: UInt, query: LECSQuery)
 }
