@@ -19,4 +19,8 @@ public protocol LECSWorldObserver {
     func selectBegin(id: UInt, query: LECSQuery)
 
     func selectEnd(id: UInt, query: LECSQuery)
+
+    func processBegin(id: LECSSystemId)
+
+    func processEnd(id: LECSSystemId)
 }

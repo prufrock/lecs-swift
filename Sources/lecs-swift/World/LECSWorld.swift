@@ -238,7 +238,11 @@ class LECSWorldFixedSize: LECSWorld {
             fatalError("SystemId[\(id)] doesn't exist.")
         }
 
+        observers.forEach { $0.processBegin(id: id) }
+
         chart.update(system.componentIds, block: system.block)
+
+        observers.forEach { $0.processEnd(id: id) }
     }
 
     func addObserver(_ observer: LECSWorldObserver) {

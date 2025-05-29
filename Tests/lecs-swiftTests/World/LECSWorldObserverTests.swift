@@ -39,7 +39,7 @@ final class LECSWorldObserverTests: XCTestCase {
         XCTAssertEqual("\(LECSPosition2d.self)", observer.componentsRemoved[spear]!)
     }
 
-    func testAddSystem() {
+    func testAddSystemAndSelectAndProcess() {
         let world = LECSWorldFixedSize(archetypeSize: 10)
         let observer = Watcher()
         world.addObserver(observer)
@@ -60,6 +60,11 @@ final class LECSWorldObserverTests: XCTestCase {
 
         XCTAssertEqual(1, observer.selectsBegan.count)
         XCTAssertEqual(1, observer.selectsEnded.count)
+
+        world.process(system: systemId)
+
+        XCTAssert(observer.processBeginCalls[systemId]! == 1)
+        XCTAssert(observer.processEndCalls[systemId]! == 1)
     }
 }
 
@@ -71,6 +76,8 @@ class Watcher: LECSWorldObserver {
     var systemsAdded: [LECSSystemId: (String, String)] = [:]
     var selectsBegan: [UInt: LECSQuery] = [:]
     var selectsEnded: [UInt: LECSQuery] = [:]
+    var processBeginCalls: [LECSSystemId: Int] = [:]
+    var processEndCalls: [LECSSystemId: Int] = [:]
 
     func entityCreated(id: LECSEntityId, name: String) {
         entitiesCreated[name] = id
@@ -98,5 +105,13 @@ class Watcher: LECSWorldObserver {
 
     func selectEnd(id: UInt, query: LECSQuery) {
         selectsEnded[id] = query
+    }
+
+    func processBegin(id: LECSSystemId) {
+        processBeginCalls[id] = (processBeginCalls[id] ?? 0) + 1
+    }
+
+    func processEnd(id: LECSSystemId) {
+        processEndCalls[id] = (processEndCalls[id] ?? 0) + 1
     }
 }
