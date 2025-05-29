@@ -29,8 +29,7 @@ let package = Package(
             dependencies: [],
             swiftSettings: [
               .enableExperimentalFeature("StrictConcurrency")
-            ],
-        ),
+            ]),
         .testTarget(
             name: "lecs-swiftTests",
             dependencies: ["lecs-swift"]),
