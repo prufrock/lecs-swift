@@ -13,4 +13,6 @@ public protocol LECSWorldObserver {
     func componentAdded<T: LECSComponent>(id: LECSEntityId, component: T)
 
     func componentRemoved(id: LECSEntityId, component: any LECSComponent.Type)
+
+    func systemAdded(id: LECSSystemId, name: String, selector: LECSQuery)
 }

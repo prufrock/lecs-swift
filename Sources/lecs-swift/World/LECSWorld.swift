@@ -202,6 +202,8 @@ class LECSWorldFixedSize: LECSWorld {
         let componentIds = chart.convertQueryToComponentIds(selector)
         systemMap[systemId] = LECSSystem(componentIds: componentIds, block: block)
 
+        observers.forEach { $0.systemAdded(id: systemId, name: name, selector: selector) }
+
         return systemId
     }
     

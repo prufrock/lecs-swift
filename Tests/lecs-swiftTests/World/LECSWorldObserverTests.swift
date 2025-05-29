@@ -38,6 +38,24 @@ final class LECSWorldObserverTests: XCTestCase {
         XCTAssertEqual(1, observer.componentsRemoved.count)
         XCTAssertEqual("\(LECSPosition2d.self)", observer.componentsRemoved[spear]!)
     }
+
+    func testAddSystem() {
+        let world = LECSWorldFixedSize(archetypeSize: 10)
+        let observer = Watcher()
+        world.addObserver(observer)
+
+        let spear = world.createEntity("spear")
+        world.addComponent(spear, LECSPosition2d())
+
+        let systemId = world.addSystem(
+            "collisions",
+            selector: [LECSPosition2d.self], block: {rows, columns in rows }
+        )
+
+        XCTAssertEqual(1, observer.systemsAdded.count)
+        XCTAssertEqual(("collisions"), observer.systemsAdded[systemId]!.0)
+        XCTAssertEqual(("[lecs_swift.LECSPosition2d]"), observer.systemsAdded[systemId]!.1)
+    }
 }
 
 class Watcher: LECSWorldObserver {
@@ -45,6 +63,7 @@ class Watcher: LECSWorldObserver {
     var entitiesDeleted: [String:LECSEntityId] = [:]
     var componentsAdded: [LECSEntityId: String] = [:]
     var componentsRemoved: [LECSEntityId: String] = [:]
+    var systemsAdded: [LECSSystemId: (String, String)] = [:]
 
     func entityCreated(id: LECSEntityId, name: String) {
         entitiesCreated[name] = id
@@ -60,5 +79,9 @@ class Watcher: LECSWorldObserver {
 
     func componentRemoved(id: LECSEntityId, component: LECSComponent.Type) {
         componentsRemoved[id] = "\(component)"
+    }
+
+    func systemAdded(id: LECSSystemId, name: String, selector: LECSQuery) {
+        systemsAdded[id] = (name, "\(selector)")
     }
 }
