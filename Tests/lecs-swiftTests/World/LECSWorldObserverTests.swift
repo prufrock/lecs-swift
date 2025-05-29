@@ -23,7 +23,7 @@ final class LECSWorldObserverTests: XCTestCase {
         XCTAssertEqual(1, observer.entitiesDeleted.count)
     }
 
-    func testAddComponent() {
+    func testAddAndRemoveComponent() {
         let world = LECSWorldFixedSize(archetypeSize: 10)
         let observer = Watcher()
         world.addObserver(observer)
@@ -33,6 +33,10 @@ final class LECSWorldObserverTests: XCTestCase {
 
         XCTAssertEqual(1, observer.componentsAdded.count)
         XCTAssertEqual("\(LECSPosition2d())", observer.componentsAdded[spear]!)
+
+        world.removeComponent(spear, component: LECSPosition2d.self)
+        XCTAssertEqual(1, observer.componentsRemoved.count)
+        XCTAssertEqual("\(LECSPosition2d.self)", observer.componentsRemoved[spear]!)
     }
 }
 
@@ -40,6 +44,7 @@ class Watcher: LECSWorldObserver {
     var entitiesCreated: [String:LECSEntityId] = [:]
     var entitiesDeleted: [String:LECSEntityId] = [:]
     var componentsAdded: [LECSEntityId: String] = [:]
+    var componentsRemoved: [LECSEntityId: String] = [:]
 
     func entityCreated(id: LECSEntityId, name: String) {
         entitiesCreated[name] = id
@@ -51,5 +56,9 @@ class Watcher: LECSWorldObserver {
 
     func componentAdded<T: LECSComponent>(id: LECSEntityId, component: T) {
         componentsAdded[id] = "\(component)"
+    }
+
+    func componentRemoved(id: LECSEntityId, component: LECSComponent.Type) {
+        componentsRemoved[id] = "\(component)"
     }
 }

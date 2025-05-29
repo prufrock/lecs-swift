@@ -191,6 +191,8 @@ class LECSWorldFixedSize: LECSWorld {
         let row = getRow(for: entityId)
         let newRow = chart.removeComponentFrom(row: row, type: component)
         update(entityId: entityId, newRow: newRow)
+
+        observers.forEach { $0.componentRemoved(id: entityId, component: component) }
     }
     
     func addSystem(_ name: String, selector: LECSQuery, block: @escaping LECSUpdate) -> LECSSystemId {
