@@ -10,6 +10,7 @@ import Foundation
 public typealias LECSEntityId = UInt
 public typealias LECSSystemId = LECSEntityId
 public typealias LECSUpdate = (LECSRow, LECSColumns) -> LECSRow
+public typealias LECSUpdateWorldScoped = (LECSWorld, LECSRow, LECSColumns) -> LECSRow
 public typealias LECSSelect = (LECSRow, LECSColumns) -> Void
 
 /// The world is the facade for the ECS system. All access to the ECS system goes through LECSWorld.
@@ -31,6 +32,12 @@ public protocol LECSWorld {
     ///   - named: The name of the entity
     /// - Returns: The id of the found entity.
     func entity(named: LECSName) -> LECSEntityId?
+
+    /// Finds the entity with the name
+    /// - Parameters:
+    ///   - named: The name of the entity
+    /// - Returns: The id of the found entity.
+    func entity(_ named: String) -> LECSEntityId?
 
     /// Checks to see if the entity has a component.
     /// - Parameters:
@@ -112,6 +119,7 @@ class LECSWorldFixedSize: LECSWorld {
 
     private var systemCounter:UInt = 0 // reserve 0
     private var systemMap: [LECSSystemId:LECSSystem] = [:]
+    private var systemWorldMap: [LECSSystemId:LECSSystemWorldScoped] = [:]
 
 
     // Indexes map LECSEntityId to another attribute.
@@ -167,7 +175,11 @@ class LECSWorldFixedSize: LECSWorld {
     func entity(named: LECSName) -> LECSEntityId? {
         indexEntityName[named.name]
     }
-    
+
+    func entity(_ named: String) -> LECSEntityId? {
+        entity(named: LECSName(name: named))
+    }
+
     func hasComponent(_ entityId: LECSEntityId, _ component: any LECSComponent.Type) -> Bool {
         let row = getRow(for: entityId)
         return chart.component(in: row, type: component)
@@ -214,7 +226,19 @@ class LECSWorldFixedSize: LECSWorld {
         //TODO: implement
         fatalError("not implemented")
     }
-    
+
+    func addSystemWorldScoped(_ name: String, selector: LECSQuery, block: @escaping LECSUpdateWorldScoped) -> LECSSystemId {
+        // critical region
+        let systemId = systemCounter
+        systemCounter += 1
+        let componentIds = chart.convertQueryToComponentIds(selector)
+        systemWorldMap[systemId] = LECSSystemWorldScoped(componentIds: componentIds, block: block)
+
+        observers.forEach { $0.systemAdded(id: systemId, name: name, selector: selector) }
+
+        return systemId
+    }
+
     func select(_ query: LECSQuery, _ block: (LECSRow, LECSColumns) -> Void) {
         // might need synchronization here, but it might be good enough to assign it here then increment it.
         // it would be nice to have some sort of atomic int...
@@ -245,6 +269,22 @@ class LECSWorldFixedSize: LECSWorld {
         observers.forEach { $0.processEnd(id: id) }
     }
 
+    func processSystemWorldScoped(system id: LECSSystemId) {
+        guard let system = systemWorldMap[id] else {
+            fatalError("SystemId[\(id)] doesn't exist.")
+        }
+
+        let scoped = { (rows: LECSRow, columns: LECSColumns) in
+            system.block(self, rows, columns)
+        }
+
+        observers.forEach { $0.processBegin(id: id) }
+
+        chart.update(system.componentIds, block: scoped)
+
+        observers.forEach { $0.processEnd(id: id) }
+    }
+
     func addObserver(_ observer: LECSWorldObserver) {
        observers.append(observer)
     }
@@ -266,4 +306,9 @@ class LECSWorldFixedSize: LECSWorld {
 private struct LECSSystem {
     let componentIds: [LECSComponentId]
     let block: LECSUpdate
+}
+
+private struct LECSSystemWorldScoped {
+    let componentIds: [LECSComponentId]
+    let block: LECSUpdateWorldScoped
 }

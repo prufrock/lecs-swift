@@ -98,12 +98,14 @@ class LECSSparseArrayTable: LECSTable {
         return items[i]
     }
 
+    @discardableResult
     func update(row i: Int, column: Int, component: LECSComponent) -> [LECSComponent] {
         throwIfRowDoesNotExist(i)
         items[i][column] = component
         return items[i]
     }
 
+    @discardableResult
     func update(row i: Int, components: [LECSComponent]) -> [LECSComponent] {
         throwIfRowDoesNotExist(i)
         items[i] = components
