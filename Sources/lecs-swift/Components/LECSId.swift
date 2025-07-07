@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct LECSId: LECSComponent {
+public struct LECSId: LECSComponent, Equatable {
     public var id: UInt
 
     public init() {
@@ -20,5 +20,9 @@ public struct LECSId: LECSComponent {
 
     public init(_ id: UInt) {
         self.id = id
+    }
+
+    public static func == (lhs: LECSId, rhs: LECSId) -> Bool {
+        return lhs.id == rhs.id
     }
 }
