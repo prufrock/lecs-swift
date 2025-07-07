@@ -108,6 +108,11 @@ public protocol LECSWorld {
     ///   - system: The system to run.
     func process(system: LECSSystemId)
 
+    /// Executes the world scoped system.
+    /// - Parameters:
+    ///   - system: The system to run.
+    func processSystemWorldScoped(system id: LECSSystemId)
+
     /// Adds an obverser that receives information about the operations of LECSWorld.
     /// - Parameters:
     ///   - observer: The observer to update.
