@@ -82,6 +82,14 @@ public protocol LECSWorld {
     /// TODO: might have to get rid of this
     func addSystem(_ name: String, selector: [Int], block: @escaping LECSUpdate) -> LECSSystemId
 
+    /// Adds a system to the world.
+    /// - Parameters:
+    ///   - name: The name of the system.
+    ///   - selector: The query of component Ids selecting entities to process with the system.
+    ///   - block: The closure to run on the results of the query.
+    /// - Returns: The id of the system.
+    func addSystemWorldScoped(_ name: String, selector: LECSQuery, block: @escaping LECSUpdateWorldScoped) -> LECSSystemId
+
     /// Runs a query to read from the world.
     /// - Parameters:
     ///   - query: The query of component Ids selecting entities.
